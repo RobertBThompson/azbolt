@@ -8,10 +8,9 @@ lip.155.138.240.74.nip.io {
 	@no-cache path /sw.js /registerSW.js /manifest.webmanifest
 	header @no-cache Cache-Control "no-cache, no-store, must-revalidate"
 
-	reverse_proxy 127.0.0.1:3003 {
-		header_up X-Forwarded-Proto {scheme}
-		header_up X-Forwarded-Host {host}
-	}
+	# Caddy passes X-Forwarded-Proto / -Host / -For upstream by default,
+	# so setting them explicitly is redundant and Caddy warns about it.
+	reverse_proxy 127.0.0.1:3003
 
 	header {
 		X-Content-Type-Options nosniff
