@@ -1,0 +1,32 @@
+# LIP — plain-HTTP test block. No hostname, no certificate, no ACME.
+# Reach it at http://155.138.240.74:8080
+#
+# Deployed to /etc/caddy/azbolt/lip-test.caddy
+#
+# Use lip.caddy instead once there is a real domain. Keep only ONE of the
+# two in /etc/caddy/azbolt/ at a time.
+#
+# KNOWN LIMITATION: service workers require a secure context (HTTPS or
+# localhost). Over plain HTTP on an IP the service worker will not
+# register, so install-to-home-screen and offline caching are inert here.
+# The app itself works fine; only the PWA layer is disabled.
+
+:8080 {
+	encode zstd gzip
+
+	@immutable path /_app/immutable/*
+	header @immutable Cache-Control "public, max-age=31536000, immutable"
+
+	@no-cache path /sw.js /registerSW.js /manifest.webmanifest
+	header @no-cache Cache-Control "no-cache, no-store, must-revalidate"
+
+	reverse_proxy 127.0.0.1:3003
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+	}
+
+	# Access logs go to journald (journalctl -u caddy) rather than a file,
+	# so this block has no filesystem dependency to get wrong.
+}

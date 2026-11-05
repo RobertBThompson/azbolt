@@ -4,6 +4,10 @@
 # Directories
 sudo mkdir -p /var/www/azbolt/{chief,chaim,lip,peace,tithe}
 sudo mkdir -p /etc/caddy/azbolt /etc/azbolt /var/log/caddy
+# The caddy user must own the log dir, or `systemctl reload caddy` fails
+# with "permission denied" WHILE `caddy validate` still reports success —
+# validation parses config without touching the filesystem.
+sudo chown caddy:caddy /var/log/caddy
 sudo chown -R deploy:www-data /var/www/azbolt
 
 # Caddy fragments
