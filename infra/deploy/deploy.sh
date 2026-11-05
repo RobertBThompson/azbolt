@@ -9,7 +9,7 @@
 set -euo pipefail
 
 APP="${1:-}"
-HOST="${AZBOLT_SSH_HOST:-deploy@155.138.24.74}"
+HOST="${AZBOLT_SSH_HOST:-deploy@155.138.240.74}"
 REMOTE_ROOT="/var/www/azbolt"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
@@ -40,4 +40,4 @@ if [ "$MODE" = node ]; then
 	ssh "$HOST" "sudo systemctl restart azbolt-$APP && sleep 1 && systemctl is-active azbolt-$APP"
 fi
 
-echo "==> done: https://$APP.155.138.24.74.nip.io"
+echo "==> done: https://$APP.155.138.240.74.nip.io"

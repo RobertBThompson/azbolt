@@ -26,7 +26,7 @@ sudo systemctl enable --now azbolt-lip
 ## Note on nip.io and TLS
 
 Caddy will try to issue a Let's Encrypt certificate for each
-`*.155.138.24.74.nip.io` name. nip.io resolves fine, so HTTP-01 works, but
+`*.155.138.240.74.nip.io` name. nip.io resolves fine, so HTTP-01 works, but
 Let's Encrypt rate-limits per registered domain and `nip.io` is shared
 across everyone using it — issuance can fail for reasons that have nothing
 to do with this server. If that happens, use Caddy's internal CA

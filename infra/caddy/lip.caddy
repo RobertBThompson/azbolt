@@ -1,5 +1,5 @@
 # LIP runs as a Node server (adapter-node) under systemd on 127.0.0.1:3003.
-lip.155.138.24.74.nip.io {
+lip.155.138.240.74.nip.io {
 	encode zstd gzip
 
 	@immutable path /_app/immutable/*

@@ -4,6 +4,11 @@ Four of the five apps (`chief`, `chaim`, `peace`, `tithe`) are static — Caddy
 serves their `build/` directory directly. `lip` runs as a Node process and is
 reverse-proxied.
 
+The four static fragments are **generated** — run `./generate.sh` after
+changing `static-app.caddy.template` or the host, rather than editing each
+`.caddy` file by hand. `lip.caddy` is maintained separately because it is
+the one reverse-proxied Node app.
+
 Import these fragments from the main `/etc/caddy/Caddyfile`:
 
 ```

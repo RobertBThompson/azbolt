@@ -5,11 +5,11 @@ dependency tree, one design system — five independently deployable apps.
 
 | App | Subdomain | Adapter | Dev port |
 | --- | --- | --- | --- |
-| `chief` | chief.155.138.24.74.nip.io | static | 5171 |
-| `chaim` | chaim.155.138.24.74.nip.io | static | 5172 |
-| `lip` | lip.155.138.24.74.nip.io | node | 5173 |
-| `peace` | peace.155.138.24.74.nip.io | static | 5174 |
-| `tithe` | tithe.155.138.24.74.nip.io | static | 5175 |
+| `chief` | chief.155.138.240.74.nip.io | static | 5171 |
+| `chaim` | chaim.155.138.240.74.nip.io | static | 5172 |
+| `lip` | lip.155.138.240.74.nip.io | node | 5173 |
+| `peace` | peace.155.138.240.74.nip.io | static | 5174 |
+| `tithe` | tithe.155.138.240.74.nip.io | static | 5175 |
 
 ## Layout
 
