@@ -1,0 +1,83 @@
+name: Deploy
+
+# Path filters are the point of the monorepo: a change to one app does not
+# redeploy the other four. A change under packages/ touches everything, so
+# that path deliberately triggers all of them.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+    inputs:
+      app:
+        description: App to deploy
+        required: true
+        type: choice
+        options: [chief, chaim, lip, peace, tithe]
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      apps: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            chief:
+              - 'apps/chief/**'
+              - 'packages/**'
+            chaim:
+              - 'apps/chaim/**'
+              - 'packages/**'
+            lip:
+              - 'apps/lip/**'
+              - 'packages/**'
+            peace:
+              - 'apps/peace/**'
+              - 'packages/**'
+            tithe:
+              - 'apps/tithe/**'
+              - 'packages/**'
+
+  deploy:
+    needs: changes
+    if: needs.changes.outputs.apps != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJSON(needs.changes.outputs.apps) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build ${{ matrix.app }}
+        run: pnpm --filter "@azbolt/${{ matrix.app }}" build
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          echo "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      - name: Sync
+        run: |
+          rsync -az --delete \
+            "apps/${{ matrix.app }}/build/" \
+            "${{ secrets.DEPLOY_HOST }}:/var/www/azbolt/${{ matrix.app }}/"
+
+      - name: Restart node service
+        if: matrix.app == 'lip'
+        run: ssh "${{ secrets.DEPLOY_HOST }}" "sudo systemctl restart azbolt-lip"

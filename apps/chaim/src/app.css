@@ -1,0 +1,8 @@
+@import '@azbolt/config/tokens.css';
+
+/* Chaim's one differing token. Everything else is shared. */
+:root {
+	--app-accent: #3f6b52;
+	--app-accent-text: #2f5240;
+	--app-accent-tint: rgba(63, 107, 82, 0.15);
+}

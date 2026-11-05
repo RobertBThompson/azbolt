@@ -1,0 +1,30 @@
+node_modules/
+.DS_Store
+
+# SvelteKit / Vite
+.svelte-kit/
+build/
+dist/
+.vercel/
+.output/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Turbo
+.turbo/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Generated at build time by packages/pwa/bin/gen-icons.js
+apps/*/static/icons/

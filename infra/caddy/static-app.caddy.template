@@ -1,0 +1,34 @@
+# Template for a static AZBOLT app. Copy per app, substituting {{SLUG}}.
+# Deployed to /etc/caddy/azbolt/{{SLUG}}.caddy
+
+{{SLUG}}.155.138.24.74.nip.io {
+	root * /var/www/azbolt/{{SLUG}}
+
+	encode zstd gzip
+
+	# Precompressed .br/.gz emitted by the SvelteKit build
+	file_server {
+		precompressed br gzip
+	}
+
+	# Immutable hashed build assets
+	@immutable path /_app/immutable/*
+	header @immutable Cache-Control "public, max-age=31536000, immutable"
+
+	# Never cache the service worker or the manifest
+	@no-cache path /sw.js /registerSW.js /manifest.webmanifest
+	header @no-cache Cache-Control "no-cache, no-store, must-revalidate"
+
+	# SPA fallback for client-side routes
+	try_files {path} {path}.html {path}/index.html /200.html
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		X-Frame-Options SAMEORIGIN
+	}
+
+	log {
+		output file /var/log/caddy/azbolt-{{SLUG}}.log
+	}
+}

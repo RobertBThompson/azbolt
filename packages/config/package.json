@@ -1,0 +1,11 @@
+{
+  "name": "@azbolt/config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tsconfig.base.json": "./tsconfig.base.json",
+    "./tokens.css": "./tokens.css"
+  },
+  "files": ["tsconfig.base.json", "tokens.css"]
+}

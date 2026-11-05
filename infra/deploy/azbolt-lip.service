@@ -1,0 +1,27 @@
+# /etc/systemd/system/azbolt-lip.service
+# systemctl daemon-reload && systemctl enable --now azbolt-lip
+
+[Unit]
+Description=AZBOLT LIP (SvelteKit adapter-node)
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/azbolt/lip
+Environment=NODE_ENV=production
+Environment=PORT=3003
+Environment=HOST=127.0.0.1
+Environment=BODY_SIZE_LIMIT=2M
+EnvironmentFile=-/etc/azbolt/lip.env
+ExecStart=/usr/bin/node /var/www/azbolt/lip/index.js
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/azbolt/lip
+
+[Install]
+WantedBy=multi-user.target

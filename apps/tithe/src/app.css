@@ -1,0 +1,8 @@
+@import '@azbolt/config/tokens.css';
+
+/* Tithe's one differing token. Everything else is shared. */
+:root {
+	--app-accent: #7a5c3d;
+	--app-accent-text: #5f482f;
+	--app-accent-tint: rgba(122, 92, 61, 0.15);
+}

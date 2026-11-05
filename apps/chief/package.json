@@ -1,0 +1,30 @@
+{
+  "name": "@azbolt/chief",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev --port 5171",
+    "build": "node ../../packages/pwa/bin/gen-icons.js static/icons '#17181a' '#b68235' && vite build",
+    "preview": "vite preview --port 4171",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "clean": "rm -rf .svelte-kit build"
+  },
+  "devDependencies": {
+    "@azbolt/config": "workspace:*",
+    "@azbolt/pwa": "workspace:*",
+    "@sveltejs/adapter-static": "^3.0.5",
+    "@sveltejs/kit": "^2.7.0",
+    "@sveltejs/vite-plugin-svelte": "^4.0.0",
+    "@types/node": "^22.7.4",
+    "@vite-pwa/sveltekit": "^0.6.5",
+    "svelte": "^5.0.0",
+    "svelte-check": "^4.0.4",
+    "typescript": "^5.6.2",
+    "vite": "^5.4.8"
+  },
+  "dependencies": {
+    "@azbolt/lib": "workspace:*",
+    "@azbolt/ui": "workspace:*"
+  }
+}

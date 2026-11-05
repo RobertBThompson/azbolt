@@ -1,0 +1,8 @@
+@import '@azbolt/config/tokens.css';
+
+/* LIP's one differing token. Everything else is shared. */
+:root {
+	--app-accent: #b68235;
+	--app-accent-text: #92682a;
+	--app-accent-tint: rgba(182, 130, 53, 0.15);
+}

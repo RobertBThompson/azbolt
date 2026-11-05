@@ -1,0 +1,8 @@
+@import '@azbolt/config/tokens.css';
+
+/* Peace's one differing token. Everything else is shared. */
+:root {
+	--app-accent: #4a6b8a;
+	--app-accent-text: #3a5470;
+	--app-accent-tint: rgba(74, 107, 138, 0.15);
+}
