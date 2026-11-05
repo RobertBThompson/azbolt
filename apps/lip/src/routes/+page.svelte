@@ -1,14 +1,39 @@
 <script>
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import Quadrant from '$lib/components/Quadrant.svelte';
-	import { views, objects, me, activity } from '$lib/data/fixtures.js';
+	import { views, objects, me, activity, binLabel } from '$lib/data/fixtures.js';
+	import { loadPosition } from '$lib/storage/position.js';
 
 	let activeView = $state('my');
 
+	/**
+	 * The user's own position is read in the browser only — it lives in
+	 * localStorage and never reaches the server, so there is nothing to
+	 * render for it during SSR.
+	 */
+	let mine = $state(/** @type {any} */ (null));
+	let ready = $state(false);
+
+	$effect(() => {
+		mine = loadPosition();
+		ready = true;
+	});
+
+	let coachmark = $state(true);
+	let justOnboarded = $derived($page.url.searchParams.get('welcome') === '1');
+
 	let view = $derived(views.find((v) => v.id === activeView) ?? views[0]);
 
+	/** Falls back to the fixture only when the instrument has not been taken. */
+	let meObject = $derived(
+		mine ? { ...me, position: { fiscal: mine.fiscal, social: mine.social }, coverage: 100 } : me
+	);
+
 	let plotted = $derived(
-		view.ids.map((id) => (id === 'me' ? me : objects.find((o) => o.id === id))).filter(Boolean)
+		view.ids
+			.map((id) => (id === 'me' ? meObject : objects.find((o) => o.id === id)))
+			.filter(Boolean)
 	);
 
 	/** Clusters hand back an array; a single marker hands back the object. */
@@ -33,8 +58,33 @@
 
 <div class="maphead">
 	<strong>{view.title}</strong>
-	<small>{view.meta}</small>
+	<small>
+		{#if activeView === 'my' && mine}
+			Private · fiscal {binLabel(mine.fiscal)} · social {binLabel(mine.social)}
+		{:else}
+			{view.meta}
+		{/if}
+	</small>
 </div>
+
+{#if ready && activeView === 'my' && !mine}
+	<!-- No instrument taken yet. The frame still renders below; this is the
+	     invitation, not a fake centered dot. -->
+	<div class="cta">
+		<b>You're not on the map yet.</b>
+		<p>Six plain-language questions. Nothing leaves this device.</p>
+		<a href="/welcome">Find your position</a>
+	</div>
+{/if}
+
+{#if justOnboarded && coachmark && mine}
+	<!-- One tap to dismiss, never a full-screen interruption competing with
+	     the dot for attention. -->
+	<div class="coach">
+		<span>That bronze dot is you. Everything else is measured against evidence, not against you.</span>
+		<button onclick={() => (coachmark = false)}>Got it</button>
+	</div>
+{/if}
 
 <div class="qwrap">
 	<Quadrant
@@ -120,6 +170,58 @@
 		font-size: 9px;
 		color: var(--muted);
 		text-align: right;
+	}
+	.cta {
+		margin: 0 12px 10px;
+		padding: 12px 14px;
+		border: 1px solid var(--line);
+		border-radius: var(--radius-sm);
+		background: var(--white);
+	}
+	.cta b {
+		font-size: 13px;
+	}
+	.cta p {
+		font-size: 11px;
+		color: var(--muted);
+		margin: 4px 0 10px;
+	}
+	.cta a {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: var(--tap-min);
+		border: 1px solid var(--ink);
+		border-radius: var(--radius-sm);
+		background: var(--ink);
+		color: #fff;
+		font: 700 11px var(--font-sans);
+		letter-spacing: 0.04em;
+		text-decoration: none;
+	}
+	.coach {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		margin: 0 12px 10px;
+		padding: 10px 12px;
+		border-left: 3px solid var(--app-accent);
+		background: var(--app-accent-tint);
+		font-size: 11px;
+		line-height: 1.45;
+	}
+	.coach button {
+		margin-left: auto;
+		flex: none;
+		min-height: 36px;
+		padding: 0 12px;
+		border: 1px solid var(--ink);
+		border-radius: var(--radius-sm);
+		background: var(--white);
+		font: 700 9px var(--font-sans);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		cursor: pointer;
 	}
 	.qwrap {
 		padding: 0 12px;

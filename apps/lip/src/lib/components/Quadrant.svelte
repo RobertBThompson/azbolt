@@ -226,6 +226,11 @@
 		background: var(--app-accent);
 		box-shadow: 0 0 0 6px var(--app-accent-tint);
 	}
+	/* Larger marker plus its ring needs a larger label offset, or the text
+	   renders on top of the dot it labels. */
+	.point.you em {
+		top: 38px;
+	}
 	/* Provisional: dashed ring, so sparse data never passes as settled. */
 	.point.provisional i {
 		border-style: dashed;

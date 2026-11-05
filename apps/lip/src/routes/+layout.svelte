@@ -13,20 +13,31 @@
 		{ href: '/me', label: 'Me', icon: '○' }
 	];
 
-	/** Tabs stay lit for their whole section, not just the exact path. */
 	/**
+	 * Tabs stay lit for their whole section, not just the exact path.
 	 * @param {string} href
 	 * @param {string} path
 	 */
 	function isActive(href, path) {
 		return href === '/' ? path === '/' : path.startsWith(href);
 	}
+
+	/**
+	 * Onboarding is pre-tab. Showing the nav mid-instrument invites the user
+	 * to wander off before they have a position, and a half-finished
+	 * instrument is worse than an unstarted one.
+	 */
+	let onboarding = $derived($page.url.pathname.startsWith('/welcome'));
 </script>
 
 <div class="shell">
 	<header>
 		<a class="appmark" href="/">LIP</a>
-		<a class="method" href="/method">Method</a>
+		{#if onboarding}
+			<span class="method">Private setup</span>
+		{:else}
+			<a class="method" href="/method">Method</a>
+		{/if}
 	</header>
 
 	<main>
@@ -34,18 +45,20 @@
 		{@render children()}
 	</main>
 
-	<nav>
-		{#each tabs as tab (tab.href)}
-			<a
-				href={tab.href}
-				class:active={isActive(tab.href, $page.url.pathname)}
-				aria-current={isActive(tab.href, $page.url.pathname) ? 'page' : undefined}
-			>
-				<b aria-hidden="true">{tab.icon}</b>
-				{tab.label}
-			</a>
-		{/each}
-	</nav>
+	{#if !onboarding}
+		<nav>
+			{#each tabs as tab (tab.href)}
+				<a
+					href={tab.href}
+					class:active={isActive(tab.href, $page.url.pathname)}
+					aria-current={isActive(tab.href, $page.url.pathname) ? 'page' : undefined}
+				>
+					<b aria-hidden="true">{tab.icon}</b>
+					{tab.label}
+				</a>
+			{/each}
+		</nav>
+	{/if}
 </div>
 
 <style>
