@@ -1,8 +1,48 @@
 @import '@azbolt/config/tokens.css';
 
-/* LIP's one differing token. Everything else is shared. */
+/*
+ * LIP v4 design tokens.
+ *
+ * These are LIP-specific on purpose and must NOT move into
+ * packages/config: the reserved action color means nothing in Tithe or
+ * Peace, and the instrument surface only exists because LIP has a map.
+ *
+ * Rule from the spec: no red or blue anywhere, including the one
+ * reserved accent. Bronze marks "this is yours" or "this is live" —
+ * never a political side.
+ */
 :root {
+	/* Identity accent — bronze */
 	--app-accent: #b68235;
-	--app-accent-text: #92682a;
+	--app-accent-text: #92682a; /* text-safe variant, clears WCAG AA on light */
 	--app-accent-tint: rgba(182, 130, 53, 0.15);
+	--gold-light: #e6c989; /* map markers on the dark instrument surface */
+
+	/* The instrument surface: desaturated navy-charcoal, no political read */
+	--instrument: #1c2b2e;
+	--instrument-line: rgba(255, 255, 255, 0.14);
+
+	/* Mode treatments — structural, not hue */
+	--verify-tint: #f5f4ee;
+
+	/* The ONE reserved color. JOIN button and the live-boycott card only. */
+	--act-accent: #c1541c;
+	--act-accent-2: #d97230;
+}
+
+.eyebrow {
+	font: 700 10px/1 var(--font-sans);
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--app-accent-text);
+}
+
+.note {
+	font-size: 11px;
+	line-height: 1.55;
+	color: var(--muted);
+}
+
+a {
+	color: inherit;
 }
