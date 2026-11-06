@@ -2,7 +2,7 @@
   "name": "azbolt",
   "private": true,
   "version": "0.1.0",
-  "description": "AZBOLT monorepo — SvelteKit PWAs (chief, chaim, lip, peace, tithe)",
+  "description": "AZBOLT monorepo \u2014 SvelteKit PWAs (chief, chaim, lip, peace, tithe)",
   "packageManager": "pnpm@10.28.0",
   "engines": {
     "node": ">=20"
@@ -20,10 +20,5 @@
     "prettier": "^3.3.3",
     "prettier-plugin-svelte": "^3.2.6",
     "turbo": "^2.1.3"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
   }
 }

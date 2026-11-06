@@ -1,3 +1,28 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+
+# Supply-chain guard: refuse to resolve or install a package published
+# less than 24 hours ago. A compromised release is usually caught and
+# pulled within hours, so even a short waiting period absorbs most of that
+# risk.
+#
+# This governs RESOLUTION as well as install, so the lockfile is generated
+# under the same rule it is later verified against. That is the point: a
+# lockfile generated with no policy fails on a machine that enforces one,
+# which is exactly how this broke on the VPS.
+#
+# 24h rather than something longer because Rollup and esbuild publish a
+# per-platform package for every target on every release and Vite pins
+# them exactly, so a longer window blocks the whole install rather than
+# selecting an older version.
+minimumReleaseAge: 1440
+
+# Packages allowed to run install scripts. Everything else is blocked.
+# esbuild needs its postinstall to fetch the right platform binary; without
+# it, every Vite build fails.
+#
+# This lives here rather than in package.json's "pnpm" field: pnpm 11 no
+# longer reads that field and silently ignores it.
+onlyBuiltDependencies:
+  - esbuild
