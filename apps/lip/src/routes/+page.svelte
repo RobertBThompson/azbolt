@@ -55,7 +55,10 @@
 <header class="hero">
 	<div class="top">
 		<span class="appmark">LIP</span>
-		<a class="method" href="/method">Method</a>
+		<div class="utils">
+			<a class="method" href="/method">Method</a>
+			<a class="method" href="/components">Components</a>
+		</div>
 	</div>
 
 	{#if ready && mine}
@@ -179,9 +182,14 @@
 		letter-spacing: 0.14em;
 		color: #fff;
 	}
-	.method {
+	.utils {
 		margin-left: auto;
-		min-height: var(--tap-min);
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+	}
+	.method {
+		min-height: 34px;
 		display: inline-flex;
 		align-items: center;
 		font-size: var(--size-label);

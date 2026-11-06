@@ -49,7 +49,10 @@
 			{#if onboarding}
 				<span class="method">Private setup</span>
 			{:else}
-				<a class="method" href="/method">Method</a>
+				<div class="utils">
+					<a class="method" href="/method">Method</a>
+					<a class="method" href="/components">Components</a>
+				</div>
 			{/if}
 		</header>
 	{/if}
@@ -100,6 +103,14 @@
 		color: #fff;
 		text-decoration: none;
 	}
+	/* Method and the component gallery stack, so both clear the target
+	   minimum without crowding the wordmark. */
+	.utils {
+		margin-left: auto;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+	}
 	.method {
 		margin-left: auto;
 		font-size: var(--size-label);
@@ -107,7 +118,7 @@
 		text-transform: uppercase;
 		color: var(--on-teal);
 		text-decoration: none;
-		min-height: var(--tap-min);
+		min-height: 34px;
 		display: inline-flex;
 		align-items: center;
 	}
