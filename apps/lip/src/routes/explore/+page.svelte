@@ -46,7 +46,7 @@
 	</div>
 
 	{#if mode === 'points'}
-		<Quadrant {objects} height={300} onselect={(o) => !Array.isArray(o) && goto(`/object/${o.id}`)} />
+		<Quadrant {objects} height={340} onselect={(o) => !Array.isArray(o) && goto(`/object/${o.id}`)} />
 	{:else}
 		<div class="matrix">
 			{#each cells as count, i (i)}
@@ -89,84 +89,95 @@
 
 <style>
 	.wrap {
-		padding: 12px;
+		padding: 16px;
 	}
 	h1 {
-		font-size: 20px;
-		margin-bottom: 10px;
+		font-size: 26px;
+		margin-bottom: 14px;
 	}
 	.toggle {
-		display: inline-flex;
-		border: 1px solid var(--ink);
-		border-radius: 7px;
-		overflow: hidden;
-		margin-bottom: 12px;
+		display: flex;
+		gap: 8px;
+		margin-bottom: 16px;
 	}
 	.toggle button {
-		min-height: 36px;
-		padding: 0 16px;
+		padding: 0 24px;
 		border: 0;
+		border-radius: 24px;
 		background: var(--white);
-		font-size: 10px;
-		font-weight: 700;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-		cursor: pointer;
+		font: 600 var(--size-small) var(--font-sans);
+		color: #3d4a48;
+		box-shadow: var(--shadow-sm);
 	}
 	.toggle button[aria-selected='true'] {
-		background: var(--ink);
+		background: linear-gradient(160deg, var(--app-accent), var(--app-accent-strong));
 		color: #fff;
+		font-weight: 700;
+		box-shadow: 0 6px 14px rgba(192, 125, 31, 0.34);
 	}
 	.matrix {
 		display: grid;
 		grid-template-columns: repeat(5, 1fr);
-		gap: 2px;
+		gap: 3px;
 		background: var(--line);
 		border: 1px solid var(--line);
-		border-radius: 8px;
+		border-radius: var(--radius);
 		overflow: hidden;
+		box-shadow: var(--shadow-sm);
 	}
 	.matrix div {
 		aspect-ratio: 1;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 11px;
+		font-size: var(--size-body);
+		font-weight: 600;
 	}
 	.axis-key {
 		display: flex;
 		justify-content: space-between;
-		font-size: 8px;
+		font-size: var(--size-label);
 		color: var(--muted);
-		margin-top: 4px;
+		margin-top: 8px;
 	}
 	.note {
-		font-size: 10px;
-		line-height: 1.5;
+		font-size: var(--size-small);
+		line-height: 1.6;
 		color: var(--muted);
-		margin: 12px 0;
+		margin: 16px 0;
 	}
 	.list {
 		list-style: none;
 		padding: 0;
 		margin: 0;
-		border-top: 1px solid var(--line);
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
 	}
 	.list a {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: 10px;
-		min-height: var(--tap-min);
-		padding: 8px 0;
-		border-bottom: 1px solid var(--line);
+		gap: 12px;
+		min-height: 64px;
+		padding: 14px 18px;
+		border-radius: var(--radius-sm);
+		background: var(--white);
+		box-shadow: var(--shadow-sm);
 		text-decoration: none;
-		font-size: 9px;
+		font-size: var(--size-small);
 		color: var(--muted);
 	}
 	.list b {
 		display: block;
-		font-size: 12px;
+		font-size: var(--size-body);
+		font-weight: 600;
 		color: var(--ink);
+		margin-bottom: 2px;
+	}
+	.list a > b.num {
+		font-family: var(--font-serif);
+		font-size: var(--size-title);
+		margin: 0;
 	}
 </style>

@@ -32,26 +32,26 @@
 
 <style>
 	.wrap {
-		padding: 12px;
+		padding: 16px;
 	}
 	h1 {
-		font-size: 20px;
+		font-size: 26px;
 	}
 	.note {
-		font-size: 11px;
-		line-height: 1.55;
+		font-size: var(--size-small);
+		line-height: 1.6;
 		color: var(--muted);
-		margin: 8px 0;
+		margin: 10px 0;
 	}
 	.card {
-		border: 1px solid var(--line);
 		border-radius: var(--radius);
 		background: var(--white);
-		padding: 14px;
-		margin-top: 12px;
+		padding: 20px;
+		box-shadow: var(--shadow-sm);
+		margin-top: 14px;
 	}
 	.k {
-		font: 700 10px var(--font-sans);
+		font: 700 var(--size-label) var(--font-sans);
 		letter-spacing: 0.11em;
 		text-transform: uppercase;
 		color: var(--muted);
@@ -59,17 +59,17 @@
 	.chain {
 		list-style: none;
 		padding: 0;
-		margin: 10px 0 0;
+		margin: 14px 0 0;
 	}
 	.chain li {
 		display: grid;
 		grid-template-columns: 1fr auto auto;
 		grid-template-areas: 'lbl score w' 'basis score w';
-		gap: 0 10px;
+		gap: 0 14px;
 		align-items: center;
-		padding: 9px 0 9px 14px;
-		border-left: 2px solid var(--line-strong);
-		font-size: 12px;
+		padding: 14px 0 14px 18px;
+		border-left: 3px solid var(--teal-500);
+		font-size: var(--size-body);
 	}
 	.lbl {
 		grid-area: lbl;
@@ -77,19 +77,19 @@
 	}
 	.basis {
 		grid-area: basis;
-		font-size: 9px;
+		font-size: var(--size-label);
 		color: var(--muted);
 	}
 	.chain b {
 		grid-area: score;
 		font-family: var(--font-serif);
-		font-size: 15px;
+		font-size: var(--size-title);
 	}
 	.w {
 		grid-area: w;
-		font-size: 10px;
+		font-size: var(--size-small);
 		color: var(--muted);
-		width: 42px;
+		width: 52px;
 		text-align: right;
 	}
 </style>

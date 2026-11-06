@@ -5,8 +5,18 @@
 	import ConfidenceCoverage from '$lib/components/ConfidenceCoverage.svelte';
 	import { qcQueue, me } from '$lib/data/fixtures.js';
 
+	/**
+	 * One item at a time rather than a scrolling list. A QC judgment
+	 * deserves the whole screen; a list of them invites skimming, which is
+	 * the opposite of what verification is for.
+	 */
+	let index = $state(0);
 	/** @type {Record<string, 'agree'|'adjust'|'flag'>} */
 	let submitted = $state({});
+
+	let item = $derived(qcQueue[index]);
+	let done = $derived(submitted[item.id]);
+	let last = $derived(index === qcQueue.length - 1);
 
 	/**
 	 * @param {string} id
@@ -20,135 +30,192 @@
 <svelte:head><title>QC · LIP</title></svelte:head>
 
 <div class="wrap">
-	<h1>Verify</h1>
+	<div class="head">
+		<h1>Verify</h1>
+		<span class="count num">{index + 1} of {qcQueue.length}</span>
+	</div>
 	<p class="intro">
-		Items needing your bin come first. Judgments here affect verification only — agreeing with a
-		measurement never enrols you in an action.
+		Judgments here affect verification only. Agreeing with a measurement never enrols you in an
+		action.
 	</p>
 
-	{#each qcQueue as item (item.id)}
-		<!-- Verify treatment: 4px left rule + a barely-there warm tint.
-		     That is the whole difference from Measure. No new hue. -->
-		<section class="qc">
-			<div class="top">
-				<span class="eyebrow">Needs {item.needsBin}</span>
-				<StateBadge state={item.state} />
-			</div>
+	<!-- Verify treatment: a left rule and a warm tint. That is the whole
+	     difference from Measure. No new hue. -->
+	<section class="qc">
+		<div class="top">
+			<span class="eyebrow">Needs {item.needsBin}</span>
+			<StateBadge state={item.state} />
+		</div>
 
-			<h2>{item.object} · {item.issue}</h2>
-			<p class="note">{item.note}</p>
+		<h2>{item.object}</h2>
+		<p class="issue">{item.issue}</p>
+		<p class="note">{item.note}</p>
 
-			<p class="proposed">
-				<span class="k">Proposed</span>
-				<b class="num">{item.proposed > 0 ? '+' : ''}{item.proposed.toFixed(1)}</b>
+		<p class="proposed">
+			<span class="k">Proposed</span>
+			<b class="num">{item.proposed > 0 ? '+' : ''}{item.proposed.toFixed(1)}</b>
+		</p>
+		<AxisMeter score={item.proposed} />
+
+		<ConfidenceCoverage confidence={item.confidence} coverage={item.coverage} />
+
+		{#if done}
+			<p class="recorded">
+				Recorded: <b>{done}</b>. Your accuracy weight updates when the item resolves — not now, and
+				not for agreeing with the majority.
 			</p>
-			<AxisMeter score={item.proposed} />
+		{:else}
+			<div class="actions">
+				<button onclick={() => act(item.id, 'agree')}>Agree</button>
+				<button onclick={() => act(item.id, 'adjust')}>Adjust</button>
+				<button onclick={() => act(item.id, 'flag')}>Flag</button>
+			</div>
+		{/if}
 
-			<ConfidenceCoverage confidence={item.confidence} coverage={item.coverage} />
+		<QuorumIndicator quorum={item.quorum} yourBin={me.bin} />
+	</section>
 
-			{#if submitted[item.id]}
-				<p class="done">
-					Recorded: <b>{submitted[item.id]}</b>. Your accuracy weight updates once the item
-					resolves — not now, and not from agreeing with the majority.
-				</p>
-			{:else}
-				<div class="actions">
-					<button onclick={() => act(item.id, 'agree')}>Agree</button>
-					<button onclick={() => act(item.id, 'adjust')}>Adjust</button>
-					<button onclick={() => act(item.id, 'flag')}>Flag</button>
-				</div>
-			{/if}
+	<div class="nav">
+		<button class="ghost" disabled={index === 0} onclick={() => (index -= 1)}>Back</button>
+		{#if !last}
+			<button class="primary" onclick={() => (index += 1)}>Next item</button>
+		{:else}
+			<a class="primary" href="/">Done</a>
+		{/if}
+	</div>
 
-			<QuorumIndicator quorum={item.quorum} yourBin={me.bin} />
-
-			<a class="inspect" href="/object/{item.objectId}">Inspect the measurement →</a>
-		</section>
-	{/each}
+	<a class="inspect" href="/object/{item.objectId}">Inspect the measurement →</a>
 </div>
 
 <style>
 	.wrap {
-		padding: 12px;
+		padding: 16px;
+	}
+	.head {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
 	}
 	h1 {
-		font-size: 20px;
+		font-size: 26px;
+	}
+	.count {
+		font-size: var(--size-small);
+		font-weight: 700;
+		color: var(--muted);
 	}
 	.intro {
-		font-size: 11px;
-		line-height: 1.55;
+		font-size: var(--size-small);
+		line-height: 1.6;
 		color: var(--muted);
-		margin: 6px 0 14px;
+		margin: 8px 0 18px;
 	}
 	.qc {
-		border: 1px solid var(--line);
-		border-left: 4px solid var(--ink);
+		border-left: 5px solid var(--teal-500);
 		background: var(--verify-tint);
-		border-radius: 0 10px 10px 0;
-		padding: 14px;
-		margin-bottom: 12px;
+		border-radius: 0 var(--radius) var(--radius) 0;
+		padding: 20px;
+		box-shadow: var(--shadow-sm);
 	}
 	.top {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		gap: 8px;
+		gap: 12px;
 	}
 	h2 {
-		font: 600 14px var(--font-sans);
-		margin-top: 8px;
+		font-size: 24px;
+		margin-top: 14px;
+	}
+	.issue {
+		font-size: var(--size-body);
+		font-weight: 600;
+		color: var(--teal-700);
+		margin: 4px 0 0;
 	}
 	.note {
-		font-size: 11px;
-		line-height: 1.5;
+		font-size: var(--size-small);
+		line-height: 1.6;
 		color: var(--muted);
-		margin: 4px 0 0;
+		margin: 10px 0 0;
 	}
 	.proposed {
 		display: flex;
 		align-items: baseline;
-		gap: 8px;
-		margin: 12px 0 0;
+		gap: 12px;
+		margin: 18px 0 0;
 	}
 	.proposed b {
-		font: 600 20px var(--font-serif);
+		font-family: var(--font-serif);
+		font-size: var(--size-score);
+		font-weight: 600;
 	}
 	.k {
-		font: 700 9px var(--font-sans);
+		font: 700 var(--size-label) var(--font-sans);
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
 		color: var(--muted);
 	}
 	.actions {
 		display: flex;
-		gap: 6px;
-		margin: 12px 0;
+		gap: 8px;
+		margin: 20px 0;
 	}
 	.actions button {
 		flex: 1;
-		min-height: var(--tap-min);
-		border: 1px solid var(--ink);
+		min-height: 52px;
+		border: 2px solid var(--ink);
 		border-radius: var(--radius-sm);
 		background: var(--white);
-		font: 700 10px var(--font-sans);
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-		cursor: pointer;
+		font: 700 var(--size-small) var(--font-sans);
 	}
-	.done {
-		font-size: 10px;
-		line-height: 1.5;
+	.recorded {
+		font-size: var(--size-small);
+		line-height: 1.6;
 		background: var(--white);
-		border: 1px solid var(--line);
 		border-radius: var(--radius-sm);
-		padding: 8px;
-		margin: 12px 0;
+		padding: 14px;
+		margin: 20px 0;
+		box-shadow: var(--shadow-sm);
+	}
+	.nav {
+		display: flex;
+		gap: 10px;
+		margin-top: 16px;
+	}
+	.primary,
+	.ghost {
+		flex: 1;
+		min-height: 52px;
+		border-radius: var(--radius-sm);
+		font: 700 var(--size-small) var(--font-sans);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-decoration: none;
+	}
+	.primary {
+		border: 0;
+		background: linear-gradient(160deg, var(--teal-700), var(--teal-900));
+		color: #fff;
+		box-shadow: 0 6px 16px rgba(15, 74, 77, 0.3);
+	}
+	.ghost {
+		border: 1.5px solid var(--line);
+		background: none;
+		color: var(--ink);
+	}
+	.ghost:disabled {
+		opacity: 0.4;
 	}
 	.inspect {
-		display: inline-flex;
+		display: flex;
 		align-items: center;
-		min-height: 36px;
-		font-size: 10px;
-		color: var(--app-accent-text);
+		justify-content: center;
+		min-height: var(--tap-min);
+		font-size: var(--size-small);
+		font-weight: 600;
+		color: var(--teal-700);
 		text-decoration: none;
 		margin-top: 8px;
 	}

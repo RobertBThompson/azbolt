@@ -32,53 +32,60 @@
 
 <style>
 	.wrap {
-		padding: 12px;
+		padding: 16px;
 	}
 	h1 {
-		font-size: 20px;
+		font-size: 26px;
 	}
 	.note {
-		font-size: 11px;
-		line-height: 1.55;
+		font-size: var(--size-small);
+		line-height: 1.6;
 		color: var(--muted);
-		margin: 8px 0 14px;
+		margin: 10px 0 18px;
 	}
 	.modules {
 		list-style: none;
 		padding: 0;
-		margin: 0 0 14px;
-		border-top: 1px solid var(--line);
+		margin: 0 0 18px;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
 	}
 	.modules li {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		min-height: var(--tap-min);
-		border-bottom: 1px solid var(--line);
-		font-size: 12px;
+		min-height: 56px;
+		padding: 0 18px;
+		border-radius: var(--radius-sm);
+		background: var(--white);
+		box-shadow: var(--shadow-sm);
+		font-size: var(--size-body);
+		font-weight: 600;
 	}
 	.modules b {
-		font-size: 10px;
-		color: var(--muted);
+		font-size: var(--size-small);
+		font-weight: 700;
+		color: var(--teal-700);
 	}
 	.card {
-		border: 1px solid var(--line);
 		border-radius: var(--radius);
 		background: var(--white);
-		padding: 14px;
+		padding: 20px;
+		box-shadow: var(--shadow-sm);
 	}
 	.k {
-		font: 700 10px var(--font-sans);
+		font: 700 var(--size-label) var(--font-sans);
 		letter-spacing: 0.11em;
 		text-transform: uppercase;
 		color: var(--muted);
-		margin-bottom: 8px;
+		margin-bottom: 12px;
 	}
 	.rules {
 		margin: 0;
-		padding-left: 18px;
-		font-size: 11px;
-		line-height: 1.7;
+		padding-left: 20px;
+		font-size: var(--size-small);
+		line-height: 1.9;
 		color: var(--ink-2);
 	}
 </style>

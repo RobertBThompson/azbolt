@@ -120,7 +120,8 @@
 		<div class="mapwrap">
 			<Quadrant
 				objects={[{ id: 'me', name: 'YOU', type: 'you', position: preview, coverage: 100 }]}
-				height={240}
+				height={300}
+				land
 			/>
 		</div>
 
@@ -139,168 +140,172 @@
 
 <style>
 	.pad {
-		padding: 16px 14px 24px;
+		padding: 20px 18px 28px;
 		display: flex;
 		flex-direction: column;
 	}
 	h1 {
-		font-size: 24px;
+		font-size: 30px;
 		line-height: 1.15;
-		margin: 8px 0 16px;
+		margin: 10px 0 20px;
+		text-wrap: balance;
 	}
 	h2 {
-		font-size: 21px;
+		font-size: 26px;
 		line-height: 1.2;
-		margin: 6px 0 0;
+		margin: 8px 0 0;
+		text-wrap: balance;
 	}
 	.q {
-		font-size: 13px;
-		line-height: 1.5;
+		font-size: var(--size-body);
+		line-height: 1.55;
 		color: var(--muted);
-		margin: 8px 0 16px;
+		margin: 10px 0 20px;
 	}
 	.note {
-		font-size: 11px;
-		line-height: 1.6;
+		font-size: var(--size-small);
+		line-height: 1.7;
 		color: var(--muted);
-		margin: 16px 0;
+		margin: 18px 0;
 	}
 
-	/* Mode samples: the real treatments, so the words map onto something. */
+	/* The three modes shown as their real treatments, so the words map
+	   onto something the user will recognise later. */
 	.sample {
 		border-radius: var(--radius);
-		padding: 12px 14px;
-		margin-bottom: 8px;
+		padding: 16px 18px;
+		margin-bottom: 10px;
 	}
 	.sample b {
-		font: 700 10px var(--font-sans);
+		font: 700 var(--size-label) var(--font-sans);
 		letter-spacing: 0.11em;
 		text-transform: uppercase;
+		color: var(--ink);
 	}
 	.sample p {
-		font-size: 11px;
-		line-height: 1.5;
-		margin: 5px 0 0;
+		font-size: var(--size-small);
+		line-height: 1.55;
+		margin: 7px 0 0;
 	}
 	.measure {
 		background: var(--white);
-		border: 1px solid var(--line);
+		box-shadow: var(--shadow-sm);
 		color: var(--muted);
 	}
 	.verify {
 		background: var(--verify-tint);
-		border: 1px solid var(--line);
-		border-left: 4px solid var(--ink);
+		border-left: 5px solid var(--teal-500);
+		box-shadow: var(--shadow-sm);
 		color: var(--muted);
 	}
 	.act {
-		background: var(--ink);
-		color: #b9bdb6;
-	}
-	.sample b {
-		color: var(--ink);
+		background: linear-gradient(145deg, #11373a, #081f22);
+		color: #9ab2b0;
+		box-shadow: var(--shadow);
 	}
 	.act b {
 		color: #fff;
 	}
 
 	.progresswrap {
-		padding: 12px 14px 0;
+		padding: 16px 18px 0;
 	}
 	.progress {
-		height: 3px;
+		height: 5px;
 		background: var(--line);
-		border-radius: 2px;
+		border-radius: 3px;
 		overflow: hidden;
 	}
 	.progress i {
 		display: block;
 		height: 100%;
-		background: var(--app-accent);
-		transition: width 180ms ease;
+		border-radius: 3px;
+		background: linear-gradient(90deg, var(--app-accent), var(--app-accent-strong));
+		transition: width 280ms cubic-bezier(0.22, 1, 0.36, 1);
 	}
 	.step {
 		display: block;
-		font: 700 9px var(--font-sans);
-		letter-spacing: 0.1em;
+		font: 700 var(--size-label) var(--font-sans);
+		letter-spacing: 0.12em;
 		text-transform: uppercase;
 		color: var(--muted);
-		margin-top: 8px;
+		margin-top: 12px;
 	}
 
 	.options {
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
+		gap: 10px;
 	}
+	/* Answer cards are the whole point of these screens, so they get real
+	   size: 15px text, generous padding, nothing cramped. */
 	.opt {
 		text-align: left;
-		min-height: var(--tap-min);
-		padding: 12px 14px;
-		border: 1px solid var(--line-strong);
+		padding: 16px 18px;
+		border: 2px solid transparent;
 		border-radius: var(--radius-sm);
 		background: var(--white);
-		font-size: 12px;
+		box-shadow: var(--shadow-sm);
+		font-size: var(--size-body);
 		line-height: 1.5;
 		color: var(--ink-2);
-		cursor: pointer;
 	}
 	.opt.selected {
-		border-color: var(--ink);
-		border-width: 2px;
+		border-color: var(--app-accent-strong);
 		background: var(--app-accent-tint);
 		color: var(--ink);
 	}
 
 	.nav {
 		display: flex;
-		gap: 8px;
-		margin-top: 16px;
+		gap: 10px;
+		margin-top: 20px;
+	}
+	.primary,
+	.ghost {
+		min-height: 56px;
+		border-radius: var(--radius-sm);
+		font: 700 var(--size-body) var(--font-sans);
+		letter-spacing: 0.02em;
+		margin-top: 10px;
 	}
 	.primary {
 		flex: 2;
-		min-height: var(--tap-min);
-		border: 1px solid var(--ink);
-		background: var(--ink);
+		border: 0;
+		background: linear-gradient(160deg, var(--teal-700), var(--teal-900));
 		color: #fff;
-		border-radius: var(--radius-sm);
-		font: 700 12px var(--font-sans);
-		letter-spacing: 0.04em;
-		cursor: pointer;
-		margin-top: 8px;
+		box-shadow: 0 8px 20px rgba(15, 74, 77, 0.32);
 	}
 	.primary:disabled {
-		background: #4a4d47;
-		border-color: #4a4d47;
-		color: #9a9d95;
+		background: #c9ccc6;
+		color: #8b918d;
+		box-shadow: none;
 		cursor: not-allowed;
 	}
 	.ghost {
 		flex: 1;
-		min-height: var(--tap-min);
-		border: 1px solid var(--ink);
+		border: 1.5px solid var(--line);
 		background: var(--white);
-		border-radius: var(--radius-sm);
-		font: 700 12px var(--font-sans);
-		cursor: pointer;
-		margin-top: 8px;
 	}
 	.version {
-		font-size: 9px;
+		font-size: var(--size-label);
+		line-height: 1.6;
 		color: var(--muted);
-		margin-top: 14px;
+		margin-top: 18px;
 	}
 	.mapwrap {
-		margin-top: 12px;
+		margin-top: 16px;
 	}
 	.retake {
 		text-align: center;
-		font-size: 10px;
+		font-size: var(--size-small);
+		font-weight: 600;
 		color: var(--muted);
-		margin-top: 12px;
-		min-height: 36px;
+		margin-top: 14px;
+		min-height: var(--tap-min);
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		text-decoration: none;
 	}
 </style>

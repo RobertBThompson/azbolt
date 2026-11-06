@@ -17,7 +17,7 @@
 
 <div class="cc">
 	<div class="metric">
-		<span class="k">Conf</span>
+		<span class="k">Confidence</span>
 		<span class="segs" aria-hidden="true">
 			{#each Array(segments) as _, i}
 				<i class:on={i < filled}></i>
@@ -46,26 +46,26 @@
 	.cc {
 		display: flex;
 		flex-direction: column;
-		gap: 6px;
-		margin-top: 10px;
+		gap: 10px;
+		margin-top: 16px;
 	}
 	.metric {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: 10px;
 	}
 	.k {
-		font: 700 8px var(--font-sans);
+		font: 700 var(--size-label) var(--font-sans);
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
 		color: var(--muted);
-		width: 58px;
+		width: 82px;
 		flex: none;
 	}
 	.v {
-		font-size: 9px;
+		font-size: var(--size-small);
 		color: var(--muted);
-		width: 30px;
+		width: 40px;
 		text-align: right;
 		flex: none;
 	}
@@ -73,13 +73,13 @@
 	.segs {
 		flex: 1;
 		display: flex;
-		gap: 2px;
+		gap: 3px;
 	}
 	.segs i {
 		flex: 1;
-		height: 6px;
+		height: 9px;
 		background: #e4e2d8;
-		border-radius: 1px;
+		border-radius: 2px;
 	}
 	.segs i.on {
 		background: var(--ink);
@@ -87,9 +87,9 @@
 	/* Coverage: one continuous rule. Not interchangeable with the above. */
 	.rule {
 		flex: 1;
-		height: 6px;
+		height: 9px;
 		background: #e4e2d8;
-		border-radius: 3px;
+		border-radius: 5px;
 		overflow: hidden;
 	}
 	.rule b {
@@ -98,15 +98,16 @@
 		background: var(--ink-2);
 	}
 	.rule.hatched b {
-		background: repeating-linear-gradient(45deg, #9a9a9a 0 3px, #cfcdc4 3px 6px);
+		background: repeating-linear-gradient(45deg, #9a9a92 0 4px, #cfcdc4 4px 8px);
 	}
 	.floor {
-		font-size: 9px;
-		line-height: 1.45;
-		border-left: 3px solid var(--muted);
-		padding: 6px 8px;
+		font-size: var(--size-small);
+		line-height: 1.55;
+		border-left: 4px solid var(--muted);
+		padding: 10px 14px;
 		background: var(--verify-tint);
-		margin: 8px 0 0;
+		border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+		margin: 14px 0 0;
 		color: var(--ink-2);
 	}
 </style>

@@ -1,48 +1,139 @@
 @import '@azbolt/config/tokens.css';
 
 /*
- * LIP v4 design tokens.
+ * LIP visual system — direction B.
  *
- * These are LIP-specific on purpose and must NOT move into
- * packages/config: the reserved action color means nothing in Tithe or
- * Peace, and the instrument surface only exists because LIP has a map.
+ * Two principles drive the numbers below.
  *
- * Rule from the spec: no red or blue anywhere, including the one
- * reserved accent. Bronze marks "this is yours" or "this is live" —
- * never a political side.
+ * 1. Saturated, but not partisan. The header and instrument field run on
+ *    deep teal; the identity accent is brass. No red and no blue anywhere,
+ *    because on a political map either one makes a claim before the user
+ *    has read a single number.
+ *
+ * 2. Nothing shrinks to fit. When a screen runs out of room the extra
+ *    detail moves behind a tap — a sheet, an expander, a second screen —
+ *    rather than down a type size. The old 8-9px labels are gone.
  */
 :root {
-	/* Identity accent — bronze */
-	--app-accent: #b68235;
-	--app-accent-text: #92682a; /* text-safe variant, clears WCAG AA on light */
-	--app-accent-tint: rgba(182, 130, 53, 0.15);
-	--gold-light: #e6c989; /* map markers on the dark instrument surface */
+	/* Ground */
+	--paper: #f3f1ea;
+	--white: #ffffff;
+	--ink: #15201f;
+	--ink-2: #243432;
+	--line: #ddd8cc;
+	--line-strong: #9a9a92;
+	--muted: #5d6b69;
+	--muted-2: #6c7a78;
 
-	/* The instrument surface: desaturated navy-charcoal, no political read */
-	--instrument: #1c2b2e;
-	--instrument-line: rgba(255, 255, 255, 0.14);
+	/* Brand — deep teal. Carries no party. */
+	--teal-900: #0f4a4d;
+	--teal-700: #136e6b;
+	--teal-500: #15837a;
+	--header: linear-gradient(145deg, #0f4a4d 0%, #136e6b 55%, #15837a 100%);
+	--on-teal: #b9ded7;
+	--on-teal-dim: #8fc9bf;
 
-	/* Mode treatments — structural, not hue */
-	--verify-tint: #f5f4ee;
+	/* Identity accent — brass. "This is yours" or "this is live", never a side. */
+	--app-accent: #d8973a;
+	--app-accent-strong: #c07d1f;
+	--app-accent-text: #96661a; /* text-safe on light grounds */
+	--app-accent-tint: rgba(216, 151, 58, 0.16);
+	--gold-light: #ffe0a3;
 
-	/* The ONE reserved color. JOIN button and the live-boycott card only. */
+	/* The instrument field */
+	--instrument: radial-gradient(125% 95% at 50% 0%, #11494a 0%, #0c3134 50%, #06191c 100%);
+	--instrument-line: rgba(255, 255, 255, 0.18);
+
+	/* Verify's single signal beyond Measure: a left rule and a warm tint. */
+	--verify-tint: #faf8f2;
+
+	/*
+	 * The one reserved colour. JOIN and the live-boycott card only.
+	 * Deliberately redder than the brass accent so the two never read as
+	 * the same signal at a glance.
+	 */
 	--act-accent: #c1541c;
-	--act-accent-2: #d97230;
+	--act-accent-2: #ff8a4c;
+
+	/*
+	 * Type. Every size moved up; the old caption sizes (8-9px) are gone.
+	 * Scores get the display size because the number is the product.
+	 */
+	--size-display: 44px;
+	--size-score: 30px;
+	--size-title: 20px;
+	--size-body: 15px;
+	--size-small: 13px;
+	--size-label: 12px;
+
+	--font-serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+	--font-sans: 'Public Sans', -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+	/* Shape and depth. Flat 1px borders everywhere were most of why the
+	   old build read as dead. */
+	--radius-sm: 12px;
+	--radius: 20px;
+	--radius-lg: 26px;
+	--tap-min: 48px;
+	--shadow-sm: 0 2px 8px rgba(21, 32, 31, 0.1);
+	--shadow: 0 6px 18px rgba(21, 32, 31, 0.12);
+	--shadow-lg: 0 18px 40px rgba(6, 25, 28, 0.34);
 }
 
+body {
+	margin: 0;
+	background: var(--paper);
+	color: var(--ink);
+	font: var(--size-body) / 1.5 var(--font-sans);
+	-webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+	margin: 0;
+	font-family: var(--font-serif);
+	font-weight: 600;
+}
+
+a {
+	color: inherit;
+}
+
+.num {
+	font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Section label. 12px is the floor — below that it stops being readable
+   on a phone in daylight, which is where this app is used. */
 .eyebrow {
-	font: 700 10px/1 var(--font-sans);
-	letter-spacing: 0.16em;
+	font: 700 var(--size-label) / 1 var(--font-sans);
+	letter-spacing: 0.14em;
 	text-transform: uppercase;
 	color: var(--app-accent-text);
 }
 
 .note {
-	font-size: 11px;
-	line-height: 1.55;
+	font-size: var(--size-small);
+	line-height: 1.6;
 	color: var(--muted);
 }
 
-a {
-	color: inherit;
+/* Every tappable thing clears the target minimum, without exception. */
+button,
+.tap {
+	min-height: var(--tap-min);
+	font-family: var(--font-sans);
+	cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
 }

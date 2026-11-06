@@ -2,16 +2,13 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import Quadrant from '$lib/components/Quadrant.svelte';
+	import Sheet from '$lib/components/Sheet.svelte';
 	import { views, objects, me, activity, binLabel } from '$lib/data/fixtures.js';
 	import { loadPosition } from '$lib/storage/position.js';
 
 	let activeView = $state('my');
 
-	/**
-	 * The user's own position is read in the browser only — it lives in
-	 * localStorage and never reaches the server, so there is nothing to
-	 * render for it during SSR.
-	 */
+	/** Position lives in localStorage, so it is read in the browser only. */
 	let mine = $state(/** @type {any} */ (null));
 	let ready = $state(false);
 
@@ -21,323 +18,452 @@
 	});
 
 	let coachmark = $state(true);
+	let legendOpen = $state(false);
+	let activityOpen = $state(false);
+
 	let justOnboarded = $derived($page.url.searchParams.get('welcome') === '1');
-
 	let view = $derived(views.find((v) => v.id === activeView) ?? views[0]);
+	let lead = $derived(activity[0]);
 
-	/** Falls back to the fixture only when the instrument has not been taken. */
 	let meObject = $derived(
 		mine ? { ...me, position: { fiscal: mine.fiscal, social: mine.social }, coverage: 100 } : me
 	);
 
 	let plotted = $derived(
-		view.ids
-			.map((id) => (id === 'me' ? meObject : objects.find((o) => o.id === id)))
-			.filter(Boolean)
+		view.ids.map((id) => (id === 'me' ? meObject : objects.find((o) => o.id === id))).filter(Boolean)
 	);
 
 	/** Clusters hand back an array; a single marker hands back the object. */
-	/** @param {any} hit */
-	function select(hit) {
+	function select(/** @type {any} */ hit) {
 		if (Array.isArray(hit)) return;
 		if (hit.id === 'me') return goto('/me');
 		goto(`/object/${hit.id}`);
 	}
+
+	const shapes = [
+		{ cls: 'lp', label: 'Person or candidate', note: 'Circle' },
+		{ cls: 'lc', label: 'Company', note: 'Rounded square' },
+		{ cls: 'lm', label: 'Media', note: 'Triangle' },
+		{ cls: 'lb', label: 'Bill', note: 'Teardrop' },
+		{ cls: 'ly', label: 'You', note: 'Larger, brass' }
+	];
 </script>
 
 <svelte:head><title>LIP</title></svelte:head>
 
-<!-- View rail: a lens change, never a navigation. -->
-<div class="viewrail">
-	{#each views as v (v.id)}
-		<button class:active={v.id === activeView} onclick={() => (activeView = v.id)}>
-			{v.label}
-		</button>
-	{/each}
-</div>
-
-<div class="maphead">
-	<strong>{view.title}</strong>
-	<small>
-		{#if activeView === 'my' && mine}
-			Private · fiscal {binLabel(mine.fiscal)} · social {binLabel(mine.social)}
-		{:else}
-			{view.meta}
-		{/if}
-	</small>
-</div>
-
-{#if ready && activeView === 'my' && !mine}
-	<!-- No instrument taken yet. The frame still renders below; this is the
-	     invitation, not a fake centered dot. -->
-	<div class="cta">
-		<b>You're not on the map yet.</b>
-		<p>Six plain-language questions. Nothing leaves this device.</p>
-		<a href="/welcome">Find your position</a>
+<!-- Home paints its own header so the score can sit inside the gradient. -->
+<header class="hero">
+	<div class="top">
+		<span class="appmark">LIP</span>
+		<a class="method" href="/method">Method</a>
 	</div>
-{/if}
 
-{#if justOnboarded && coachmark && mine}
-	<!-- One tap to dismiss, never a full-screen interruption competing with
-	     the dot for attention. -->
-	<div class="coach">
-		<span>That bronze dot is you. Everything else is measured against evidence, not against you.</span>
-		<button onclick={() => (coachmark = false)}>Got it</button>
+	{#if ready && mine}
+		<div class="scoreblock">
+			<span class="kicker">Your position</span>
+			<p class="score num">
+				{mine.fiscal > 0 ? '+' : ''}{mine.fiscal.toFixed(1)}
+				<span class="slash">/</span>
+				{mine.social > 0 ? '+' : ''}{mine.social.toFixed(1)}
+			</p>
+			<p class="bins">Fiscal {binLabel(mine.fiscal)} · Social {binLabel(mine.social)}</p>
+		</div>
+	{:else if ready}
+		<div class="scoreblock">
+			<span class="kicker">Your position</span>
+			<p class="empty">You're not on the map yet.</p>
+			<a class="cta" href="/welcome">Find your position</a>
+		</div>
+	{/if}
+</header>
+
+<div class="pad">
+	{#if justOnboarded && coachmark && mine}
+		<div class="coach">
+			<span>That brass dot is you. Everything else is measured against evidence, not against you.</span>
+			<button onclick={() => (coachmark = false)}>Got it</button>
+		</div>
+	{/if}
+
+	<div class="viewrail">
+		{#each views as v (v.id)}
+			<button class:active={v.id === activeView} onclick={() => (activeView = v.id)}>
+				{v.label}
+			</button>
+		{/each}
 	</div>
-{/if}
 
-<div class="qwrap">
-	<Quadrant
-		objects={plotted}
-		height={300}
-		sizeBy={activeView === 'pressure' ? 'pressure' : 'none'}
-		onselect={select}
-	/>
-
-	<div class="legend">
-		<span class="lp"><i></i>Person</span>
-		<span class="lc"><i></i>Company</span>
-		<span class="lm"><i></i>Media</span>
-		<span class="lb"><i></i>Bill</span>
-		<span class="ly"><i></i>You</span>
+	<div class="maphead">
+		<h2>{view.title}</h2>
+		<button class="keybtn" onclick={() => (legendOpen = true)}>Key</button>
 	</div>
+
+	{#key activeView}
+		<Quadrant
+			objects={plotted}
+			height={320}
+			sizeBy={activeView === 'pressure' ? 'pressure' : 'none'}
+			land={justOnboarded && activeView === 'my'}
+			onselect={select}
+		/>
+	{/key}
 
 	{#if activeView === 'pressure'}
-		<p class="lens-note">
-			Marker size is pressure magnitude, not political position. A larger dot means more people are
+		<p class="lens">
+			Marker size is pressure magnitude, not political position. A bigger dot means more people are
 			acting, not that the object sits further out.
 		</p>
 	{/if}
+
+	<section class="feed">
+		<div class="feedhead">
+			<h2>What's speaking now</h2>
+			<span class="live">Live</span>
+		</div>
+
+		<!-- One item at full size, the rest behind a tap. -->
+		<a class="arow {lead.mode}" href={lead.href}>
+			<span class="txt">
+				<b>{lead.title}</b>
+				<span class="detail">{lead.detail}</span>
+			</span>
+			{#if lead.badge}<span class="mv">{lead.badge}</span>{/if}
+		</a>
+
+		<button class="more" onclick={() => (activityOpen = true)}>
+			See all {activity.length} items
+		</button>
+	</section>
 </div>
 
-<section class="activity">
-	<div class="head">
-		<h2>What's speaking now</h2>
-		<span>Live</span>
-	</div>
+<Sheet open={legendOpen} title="Map key" onclose={() => (legendOpen = false)}>
+	<ul class="keylist">
+		{#each shapes as s (s.cls)}
+			<li><i class={s.cls}></i><b>{s.label}</b><span>{s.note}</span></li>
+		{/each}
+	</ul>
+	<p class="note">
+		Shape carries the type of object, never colour on its own. Only Expressed Position is plotted
+		here — support and pressure are not positions, so they get no coordinate.
+	</p>
+</Sheet>
 
-	{#each activity as row (row.title)}
-		<a class="arow {row.mode}" href={row.href}>
-			<span class="txt">
-				<b>{row.title}</b>
-				{row.detail}
-			</span>
-			{#if row.badge}<span class="mv">{row.badge}</span>{/if}
-		</a>
-	{/each}
-</section>
+<Sheet open={activityOpen} title="What's speaking now" onclose={() => (activityOpen = false)}>
+	<div class="sheetfeed">
+		{#each activity as row (row.title)}
+			<a class="arow {row.mode}" href={row.href}>
+				<span class="txt">
+					<b>{row.title}</b>
+					<span class="detail">{row.detail}</span>
+				</span>
+				{#if row.badge}<span class="mv">{row.badge}</span>{/if}
+			</a>
+		{/each}
+	</div>
+</Sheet>
 
 <style>
+	.hero {
+		padding: 16px 18px 20px;
+		background: var(--header);
+		box-shadow: 0 6px 24px rgba(15, 74, 77, 0.3);
+	}
+	.top {
+		display: flex;
+		align-items: center;
+	}
+	.appmark {
+		font-family: var(--font-serif);
+		font-size: 27px;
+		font-weight: 600;
+		letter-spacing: 0.14em;
+		color: #fff;
+	}
+	.method {
+		margin-left: auto;
+		min-height: var(--tap-min);
+		display: inline-flex;
+		align-items: center;
+		font-size: var(--size-label);
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--on-teal);
+		text-decoration: none;
+	}
+	.scoreblock {
+		margin-top: 12px;
+	}
+	.kicker {
+		font: 700 var(--size-label) / 1 var(--font-sans);
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: var(--on-teal-dim);
+	}
+	/* The number is the product, so it gets the display size. */
+	.score {
+		font-family: var(--font-serif);
+		font-size: var(--size-display);
+		font-weight: 600;
+		line-height: 1;
+		color: #fff;
+		margin: 8px 0 0;
+	}
+	.slash {
+		color: rgba(255, 255, 255, 0.45);
+	}
+	.bins {
+		font-size: var(--size-small);
+		color: var(--on-teal);
+		margin: 8px 0 0;
+	}
+	.empty {
+		font-family: var(--font-serif);
+		font-size: 26px;
+		color: #fff;
+		margin: 8px 0 14px;
+	}
+	.cta {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: var(--tap-min);
+		padding: 0 22px;
+		border-radius: 24px;
+		background: linear-gradient(160deg, var(--app-accent), var(--app-accent-strong));
+		color: #fff;
+		font-weight: 700;
+		text-decoration: none;
+		box-shadow: 0 6px 16px rgba(192, 125, 31, 0.36);
+	}
+
+	.pad {
+		padding: 16px;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	.coach {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 14px 16px;
+		border-left: 5px solid var(--app-accent);
+		border-radius: var(--radius-sm);
+		background: var(--app-accent-tint);
+		font-size: var(--size-small);
+		line-height: 1.5;
+	}
+	.coach button {
+		margin-left: auto;
+		flex: none;
+		padding: 0 16px;
+		border: 0;
+		border-radius: var(--radius-sm);
+		background: var(--white);
+		font: 700 var(--size-label) var(--font-sans);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		box-shadow: var(--shadow-sm);
+	}
+
 	.viewrail {
 		display: flex;
-		gap: 6px;
+		gap: 8px;
 		overflow-x: auto;
-		padding: 9px 12px 8px;
-		background: var(--white);
 		scrollbar-width: none;
+		margin: 0 -16px;
+		padding: 0 16px 2px;
 	}
 	.viewrail::-webkit-scrollbar {
 		display: none;
 	}
 	.viewrail button {
-		min-height: 32px;
 		white-space: nowrap;
-		border: 1px solid var(--line);
-		border-radius: 16px;
+		padding: 0 20px;
+		border: 0;
+		border-radius: 24px;
 		background: var(--white);
-		padding: 0 12px;
-		font-size: 10px;
-		font-weight: 700;
-		color: var(--ink-2);
-		cursor: pointer;
+		color: #3d4a48;
+		font: 600 var(--size-small) var(--font-sans);
+		box-shadow: var(--shadow-sm);
 	}
 	.viewrail button.active {
-		background: var(--ink);
-		border-color: var(--ink);
+		background: linear-gradient(160deg, var(--app-accent), var(--app-accent-strong));
 		color: #fff;
-	}
-	.maphead {
-		display: flex;
-		justify-content: space-between;
-		align-items: baseline;
-		gap: 10px;
-		padding: 2px 14px 8px;
-	}
-	.maphead strong {
-		font: 600 15px var(--font-serif);
-	}
-	.maphead small {
-		font-size: 9px;
-		color: var(--muted);
-		text-align: right;
-	}
-	.cta {
-		margin: 0 12px 10px;
-		padding: 12px 14px;
-		border: 1px solid var(--line);
-		border-radius: var(--radius-sm);
-		background: var(--white);
-	}
-	.cta b {
-		font-size: 13px;
-	}
-	.cta p {
-		font-size: 11px;
-		color: var(--muted);
-		margin: 4px 0 10px;
-	}
-	.cta a {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		min-height: var(--tap-min);
-		border: 1px solid var(--ink);
-		border-radius: var(--radius-sm);
-		background: var(--ink);
-		color: #fff;
-		font: 700 11px var(--font-sans);
-		letter-spacing: 0.04em;
-		text-decoration: none;
-	}
-	.coach {
-		display: flex;
-		align-items: center;
-		gap: 10px;
-		margin: 0 12px 10px;
-		padding: 10px 12px;
-		border-left: 3px solid var(--app-accent);
-		background: var(--app-accent-tint);
-		font-size: 11px;
-		line-height: 1.45;
-	}
-	.coach button {
-		margin-left: auto;
-		flex: none;
-		min-height: 36px;
-		padding: 0 12px;
-		border: 1px solid var(--ink);
-		border-radius: var(--radius-sm);
-		background: var(--white);
-		font: 700 9px var(--font-sans);
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-		cursor: pointer;
-	}
-	.qwrap {
-		padding: 0 12px;
-	}
-	.legend {
-		display: flex;
-		gap: 10px;
-		flex-wrap: wrap;
-		padding: 10px 2px 0;
-		font-size: 9px;
-		color: var(--muted);
-	}
-	.legend span {
-		display: inline-flex;
-		align-items: center;
-		gap: 4px;
-	}
-	.legend i {
-		width: 8px;
-		height: 8px;
-		background: var(--muted-2);
-		display: inline-block;
-	}
-	.lp i {
-		border-radius: 50%;
-	}
-	.lc i {
-		border-radius: 2px;
-	}
-	.lm i {
-		clip-path: polygon(50% 6%, 96% 92%, 4% 92%);
-	}
-	.lb i {
-		border-radius: 50% 0 50% 50%;
-		rotate: -45deg;
-	}
-	.ly i {
-		background: var(--app-accent);
-		border-radius: 50%;
-		width: 11px;
-		height: 11px;
-	}
-	.lens-note {
-		font-size: 9px;
-		line-height: 1.45;
-		color: var(--muted);
-		border-left: 3px solid var(--line-strong);
-		padding: 5px 8px;
-		margin: 10px 0 0;
+		font-weight: 700;
+		box-shadow: 0 6px 14px rgba(192, 125, 31, 0.34);
 	}
 
-	.activity {
-		padding: 16px 12px 0;
-	}
-	.head {
+	.maphead {
 		display: flex;
-		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 8px;
+		justify-content: space-between;
+		gap: 12px;
 	}
-	.head h2 {
-		font: 600 13px var(--font-serif);
+	.maphead h2 {
+		font-size: var(--size-title);
 	}
-	.head span {
-		font-size: 8px;
-		letter-spacing: 0.1em;
+	.keybtn {
+		flex: none;
+		padding: 0 18px;
+		border: 0;
+		border-radius: 24px;
+		background: var(--white);
+		font: 700 var(--size-label) var(--font-sans);
+		letter-spacing: 0.08em;
 		text-transform: uppercase;
-		color: var(--muted);
+		color: var(--teal-900);
+		box-shadow: var(--shadow-sm);
 	}
-	/* Mode treatments: plain card / left-rule + tint / full inversion.
+	.lens {
+		font-size: var(--size-small);
+		line-height: 1.55;
+		color: var(--muted);
+		border-left: 4px solid var(--line-strong);
+		padding: 8px 12px;
+		margin: 0;
+	}
+
+	.feed {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+	.feedhead {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+	}
+	.feedhead h2 {
+		font-size: var(--size-title);
+	}
+	.live {
+		font: 700 var(--size-label) var(--font-sans);
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--teal-500);
+	}
+
+	/* Mode treatments: plain card / left rule + tint / full inversion.
 	   Structural, never a hue. */
 	.arow {
 		display: flex;
-		gap: 9px;
 		align-items: center;
-		border-radius: 9px;
-		padding: 10px;
-		margin-bottom: 6px;
-		font-size: 9px;
+		gap: 12px;
+		padding: 18px;
+		border-radius: var(--radius);
 		text-decoration: none;
 		min-height: var(--tap-min);
 	}
 	.arow .txt {
 		flex: 1;
-		color: var(--muted);
 	}
 	.arow b {
 		display: block;
-		font-size: 11px;
-		color: inherit;
-		margin-bottom: 2px;
+		font-size: var(--size-body);
+		font-weight: 600;
+		line-height: 1.35;
+	}
+	.arow .detail {
+		display: block;
+		font-size: var(--size-small);
+		margin-top: 4px;
 	}
 	.measure {
 		background: var(--white);
-		border: 1px solid var(--line);
+		box-shadow: var(--shadow-sm);
+		color: var(--ink);
+	}
+	.measure .detail {
+		color: var(--muted);
 	}
 	.verify {
-		background: var(--verify-tint);
-		border: 1px solid var(--line);
-		border-left: 4px solid var(--ink);
+		background: var(--white);
+		border-left: 5px solid var(--teal-500);
+		box-shadow: var(--shadow-sm);
+		color: var(--ink);
+	}
+	.verify .detail {
+		color: var(--muted);
 	}
 	.act {
-		background: var(--ink);
-		border: 1px solid var(--ink);
+		background: linear-gradient(145deg, #11373a, #081f22);
+		box-shadow: 0 10px 24px rgba(8, 31, 34, 0.32);
 		color: #fff;
 	}
-	.act .txt {
-		color: #b9bdb6;
+	.act .detail {
+		color: #96b3b0;
 	}
 	.mv {
-		font-weight: 700;
+		flex: none;
+		font: 700 var(--size-small) var(--font-sans);
+		letter-spacing: 0.1em;
 		color: var(--app-accent-text);
-		letter-spacing: 0.06em;
 	}
-	/* The reserved color appears on the live-boycott row and the JOIN button only. */
+	/* The reserved colour appears on the live-boycott row and JOIN only. */
 	.act .mv {
 		color: var(--act-accent-2);
+	}
+
+	.more {
+		border: 0;
+		border-radius: var(--radius);
+		background: none;
+		border: 1.5px solid var(--line);
+		font: 700 var(--size-small) var(--font-sans);
+		color: var(--teal-900);
+	}
+
+	.keylist {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.keylist li {
+		display: flex;
+		align-items: center;
+		gap: 14px;
+		min-height: var(--tap-min);
+		border-bottom: 1px solid var(--line);
+	}
+	.keylist b {
+		flex: 1;
+		font-size: var(--size-body);
+		font-weight: 600;
+	}
+	.keylist span {
+		font-size: var(--size-small);
+		color: var(--muted);
+	}
+	.keylist i {
+		width: 18px;
+		height: 18px;
+		flex: none;
+		background: var(--app-accent);
+		display: block;
+	}
+	.lp {
+		border-radius: 50%;
+	}
+	.lc {
+		border-radius: 5px;
+	}
+	.lm {
+		clip-path: polygon(50% 4%, 97% 94%, 3% 94%);
+	}
+	.lb {
+		border-radius: 50% 0 50% 50%;
+		rotate: -45deg;
+	}
+	.ly {
+		border-radius: 50%;
+		box-shadow: 0 0 0 4px var(--app-accent-tint);
+	}
+
+	.sheetfeed {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
 	}
 </style>

@@ -1,14 +1,12 @@
 <script>
+	import Sheet from '$lib/components/Sheet.svelte';
+
 	let { data } = $props();
 
-	/**
-	 * Local overrides so the gate can be exercised without a backend.
-	 * Kept separate from `data` rather than copied out of it, so navigating
-	 * to a different action resets cleanly instead of showing stale state.
-	 * @type {Record<string, boolean>}
-	 */
+	/** @type {Record<string, boolean>} */
 	let overrides = $state({});
 	let joined = $state(false);
+	let remediationOpen = $state(false);
 
 	let conditions = $derived(
 		data.boycott.conditions.map((/** @type {any} */ c) => ({
@@ -31,16 +29,13 @@
 <div class="wrap">
 	<a class="back" href="/object/{data.boycott.objectId}">← Measurement</a>
 
-	<!-- Act treatment: full inversion. The only mode-level signal Act gets.
-	     Consequential screens read as consequential structurally. -->
+	<!-- Act treatment: full inversion. The only mode-level signal Act gets. -->
 	<section class="act">
 		<span class="eyebrow">Boycott · {data.boycott.object}</span>
 
-		<p class="strength">
-			<b class="num">{data.boycott.strength}</b><span>/ 100 strength</span>
-		</p>
+		<p class="strength num">{data.boycott.strength}<span>/ 100</span></p>
 		<p class="sub">
-			Severity {data.boycott.severity} · triggering side: {data.boycott.triggeringSide} ·
+			Severity {data.boycott.severity} · triggering side {data.boycott.triggeringSide} ·
 			calculated duration {data.boycott.durationDays} days
 		</p>
 
@@ -58,7 +53,7 @@
 			{:else if allMet}
 				Join this boycott
 			{:else}
-				Join — {remaining} condition{remaining === 1 ? '' : 's'} remaining
+				{remaining} condition{remaining === 1 ? '' : 's'} remaining
 			{/if}
 		</button>
 
@@ -69,106 +64,111 @@
 		<h3 class="k">Why the gate exists</h3>
 		<p class="note">
 			Severity, verified instances, attribution confidence and a cool-off window must each be
-			independently true before the commit button becomes live. The delay is the feature: it is what
+			independently true before the commit button goes live. The delay is the feature. It is what
 			separates accountability infrastructure from an outrage engine.
 		</p>
 		<button class="ghost" onclick={() => toggle('cooloff')}>Toggle the cool-off condition</button>
 	</div>
 
-	<div class="card">
-		<h3 class="k">Remediation</h3>
-		<p class="note">
-			De-escalation carries the same weight as escalation. Verified remediation recalculates
-			strength rather than being filed away as a footnote.
-		</p>
-		<ul>
-			{#each data.boycott.remediation as r (r.label)}
-				<li><span>{r.label}</span><b>{r.effect}</b></li>
-			{/each}
-		</ul>
-	</div>
+	<button class="ghostwide" onclick={() => (remediationOpen = true)}>
+		Remediation · {data.boycott.remediation.length} verified actions
+	</button>
 </div>
+
+<Sheet open={remediationOpen} title="Remediation" onclose={() => (remediationOpen = false)}>
+	<p class="note">
+		De-escalation carries the same weight as escalation. Verified remediation recalculates strength
+		rather than being filed as a footnote.
+	</p>
+	<ul class="rem">
+		{#each data.boycott.remediation as r (r.label)}
+			<li><span>{r.label}</span><b>{r.effect}</b></li>
+		{/each}
+	</ul>
+</Sheet>
 
 <style>
 	.wrap {
-		padding: 12px;
+		padding: 16px;
 		display: flex;
 		flex-direction: column;
-		gap: 12px;
+		gap: 14px;
 	}
 	.back {
-		font-size: 10px;
+		min-height: var(--tap-min);
+		display: inline-flex;
+		align-items: center;
+		font-size: var(--size-small);
+		font-weight: 600;
 		letter-spacing: 0.06em;
 		text-transform: uppercase;
 		color: var(--muted);
 		text-decoration: none;
-		min-height: 32px;
-		display: inline-flex;
-		align-items: center;
 	}
 	.act {
-		background: var(--ink);
+		background: linear-gradient(145deg, #11373a, #06191c);
 		color: #fff;
-		border-radius: 10px;
-		padding: 16px;
+		border-radius: var(--radius);
+		padding: 22px;
+		box-shadow: var(--shadow-lg);
 	}
 	.act .eyebrow {
 		color: var(--gold-light);
 	}
 	.strength {
-		display: flex;
-		align-items: baseline;
-		gap: 8px;
-		margin: 10px 0 0;
-	}
-	.strength b {
-		font: 600 34px var(--font-serif);
+		font-family: var(--font-serif);
+		font-size: 56px;
+		font-weight: 600;
+		line-height: 1;
+		margin: 14px 0 0;
 	}
 	.strength span {
-		font-size: 11px;
-		color: #9a9d95;
+		font-size: var(--size-body);
+		font-family: var(--font-sans);
+		color: #9ab2b0;
+		margin-left: 8px;
 	}
 	.sub {
-		font-size: 10px;
-		color: #9a9d95;
-		margin: 4px 0 0;
+		font-size: var(--size-small);
+		line-height: 1.5;
+		color: #9ab2b0;
+		margin: 8px 0 0;
 	}
 	.k {
-		font: 700 10px var(--font-sans);
+		font: 700 var(--size-label) var(--font-sans);
 		letter-spacing: 0.11em;
 		text-transform: uppercase;
 		color: var(--muted);
-		margin: 16px 0 4px;
+		margin: 22px 0 6px;
 	}
 	.act .k {
-		color: #9a9d95;
+		color: #9ab2b0;
 	}
 	.cond {
 		display: flex;
-		gap: 10px;
+		gap: 14px;
 		align-items: flex-start;
-		padding: 10px 0;
-		border-bottom: 1px solid #34372f;
-		font-size: 11px;
-		line-height: 1.4;
+		padding: 14px 0;
+		border-bottom: 1px solid #2a4446;
+		font-size: var(--size-small);
+		line-height: 1.5;
 	}
 	.cond:last-of-type {
 		border-bottom: 0;
 	}
 	.cond i {
-		width: 16px;
-		height: 16px;
-		border: 1.5px solid #7c8078;
+		width: 24px;
+		height: 24px;
+		border: 2px solid #5e7a78;
 		border-radius: 50%;
 		flex: none;
-		margin-top: 1px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 9px;
+		font-size: var(--size-small);
 		font-style: normal;
 	}
-	/* The one reserved color. Nowhere else in the product. */
+	/* The one reserved colour. Nowhere else in the product. */
 	.cond.met i {
 		background: var(--act-accent);
 		border-color: var(--act-accent);
@@ -176,64 +176,65 @@
 	}
 	.join {
 		width: 100%;
-		margin-top: 14px;
-		min-height: var(--tap-min);
+		margin-top: 20px;
+		min-height: 58px;
 		border: 0;
-		border-radius: 7px;
-		background: #4a4d47;
-		color: #9a9d95;
-		font-size: 11px;
-		font-weight: 700;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
+		border-radius: var(--radius-sm);
+		background: #3d5250;
+		color: #93a8a6;
+		font: 700 var(--size-body) var(--font-sans);
+		letter-spacing: 0.04em;
 		cursor: not-allowed;
 	}
 	.join.ready {
-		background: var(--act-accent);
+		background: linear-gradient(160deg, #d4631f, var(--act-accent));
 		color: #fff;
 		cursor: pointer;
+		box-shadow: 0 8px 22px rgba(193, 84, 28, 0.42);
 	}
 	.count {
-		font-size: 10px;
-		color: #9a9d95;
-		margin: 10px 0 0;
+		font-size: var(--size-small);
+		color: #9ab2b0;
+		margin: 14px 0 0;
 		text-align: center;
 	}
 	.card {
-		border: 1px solid var(--line);
 		border-radius: var(--radius);
 		background: var(--white);
-		padding: 14px;
+		padding: 20px;
+		box-shadow: var(--shadow-sm);
 	}
 	.card .k {
 		margin-top: 0;
 	}
-	.ghost {
+	.ghost,
+	.ghostwide {
 		width: 100%;
-		min-height: 36px;
-		margin-top: 10px;
-		border: 1px solid var(--ink);
+		border: 1.5px solid var(--line);
 		border-radius: var(--radius-sm);
 		background: var(--white);
-		font: 700 9px var(--font-sans);
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-		cursor: pointer;
+		font: 700 var(--size-small) var(--font-sans);
+		color: var(--ink);
 	}
-	.card ul {
+	.ghost {
+		margin-top: 14px;
+	}
+	.rem {
 		list-style: none;
 		padding: 0;
-		margin: 10px 0 0;
+		margin: 14px 0 0;
 	}
-	.card li {
+	.rem li {
 		display: flex;
 		justify-content: space-between;
-		gap: 10px;
-		padding: 7px 0;
+		gap: 14px;
+		align-items: center;
+		min-height: var(--tap-min);
 		border-bottom: 1px solid var(--line);
-		font-size: 11px;
+		font-size: var(--size-body);
 	}
-	.card li:last-child {
-		border-bottom: 0;
+	.rem li b {
+		font-size: var(--size-small);
+		color: var(--teal-700);
 	}
 </style>

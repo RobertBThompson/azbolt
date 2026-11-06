@@ -1,9 +1,7 @@
 <script>
 	/**
 	 * Six states. Each pairs a shape/stroke treatment with the word itself —
-	 * color never carries the meaning alone, and no state has a unique hue.
-	 * Stroke weight is 1.5px minimum so dashed/solid/struck stay legible at
-	 * caption size on a real device.
+	 * colour never carries the meaning alone, and no state has a unique hue.
 	 *
 	 * @type {{ state: 'proposed'|'review'|'contested'|'locked'|'reopened'|'withdrawn' }}
 	 */
@@ -25,23 +23,23 @@
 	.badge {
 		display: inline-flex;
 		align-items: center;
-		font: 700 8px var(--font-sans);
+		font: 700 var(--size-label) var(--font-sans);
 		letter-spacing: 0.08em;
 		text-transform: uppercase;
-		padding: 3px 7px;
+		padding: 6px 12px;
 		border-radius: 20px;
 		white-space: nowrap;
 	}
 	.proposed {
-		border: 1.5px dashed var(--muted);
+		border: 2px dashed var(--muted);
 		color: var(--muted);
 	}
 	.review {
-		border: 1.5px solid var(--ink);
+		border: 2px solid var(--ink);
 		color: var(--ink);
 	}
 	.contested {
-		border: 1.5px solid var(--ink);
+		border: 2px solid var(--ink);
 		background: repeating-linear-gradient(45deg, #efeee8 0 4px, #e2e0d7 4px 8px);
 		color: var(--ink);
 	}
@@ -50,12 +48,12 @@
 		color: #fff;
 	}
 	.reopened {
-		border: 1.5px solid var(--ink);
-		border-bottom-width: 3px;
+		border: 2px solid var(--ink);
+		border-bottom-width: 4px;
 		color: var(--ink);
 	}
 	.withdrawn {
-		border: 1.5px solid var(--line);
+		border: 2px solid var(--line);
 		color: var(--muted-2);
 		text-decoration: line-through;
 	}

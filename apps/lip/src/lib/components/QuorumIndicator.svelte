@@ -1,8 +1,8 @@
 <script>
 	/**
 	 * Five ideological bins. Filled chips have weighed in; dashed chips are
-	 * still needed. The user's own bin is called out in text beneath the row,
-	 * never by color alone.
+	 * still needed. The user's own bin is called out in text beneath the
+	 * row, never by colour alone.
 	 *
 	 * @type {{ quorum: Record<string, number>, yourBin?: string }}
 	 */
@@ -12,11 +12,11 @@
 	let met = $derived(bins.filter((b) => quorum[b] > 0).length);
 </script>
 
-<div class="k">Quorum {met} / 5 bins</div>
+<div class="k">Quorum {met} of 5 bins</div>
 <div class="quorum">
 	{#each bins as b (b)}
 		<div class={quorum[b] > 0 ? 'met' : 'unmet'}>
-			{b}<br /><span class="num">{quorum[b]}</span>
+			<b>{b}</b><span class="num">{quorum[b]}</span>
 		</div>
 	{/each}
 </div>
@@ -26,34 +26,44 @@
 
 <style>
 	.k {
-		font: 700 10px var(--font-sans);
+		font: 700 var(--size-label) var(--font-sans);
 		letter-spacing: 0.11em;
 		text-transform: uppercase;
 		color: var(--muted);
-		margin-bottom: 6px;
+		margin-bottom: 10px;
 	}
 	.quorum {
 		display: grid;
 		grid-template-columns: repeat(5, 1fr);
-		gap: 4px;
+		gap: 6px;
 		text-align: center;
-		font-size: 9px;
 	}
 	.quorum div {
-		padding: 6px 0;
-		border-radius: 4px;
+		padding: 10px 0;
+		border-radius: var(--radius-sm);
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+	.quorum b {
+		font-size: var(--size-small);
+		font-weight: 700;
+	}
+	.quorum span {
+		font-size: var(--size-label);
+		opacity: 0.8;
 	}
 	.met {
 		background: var(--ink-2);
 		color: #fff;
 	}
 	.unmet {
-		border: 1.5px dashed var(--ink);
+		border: 2px dashed var(--ink);
 		color: var(--ink);
 	}
 	.yours {
-		font-size: 9px;
+		font-size: var(--size-small);
 		color: var(--muted);
-		margin: 8px 0 0;
+		margin: 12px 0 0;
 	}
 </style>
