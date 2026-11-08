@@ -36,7 +36,7 @@ export const PEOPLE = {
 };
 
 /**
- * D5-D7 prove the organisation profile does not assume a parent company,
+ * D5-D7 prove the organization profile does not assume a parent company,
  * employees or conventional shares: the same slots hold members,
  * governance and oversight without changing the page architecture.
  * @type {Record<string, { name: string, context: string|null, blurb: string, stats: [string,string][], rows: { t: string, m: string, x: string, href?: string, tone?: string }[] }>}

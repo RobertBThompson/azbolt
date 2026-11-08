@@ -21,6 +21,9 @@
 	let mode = $state(0);
 	let email = $state('');
 	let password = $state('');
+	let name = $state('');
+	/** Edited in the signed-in panel, seeded from whatever is stored. */
+	let displayName = $state('');
 
 	const creating = $derived(mode === 1);
 	const ready = $derived(email.trim().length > 0 && password.length > 0 && !session.busy);
@@ -30,7 +33,7 @@
 	async function submit() {
 		if (!ready) return;
 		const ok = creating
-			? await session.signUp(email.trim(), password)
+			? await session.signUp(email.trim(), password, name.trim())
 			: await session.signIn(email.trim(), password);
 		if (ok) goto('/people');
 	}
@@ -41,6 +44,32 @@
 <Screen back="/menu" nav={false}>
 	{#if session.signedIn}
 		<Banner title="Signed in" meta={session.label} />
+
+		<form
+			onsubmit={(e) => {
+				e.preventDefault();
+				session.setName(displayName.trim());
+			}}
+		>
+			<Field
+				label="Display name"
+				placeholder={session.user?.name || 'How Chief should address you'}
+				autocomplete="name"
+				disabled={session.busy}
+				bind:value={displayName}
+			/>
+			<Btn
+				primary={false}
+				type="submit"
+				disabled={session.busy || displayName.trim() === ''}
+				label={session.busy ? 'Saving…' : 'Save name'}
+			/>
+		</form>
+
+		{#if session.error}
+			<Alert title="Could not save" meta={session.error} />
+		{/if}
+
 		<Note>Your Directory reads your own records. Everything else is still design data.</Note>
 		<Btn t="cool" href="/people" label="Open Directory" />
 		<Btn primary={false} label="Sign out" onclick={() => session.signOut()} />
@@ -63,6 +92,15 @@
 				submit();
 			}}
 		>
+			{#if creating}
+				<Field
+					label="Name"
+					placeholder="What Chief should call you"
+					autocomplete="name"
+					disabled={session.busy}
+					bind:value={name}
+				/>
+			{/if}
 			<Field
 				label="Email"
 				type="email"

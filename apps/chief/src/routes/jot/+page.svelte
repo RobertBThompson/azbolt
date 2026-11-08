@@ -63,7 +63,7 @@
 		<Banner
 			t="ai"
 			title="Saved on this phone"
-			meta="2 jots queued. They will be analysed when you reconnect."
+			meta="2 jots queued. They will be analyzed when you reconnect."
 		/>
 		<Row t="ai" title="6:12 PM jot" meta="11 words · queued" trailing="Queued" />
 		<Row t="ai" title="4:40 PM jot" meta="23 words · queued" trailing="Queued" />
@@ -85,7 +85,7 @@
 			bind:active={mode}
 			onpick={(i) => i === 0 && goto('/jot/listening')}
 		/>
-		<Btn t="ai" href="/jot/split" label="Analyse this jot" />
+		<Btn t="ai" href="/jot/split" label="Analyze this jot" />
 		<Note>Capture never blocks on the network. Only analysis does.</Note>
 	{/if}
 </Screen>

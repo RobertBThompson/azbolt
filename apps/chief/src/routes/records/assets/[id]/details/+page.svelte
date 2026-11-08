@@ -21,7 +21,7 @@
 		meta="Add only the detail needed for a decision or a proof record."
 	/>
 	<Tabs items={['Rights', 'Physical', 'Financial']} {active} onpick={(i) => (active = i)} />
-	<Row t="warm" title="Rights" meta="Creator, licence, reproduction" trailing="›" />
+	<Row t="warm" title="Rights" meta="Creator, license, reproduction" trailing="›" />
 	<Row t="warm" title="Physical" meta="Dimensions, condition, storage" trailing="›" />
 	<Row t="warm" title="Financial" meta="Liquidity, insurance, tax notes" trailing="›" />
 	<Btn t="warm" label="Save details" />

@@ -24,7 +24,7 @@
 <svelte:head><title>People · Chief</title></svelte:head>
 
 <Screen search>
-	<Field label="Search people" placeholder="Name, relationship, organisation" />
+	<Field label="Search people" placeholder="Name, relationship, organization" />
 	<Chips t="cool" items={['All', 'Personal', 'Work']} />
 
 	{#await load}
@@ -47,8 +47,8 @@
 
 	<Row
 		t="cool"
-		href="/organisations"
-		title="Organisations"
+		href="/organizations"
+		title="Organizations"
 		meta="Workspaces with records attached"
 		trailing="›"
 	/>

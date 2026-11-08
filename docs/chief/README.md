@@ -18,7 +18,7 @@ reads from them and none of them read back.
 |     | Branch                | Owns                                                          |
 | --- | --------------------- | ------------------------------------------------------------- |
 | F0  | Shell & Context       | context switching, app bar, bottom nav, search, notifications |
-| F1  | Directory             | the only place a person or an organisation exists             |
+| F1  | Directory             | the only place a person or an organization exists             |
 | F2  | Capture (Quick Jot)   | jot input, the proposal model, placement rules and history    |
 | B1  | Onboarding            | auth, workspace creation, first-run permissions               |
 | B2  | Today                 | the daily feed, attention ranking, the Records landing page   |

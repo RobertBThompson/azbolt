@@ -80,7 +80,7 @@ export function listPeople() {
 	);
 }
 
-/** F1 Directory — D4. An organisation is a workspace with records attached. */
+/** F1 Directory — D4. An organization is a workspace with records attached. */
 export function listWorkspaces() {
 	return readOr(
 		async () => {

@@ -17,7 +17,7 @@
 		meta="A record you can find beats a record that is complete."
 	/>
 	<Field label="What is it" placeholder="Required" />
-	<Field label="Who owns it" placeholder="Person or organisation" />
+	<Field label="Who owns it" placeholder="Person or organization" />
 	<Btn t="warm" label="Create draft" />
 	<Note>The draft appears in the list immediately, flagged as incomplete rather than hidden.</Note>
 </Screen>
