@@ -18,6 +18,6 @@
 		meta="This only shapes setup. It changes later."
 	/>
 	<Seg a="Personal" b="Business" bind:active={pick} />
-	<Btn href="/onboarding/workspace" label="Both, actually" />
+	<Btn href="/onboarding/sphere" label="Both, actually" />
 	<Note>The answer changes which four screens follow, not what the product can do.</Note>
 </Screen>

@@ -17,6 +17,6 @@
 	<Field label="Share or control" value="100% · controlling interest" />
 	<Row t="warm" title="Effective dates" meta="From 1 January · no end date" trailing="›" />
 	<Row t="warm" title="Proof" meta="3 verified documents" trailing="↗" />
-	<Row t="warm" title="Value visibility" meta="Private to this workspace" trailing="›" />
+	<Row t="warm" title="Value visibility" meta="Private to this sphere" trailing="›" />
 	<Btn t="warm" label="Review changes" />
 </Screen>

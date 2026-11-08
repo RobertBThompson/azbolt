@@ -20,7 +20,7 @@ reads from them and none of them read back.
 | F0  | Shell & Context       | context switching, app bar, bottom nav, search, notifications |
 | F1  | Directory             | the only place a person or an organization exists             |
 | F2  | Capture (Quick Jot)   | jot input, the proposal model, placement rules and history    |
-| B1  | Onboarding            | auth, workspace creation, first-run permissions               |
+| B1  | Onboarding            | auth, sphere creation, first-run permissions               |
 | B2  | Today                 | the daily feed, attention ranking, the Records landing page   |
 | B3  | Work & Calendar       | endeavors, tasks, calendar, external sync                     |
 | B4  | Structure & Ownership | reporting links, ownership records                            |
@@ -114,3 +114,44 @@ All content is placeholder taken from the map, including its dashed `$—`
 figures: the map deliberately does not invent numbers, and neither does
 this build. There is no backend yet — PocketBase is the near-term target
 on the existing VPS, with Supabase once the box has the RAM for it.
+
+## The jot lifecycle
+
+A jot has three stages, and Today is those three stages rather than a
+dashboard about them:
+
+1. **Throw it** — the text field, voice or typed. A jot does not start in a
+   sphere and is never blocked on choosing one. Throwing must cost nothing.
+2. **Sphere it** — select a sphere, then any people or organizations, then
+   any assets. Everything is optional. "Untitled" and "not selected" are
+   valid resting states, not defects, and a jot left that way stays in the
+   queue rather than being lost or nagged about.
+3. **Task it** — offered as a choice at the end of Sphere It, never as a
+   step. Most jots record something rather than commit to it, and promoting
+   every jot to a task is how a capture tool becomes a backlog.
+
+An **endeavor** is a group of tasks. It is never required.
+
+## Sphere and organization
+
+**Sphere** replaced **Workspace** throughout. A sphere is an *area of a
+life* — Family, Business, Church, Career, Hobby, Children, Spouse. It is
+the lens a Chief is looking through, and it is the app's subject rather
+than one of its fields: spheres overlap, compete for the same hours, and
+run up against each other, and choosing between them is the Chief's
+central dilemma.
+
+Spheres are personal. The seven in `spheres.js` are a prototype
+stand-in, not a set the app decides; real spheres will be records a
+Chief writes.
+
+An **organization** is a person or a grouping of people, and need not
+include the Chief at all. Inside the Spouse sphere there might be an
+organization called "Wife" and another called "Chief and Wife". It is a
+separate axis from the sphere, and it is parked for now — when it is
+picked up it brings control, ownership and interests with it, tied back
+to actions, people and assets.
+
+The collection once called `workspaces` holds organizations, so it is
+named `organizations`. There is no spheres collection yet, deliberately:
+the concept is still being worked out, and a schema would freeze it.

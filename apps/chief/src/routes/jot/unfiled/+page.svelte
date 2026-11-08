@@ -27,7 +27,7 @@
 		t="ai"
 		href="/jot/unplaced"
 		title="Check storage before Friday"
-		meta="Needs an asset or workspace"
+		meta="Needs an asset or sphere"
 		trailing="›"
 	/>
 	<Btn t="ai" href="/jot/unplaced" label="Review the next one" />

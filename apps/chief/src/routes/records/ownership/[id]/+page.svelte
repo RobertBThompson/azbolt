@@ -24,6 +24,6 @@
 	/>
 	<Row t="warm" title="Proof" meta="3 verified documents" trailing="›" />
 	<Row t="warm" title="Effective dates" meta="From 1 Jan · no end date" trailing="›" />
-	<Row t="warm" title="Value" meta="Private to this workspace" trailing="›" />
+	<Row t="warm" title="Value" meta="Private to this sphere" trailing="›" />
 	<Btn t="warm" href="/records/ownership/{$page.params.id}/edit" label="Edit this record" />
 </Screen>

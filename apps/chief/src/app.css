@@ -70,15 +70,19 @@
 	--wash-blue: rgba(102, 153, 206, 0.14);
 	--wash-wine: rgba(159, 62, 73, 0.12);
 
-	/* Context swatches. Three redundant channels carry context — a muted
-	   hue, a swatch shape, and the name in permanent mono caps — so colour
-	   alone never has to survive colour-blindness, sunlight or a glance. */
-	--ctx-all: linear-gradient(90deg, #9f3e49 0 50%, #6699ce 50%);
-	--ctx-azbolt: #46688f;
-	--ctx-tn: #4b7a63;
-	--ctx-ame: #8e6035;
-	--ctx-personal: repeating-linear-gradient(45deg, #7b5a9c 0 3px, #b4a3c6 3px 6px);
-	--ctx-account: #6d655e;
+	/* Sphere swatches. Three redundant channels carry the active sphere —
+	   a muted hue, a swatch shape, and the name in permanent mono caps — so
+	   colour alone never has to survive colour-blindness, sunlight or a
+	   glance. Hues are spread for separability but held to one saturation
+	   and lightness band so they read as a set rather than a paintbox. */
+	--sph-all: linear-gradient(90deg, #9f3e49 0 50%, #6699ce 50%);
+	--sph-family: #9a5260;
+	--sph-spouse: #8e5a7f;
+	--sph-children: #a8703f;
+	--sph-church: #4b7a63;
+	--sph-career: #46688f;
+	--sph-business: #5a6472;
+	--sph-hobby: repeating-linear-gradient(45deg, #7a7140 0 3px, #a89d6e 3px 6px);
 
 	/* Type */
 	--font-sans: 'Instrument Sans', system-ui, -apple-system, sans-serif;

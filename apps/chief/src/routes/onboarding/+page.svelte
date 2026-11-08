@@ -9,12 +9,12 @@
 	import { shell } from '$lib/state.svelte.js';
 
 	// Not signed in yet — the context band has nothing to report.
-	shell.context = 'account';
+	shell.sphere = 'all';
 </script>
 
 <svelte:head><title>Chief</title></svelte:head>
 
 <Screen nav={false}>
 	<Hero title="Chief" meta="Build what matters." />
-	<Prog title="Preparing your workspace" value={0.72} meta="Loading securely" />
+	<Prog title="Preparing your sphere" value={0.72} meta="Loading securely" />
 </Screen>

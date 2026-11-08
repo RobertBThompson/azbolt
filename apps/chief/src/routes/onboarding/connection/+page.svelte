@@ -8,12 +8,12 @@
 	import { Prog, Banner, Field, Btn } from '$lib/kit';
 	import { shell } from '$lib/state.svelte.js';
 
-	shell.context = 'azbolt';
+	shell.sphere = 'business';
 </script>
 
 <svelte:head><title>One connection · Chief</title></svelte:head>
 
-<Screen back="/onboarding/workspace" nav={false}>
+<Screen back="/onboarding/sphere" nav={false}>
 	<Prog t="cool" title="Setup" value={1} meta="Step 2 of 2" />
 	<Banner
 		t="cool"

@@ -1,28 +1,29 @@
 <script>
 	/**
-	 * F0 Shell & Context. In v2 the context pill was small grey text — the
-	 * least prominent element on screen carrying the most consequential
-	 * fact on it: which set of records you are about to write into.
-	 * Here it claims the top band of every screen plus the leading slot in
-	 * the app bar, in three redundant channels.
+	 * F0 Shell — the sphere bar. In v2 this was small grey text: the least
+	 * prominent element on screen carrying the most consequential fact on
+	 * it. Which sphere you are in decides what a jot means, and deciding
+	 * between spheres is the Chief's central dilemma, so it claims the top
+	 * band of every screen plus the leading slot in the app bar, in three
+	 * redundant channels.
 	 */
-	import { CONTEXTS } from '$lib/contexts.js';
+	import { SPHERES } from '$lib/spheres.js';
 	import { shell } from '$lib/state.svelte.js';
 
 	/** @type {{ search?: boolean, back?: string|null, onSwitch?: (() => void)|null }} */
 	let { search = false, back = null, onSwitch = null } = $props();
-	const ctx = $derived(CONTEXTS[shell.context] ?? CONTEXTS.all);
+	const sphere = $derived(SPHERES[shell.sphere] ?? SPHERES.all);
 </script>
 
-<div class="band" style="background:{ctx.swatch}"></div>
+<div class="band" style="background:{sphere.swatch}"></div>
 
 <header>
 	{#if back}
 		<a class="back" href={back} aria-label="Back">‹</a>
 	{/if}
-	<button class="ctx" onclick={onSwitch} aria-label="Switch context, currently {ctx.name}">
-		<span class="swatch" style="background:{ctx.swatch}"></span>
-		<span class="name">{ctx.name}</span>
+	<button class="sph" onclick={onSwitch} aria-label="Switch sphere, currently {sphere.name}">
+		<span class="swatch" style="background:{sphere.swatch}"></span>
+		<span class="name">{sphere.name}</span>
 		<span class="caret" aria-hidden="true">▾</span>
 	</button>
 	<span class="spacer"></span>
@@ -61,7 +62,7 @@
 		color: var(--ink);
 		text-decoration: none;
 	}
-	.ctx {
+	.sph {
 		display: flex;
 		align-items: center;
 		gap: 8px;

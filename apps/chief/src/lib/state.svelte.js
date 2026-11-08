@@ -1,2 +1,2 @@
-/** Active shell context. Set by the context switcher (SH1). */
-export const shell = $state({ context: 'all' });
+/** Active sphere. Set by the sphere switcher (SH1). 'all' is every sphere at once. */
+export const shell = $state({ sphere: 'all' });

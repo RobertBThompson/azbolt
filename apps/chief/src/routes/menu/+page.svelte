@@ -7,17 +7,17 @@
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Banner, Row, Btn } from '$lib/kit';
-	import { CONTEXTS } from '$lib/contexts.js';
+	import { SPHERES } from '$lib/spheres.js';
 	import { shell } from '$lib/state.svelte.js';
 	import { session } from '$lib/session.svelte.js';
 
-	const ctx = $derived(CONTEXTS[shell.context] ?? CONTEXTS.all);
+	const sphere = $derived(SPHERES[shell.sphere] ?? SPHERES.all);
 </script>
 
 <svelte:head><title>Menu · Chief</title></svelte:head>
 
 <Screen back="/" nav={false}>
-	<Banner title={ctx.name} meta="Workspace controls and account actions." />
+	<Banner title={sphere.name} meta="Sphere controls and account actions." />
 	<Row href="/settings" title="Settings" meta="AI, privacy and integrations" trailing="↗" />
 	<Row href="/settings/help" title="Help" meta="Guides and support" trailing="↗" />
 	<Row
@@ -26,7 +26,12 @@
 		meta="Profile, export and terms"
 		trailing="↗"
 	/>
-	<Row href="/context" title="Switch workspace" meta="Open the context switcher" trailing="↗" />
+	<Row
+		href="/sphere"
+		title="Switch sphere"
+		meta="Family, Business, Church — the area you are in"
+		trailing="↗"
+	/>
 	{#if session.signedIn}
 		<Row href="/signin" title="Account" meta={session.label} trailing="↗" />
 		<Btn primary={false} label="Sign out" onclick={() => session.signOut()} />

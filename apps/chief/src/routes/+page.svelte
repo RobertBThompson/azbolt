@@ -2,34 +2,65 @@
 	/**
 	 * B2 Today — T1.
 	 *
-	 * Attention first, then today's two commitments, then the counts.
+	 * Today is the jot lifecycle, in the three stages a jot moves through:
+	 * throw it, sphere it, task it. The page is the pipeline, not a
+	 * dashboard about the pipeline, so each stage is somewhere work gets
+	 * done rather than a count that links elsewhere.
 	 *
-	 * The date leads in serif at a size nothing else on the screen uses.
-	 * Every other Chief screen is a list of records; this one is a moment
-	 * in time, and it should not open looking like the others.
+	 * Throwing comes first and asks for nothing. A jot does not start in
+	 * a sphere and is never blocked on choosing one — "not selected" is a
+	 * real, valid state, and Sphere It is where it stops being one.
 	 *
-	 * There is no Quick Jot button here any more. Capture is the mark in
-	 * the nav, reachable from every screen — a second entry point on this
-	 * screen alone would teach that it is a Today feature.
+	 * Sphere It is the only stage with a queue, because it is the only
+	 * stage that can fall behind.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Banner, Row, Stats } from '$lib/kit';
+	import { Btn, Row, SectionHead, Seg } from '$lib/kit';
+	import { UNSPHERED } from '$lib/data.js';
 
-	const now = new Date();
-	const weekday = now.toLocaleDateString(undefined, { weekday: 'long' });
-	const date = now.toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
+	/** 0 = text, 1 = voice. Text is first because it needs no permission. */
+	let input = $state(0);
+	let draft = $state('');
+
+	const queue = Object.entries(UNSPHERED);
+	const canThrow = $derived(draft.trim().length > 0);
 </script>
 
 <svelte:head><title>Today · Chief</title></svelte:head>
 
 <Screen>
-	<header class="day">
-		<p class="eyebrow">{weekday}</p>
-		<h1>{date}</h1>
-	</header>
+	<SectionHead label="Throw it" />
+	<p class="lede">Say it or type it. No sphere, no title, nothing to choose.</p>
 
-	<!-- Violet: the waiting-placement banner is the only AI moment here. -->
-	<Banner t="ai" title="2 placements waiting" meta="From your 6:12 PM jot. Nothing created yet." />
+	<Seg a="Text" b="Voice" bind:active={input} />
+
+	{#if input === 0}
+		<form
+			onsubmit={(e) => {
+				e.preventDefault();
+				draft = '';
+			}}
+		>
+			<textarea
+				rows="2"
+				bind:value={draft}
+				placeholder="I need to call my daughter. Oh and I need to talk to Carmen ASAP."
+			></textarea>
+			<Btn t="cool" type="submit" disabled={!canThrow} label="Throw it" />
+		</form>
+	{:else}
+		<Btn t="cool" href="/jot/listening" label="Hold to speak" />
+	{/if}
+
+	<SectionHead label="Sphere it" t="clay" count={queue.length} />
+	<p class="lede">Thrown, kept, and waiting for a sphere.</p>
+
+	{#each queue as [id, jot] (id)}
+		<Row t="clay" href="/jot/{id}/sphere" title={jot.text} meta={jot.meta} trailing="›" />
+	{/each}
+
+	<SectionHead label="Task it" t="cool" count={2} />
+	<p class="lede">An endeavor groups tasks when one helps. It is never required.</p>
 
 	<Row
 		t="cool"
@@ -45,35 +76,33 @@
 		meta="Personal · tonight 7:00 PM"
 		trailing="›"
 	/>
-
-	<Stats
-		items={[
-			['3', 'Needs you'],
-			['5', 'On track'],
-			['1', 'Overdue']
-		]}
-	/>
-
-	<Row
-		t="cool"
-		href="/opportunities"
-		title="3 things Chief noticed"
-		meta="Patterns across records you already have"
-		trailing="›"
-	/>
 </Screen>
 
 <style>
-	.day {
-		padding: 2px 2px 4px;
+	.lede {
+		margin: 0 2px 3px;
+		font-size: 12px;
+		line-height: 1.45;
+		color: var(--ink-3);
 	}
-	.day h1 {
-		margin: 1px 0 0;
-		font-family: var(--font-serif);
-		font-weight: 500;
-		font-size: 29px;
-		line-height: 1.1;
-		letter-spacing: -0.015em;
+	form {
+		display: flex;
+		flex-direction: column;
+		gap: 9px;
+	}
+	textarea {
+		width: 100%;
+		border: 1px solid var(--line-2);
+		border-radius: 10px;
+		background: var(--sunk);
+		padding: 10px 13px;
+		font-family: inherit;
+		font-size: 13.5px;
+		line-height: 1.5;
 		color: var(--ink);
+		resize: vertical;
+	}
+	textarea::placeholder {
+		color: var(--ink-4);
 	}
 </style>
