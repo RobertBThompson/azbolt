@@ -9,14 +9,17 @@
 	import { CONTEXTS } from '$lib/contexts.js';
 	import { shell } from '$lib/state.svelte.js';
 
-	/** @type {{ search?: boolean, onSwitch?: (() => void)|null }} */
-	let { search = false, onSwitch = null } = $props();
+	/** @type {{ search?: boolean, back?: string|null, onSwitch?: (() => void)|null }} */
+	let { search = false, back = null, onSwitch = null } = $props();
 	const ctx = $derived(CONTEXTS[shell.context] ?? CONTEXTS.all);
 </script>
 
 <div class="band" style="background:{ctx.swatch}"></div>
 
 <header>
+	{#if back}
+		<a class="back" href={back} aria-label="Back">‹</a>
+	{/if}
 	<button class="ctx" onclick={onSwitch} aria-label="Switch context, currently {ctx.name}">
 		<span class="swatch" style="background:{ctx.swatch}"></span>
 		<span class="name">{ctx.name}</span>
@@ -26,7 +29,7 @@
 	{#if search}
 		<a class="act" href="/search" aria-label="Search">⌕</a>
 	{/if}
-	<a class="act" href="/settings" aria-label="More">⋯</a>
+	<a class="act" href="/menu" aria-label="More">⋯</a>
 </header>
 
 <style>
@@ -43,6 +46,17 @@
 		padding: 0 13px;
 		background: var(--card);
 		border-bottom: 1px solid var(--line-4);
+	}
+	.back {
+		width: 30px;
+		height: 36px;
+		margin-left: -8px;
+		display: grid;
+		place-items: center;
+		font-size: 26px;
+		line-height: 1;
+		color: var(--ink);
+		text-decoration: none;
 	}
 	.ctx {
 		display: flex;

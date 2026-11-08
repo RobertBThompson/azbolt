@@ -14,8 +14,32 @@
 
 <Screen>
 	<Banner t="cool" title="Everything not used daily" meta="Four areas, and what changed in each." />
-	<Row t="warm" title="Assets & evidence" meta="41 assets · 2 need attention" trailing="›" />
-	<Row t="warm" title="Money" meta="Runway 4.5 months · 1 payment Friday" trailing="›" />
-	<Row t="warm" title="Structure & ownership" meta="No changes since June" trailing="›" />
-	<Row t="cool" title="Business plans" meta="Azbolt · 2 gaps left" trailing="›" />
+	<Row
+		t="warm"
+		href="/records/assets"
+		title="Assets & evidence"
+		meta="41 assets · 2 need attention"
+		trailing="›"
+	/>
+	<Row
+		t="warm"
+		href="/records/money"
+		title="Money"
+		meta="Runway 4.5 months · 1 payment Friday"
+		trailing="›"
+	/>
+	<Row
+		t="warm"
+		href="/records/structure"
+		title="Structure & ownership"
+		meta="No changes since June"
+		trailing="›"
+	/>
+	<Row
+		t="cool"
+		href="/records/plans/overview"
+		title="Business plans"
+		meta="Azbolt · 2 gaps left"
+		trailing="›"
+	/>
 </Screen>

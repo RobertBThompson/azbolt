@@ -13,7 +13,13 @@
 	<!-- Teal: the waiting-placement banner is the only AI moment on this screen. -->
 	<Banner t="ai" title="2 placements waiting" meta="From your 6:12 PM jot. Nothing created yet." />
 
-	<Row t="cool" href="/work" title="Talk to Carmen" meta="Azbolt · today 3:30 PM" trailing="›" />
+	<Row
+		t="cool"
+		href="/work/tasks/carmen"
+		title="Talk to Carmen"
+		meta="Azbolt · today 3:30 PM"
+		trailing="›"
+	/>
 	<Row
 		t="cool"
 		href="/work"
@@ -28,6 +34,14 @@
 			['5', 'On track'],
 			['1', 'Overdue']
 		]}
+	/>
+
+	<Row
+		t="cool"
+		href="/opportunities"
+		title="3 things Chief noticed"
+		meta="Patterns across records you already have"
+		trailing="›"
 	/>
 
 	<Btn t="ai" primary={false} href="/jot" label="Quick Jot" />
