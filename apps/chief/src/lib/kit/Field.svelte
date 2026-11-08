@@ -7,7 +7,8 @@
 	 *   type?: 'text'|'email'|'password'|'tel'|'url',
 	 *   autocomplete?: AutoFill|null,
 	 *   required?: boolean,
-	 *   disabled?: boolean
+	 *   disabled?: boolean,
+	 *   lines?: number
 	 * }}
 	 */
 	let {
@@ -17,7 +18,8 @@
 		type = 'text',
 		autocomplete = null,
 		required = false,
-		disabled = false
+		disabled = false,
+		lines = 1
 	} = $props();
 </script>
 
@@ -28,7 +30,9 @@
 		so each input type the app actually uses gets its own branch rather
 		than a spread that silently degrades to text.
 	-->
-	{#if type === 'password'}
+	{#if lines > 1}
+		<textarea rows={lines} {placeholder} {required} {disabled} bind:value></textarea>
+	{:else if type === 'password'}
 		<input
 			type="password"
 			{placeholder}
@@ -72,10 +76,24 @@
 		font-size: 13.5px;
 		color: var(--ink);
 	}
-	input::placeholder {
+	textarea {
+		width: 100%;
+		border: 1px solid var(--line-2);
+		border-radius: 10px;
+		background: var(--sunk);
+		padding: 10px 13px;
+		font-family: inherit;
+		font-size: 13.5px;
+		line-height: 1.5;
+		color: var(--ink);
+		resize: vertical;
+	}
+	input::placeholder,
+	textarea::placeholder {
 		color: var(--ink-4);
 	}
-	input:disabled {
+	input:disabled,
+	textarea:disabled {
 		opacity: 0.55;
 	}
 </style>

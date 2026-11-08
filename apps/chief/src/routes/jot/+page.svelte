@@ -74,8 +74,11 @@
 			title="What is on your mind?"
 			meta="Type it or say it. One jot can hold several things."
 		/>
+		<!-- Two lines, not one: a jot is meant to hold several things, and a
+		     single-line box silently argues for a single thought. -->
 		<Field
 			label="Jot"
+			lines={2}
 			placeholder="I need to call my daughter. Oh and I need to talk to Carmen ASAP."
 		/>
 		<Seg

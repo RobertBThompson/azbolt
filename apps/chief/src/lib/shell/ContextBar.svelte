@@ -44,8 +44,11 @@
 		align-items: center;
 		gap: 8px;
 		padding: 0 13px;
-		background: var(--card);
-		border-bottom: 1px solid var(--line-4);
+		/* Paper, not card. The bottom nav is now continuous with the page,
+		   and a white strip at the top would reinstate exactly the seam
+		   the nav just lost. The context band above still does the
+		   dividing, so nothing here needs a border. */
+		background: var(--paper);
 	}
 	.back {
 		width: 30px;
