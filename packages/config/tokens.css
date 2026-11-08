@@ -18,6 +18,23 @@
 	--app-accent-text: #92682a;
 	--app-accent-tint: rgba(182, 130, 53, 0.15);
 
+	/* Semantic tones — "what is this screen asking of you", never "which
+	   section is this". Introduced by Chief's v3 experience map; additive,
+	   so an app that does not reference them is unaffected.
+	   Graphite is the default and should be roughly two thirds of a screen;
+	   that restraint is what makes the other four legible. */
+	--tone-graphite: #4a4540;
+	--tone-graphite-tint: #f2efe9;
+	--tone-cool: #2b5ea6; /* arranging — reversible, nothing committed */
+	--tone-cool-tint: #eaf0f9;
+	--tone-clay: #96591a; /* committing something of value */
+	--tone-clay-tint: #f8f0e3;
+	--tone-ai: #0f7a63; /* reserved, without exception, for AI moments */
+	--tone-ai-tint: #e7f3ef;
+	--tone-alert: #a63a2e; /* attention required — never decorative */
+	--tone-alert-tint: #fbecea;
+	--tone-alert-ink: #7d2c22;
+
 	/* Type */
 	--font-serif: Georgia, 'Times New Roman', serif;
 	--font-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;

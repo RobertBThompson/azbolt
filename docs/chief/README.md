@@ -1,0 +1,98 @@
+# Chief — the rules the code must honour
+
+Source of truth is the **Layer 2 mobile experience map, v3** ("A tree, not
+a list") in the claude.ai project. This file is the short version: the
+decisions a change to `apps/chief` can get wrong without anyone noticing.
+
+Chief was first built in Flutter in 2021 and never launched. That app is
+**not** the target — v3 is a deliberate redesign of it. Do not port the
+2021 drawer, its 3×3 neumorphic tile grid, or its "Goodies/Quests"
+front-of-house naming into this app.
+
+## The tree
+
+Eleven branches on two tiers. Three are foundation: every branch below
+reads from them and none of them read back.
+
+|     | Branch                | Owns                                                          |
+| --- | --------------------- | ------------------------------------------------------------- |
+| F0  | Shell & Context       | context switching, app bar, bottom nav, search, notifications |
+| F1  | Directory             | the only place a person or an organisation exists             |
+| F2  | Capture (Quick Jot)   | jot input, the proposal model, placement rules and history    |
+| B1  | Onboarding            | auth, workspace creation, first-run permissions               |
+| B2  | Today                 | the daily feed, attention ranking, the Records landing page   |
+| B3  | Work & Calendar       | endeavors, tasks, calendar, external sync                     |
+| B4  | Structure & Ownership | reporting links, ownership records                            |
+| B5  | Assets & Evidence     | asset records, valuations, claims, movement history           |
+| B6  | Money                 | cash entries, liabilities, the runway calculation             |
+| B7  | Business Plan         | plan sections, coverage, gap questions, export                |
+| B8  | System & Trust        | connections, AI permissions, help, legal                      |
+
+## Five rules that are load-bearing
+
+1. **Colour answers "what is this screen asking of you", never "which
+   section is this".** Graphite is default and should be about two thirds
+   of the app; that restraint is what makes the rest legible. Cool blue =
+   arranging, reversible. Warm clay = committing something of value.
+   Teal = an AI moment, with no decorative exceptions. Rust = attention
+   required, never a section colour. Tokens live in
+   `packages/config/tokens.css` as `--tone-*`.
+
+2. **Context is never carried by colour alone.** Three redundant channels:
+   a muted hue, a swatch shape, and the name in permanent mono caps. It
+   claims the top band of every screen plus the leading slot in the app
+   bar. A branch may read the active context and may never read another
+   branch's context.
+
+3. **Capture must not import a feature branch.** It emits a typed
+   placement intent — kind, payload, confidence, context — and each
+   branch registers a handler for the kinds it accepts. If Capture ever
+   imports Work or Money directly, the tree is gone. Write that contract
+   before any branch is coded.
+
+4. **AI never writes without approval.** Nothing is created until the user
+   approves it, undo is stated with a duration, and a wrong guess costs
+   one tap rather than a repeat performance. Zero confidence produces an
+   unfiled note in the user's own words — never an invented record.
+
+5. **Structure & Ownership cannot be built before Directory.** It has no
+   records of its own; it is a graph over Directory records. The full
+   dependency ledger is in the v3 map.
+
+## Scale
+
+Wireframes are drawn 310px wide for a 390pt phone — 0.795 px per point —
+so a wireframe value scaled by ~1.258 gives the real one. At that scale
+rows are 45pt, buttons 45pt and the nav 58pt, all above the 44pt minimum;
+chips are 30pt, which is under it, so **chips are labels, not controls**
+everywhere they appear.
+
+## Accessibility, where the interaction model creates the problem
+
+- **Placement review (Q4)** — each proposal is one accessibility element
+  with a composed label ("Proposal 1 of 4. … Confidence 97 percent.
+  Included. Double-tap to exclude."), not four bare checkboxes. The bulk
+  button's label counts what is actually selected. Confidence is a number
+  or a word, never colour.
+- **Ownership (R4/R5)** — stats announce label first, swapped from the
+  visual order: "Role: controlling interest". The List tab is the
+  canonical representation of the ownership graph, not a fallback, and
+  the toggle persists per user.
+- **Amount entry (M2)** — the custom keypad must keep the system keyboard
+  reachable, or voice and switch control users lose dictation. Smart-line
+  tokens are individually focusable buttons.
+- **Contrast** — tinted panels always use full ink. Mid grey on a 10%
+  accent tint lands near or under 4.5:1.
+
+## What is built
+
+`/` Today (T1) · `/work` Work queue (W4) · `/jot` Quick Jot (Q1) ·
+`/people` People (D1) · `/records` Records (T3).
+
+Shell in `src/lib/shell/`, components in `src/lib/kit/`. The kit is
+app-local because the tone language is proven on Chief only — if a second
+app adopts it, move the folder to `packages/ui` rather than copying it.
+
+All data on these screens is placeholder, taken from the wireframes. There
+is no backend yet: PocketBase is the near-term target on the existing VPS,
+with Supabase once the box has the RAM for it.

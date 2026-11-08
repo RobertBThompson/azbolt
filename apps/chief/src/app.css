@@ -1,8 +1,71 @@
 @import '@azbolt/config/tokens.css';
 
-/* Chief's one differing token. Everything else is shared. */
+/* Chief overrides more than --app-accent, which the README warns about.
+   The reason: Chief has a full design spec of its own (docs/chief), and it
+   names a surface palette, a type system and a context language. None of
+   that is proven across the other four apps yet, so it stays here.
+   If Chaim or Peace adopt the same language, move this block into
+   packages/config/tokens.css rather than copying it. */
 :root {
 	--app-accent: #b68235;
 	--app-accent-text: #92682a;
 	--app-accent-tint: rgba(182, 130, 53, 0.15);
+
+	/* Surfaces — warmer and lower-contrast than the shared neutrals */
+	--paper: #efece6;
+	--card: #ffffff;
+	--sunk: #fbfaf8;
+	--ink: #1c1b19;
+	--ink-2: #3a3631;
+	--ink-3: #6b6660;
+	--ink-4: #8b857d;
+	--line: #cfc9c0;
+	--line-2: #ddd8d1;
+	--line-3: #e6e1da;
+	--line-4: #ece8e2;
+
+	/* Context swatches. Three redundant channels carry context — a muted
+	   hue, a swatch shape, and the name in permanent mono caps — so colour
+	   alone never has to survive colour-blindness, sunlight or a glance. */
+	--ctx-all: linear-gradient(90deg, #8d867c 0 50%, #c3b7a5 50%);
+	--ctx-azbolt: #46688f;
+	--ctx-tn: #3f6b57;
+	--ctx-ame: #8a7340;
+	--ctx-personal: repeating-linear-gradient(45deg, #6f5f8c 0 3px, #a99ec0 3px 6px);
+	--ctx-account: #6b6660;
+
+	/* Type */
+	--font-sans: 'Instrument Sans', system-ui, -apple-system, sans-serif;
+	--font-serif: Newsreader, Georgia, serif;
+	--font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+	/* Scale. Wireframes are drawn 310px wide for a 390pt phone
+	   (0.795 px per pt), so every size below is the wireframe value
+	   scaled up by ~1.258. That keeps rows, buttons and the nav above
+	   the 44pt minimum. */
+	--band: 9px;
+	--appbar: 44px;
+	--nav: 58px;
+	--tap-min: 45px;
+}
+
+body {
+	font-family: var(--font-sans);
+}
+
+h1,
+h2,
+h3,
+h4 {
+	font-family: var(--font-sans);
+	font-weight: 600;
+}
+
+/* One mono eyebrow style, used for every small caps label in the app. */
+.eyebrow {
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	letter-spacing: 0.11em;
+	color: var(--ink-4);
+	text-transform: uppercase;
 }
