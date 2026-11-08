@@ -13,10 +13,21 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # lip is deliberately excluded: it is the one reverse-proxied Node app and
 # has its own hand-maintained fragment.
+# An app may add host-level directives of its own by dropping a
+# <slug>.extra.caddy beside this script — Chief uses one to proxy
+# PocketBase under its own origin. Everything else still comes from the
+# one template, so the host stays in one place.
 for slug in chief chaim peace tithe; do
-	sed -e "s|{{SLUG}}|$slug|g" \
-		-e "s|155\.138\.240\.74\.nip\.io|$HOST|g" \
-		"$DIR/static-app.caddy.template" > "$DIR/$slug.caddy"
+	extra=""
+	if [ -f "$DIR/$slug.extra.caddy" ]; then
+		extra="$(cat "$DIR/$slug.extra.caddy")"
+		echo "  including $slug.extra.caddy"
+	fi
+	awk -v extra="$extra" '{ if ($0 == "{{EXTRA}}") { if (extra != "") print extra } else print }' \
+		"$DIR/static-app.caddy.template" \
+		| sed -e "s|{{SLUG}}|$slug|g" \
+			-e "s|155\.138\.240\.74\.nip\.io|$HOST|g" \
+		> "$DIR/$slug.caddy"
 	echo "wrote $slug.caddy -> $slug.$HOST"
 done
 

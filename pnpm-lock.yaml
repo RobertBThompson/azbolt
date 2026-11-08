@@ -240,6 +240,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.45.4
         version: 2.119.0
+      pocketbase:
+        specifier: ^0.28.2
+        version: 0.28.2
 
   packages/pwa: {}
 
@@ -1889,6 +1892,9 @@ packages:
   picomatch@4.0.7:
     resolution: {integrity: sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==}
     engines: {node: '>=12'}
+
+  pocketbase@0.28.2:
+    resolution: {integrity: sha512-5lS4g7iDZi90LxLai8kyUK4r5u1GkEAoZ3yuzTEFX97FyDQAoEmXWbTqf+pYA1hz5e/icBQu1MCUjM/9V8mitg==}
 
   possible-typed-array-names@1.1.0:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
@@ -4026,6 +4032,8 @@ snapshots:
   picocolors@1.1.1: {}
 
   picomatch@4.0.7: {}
+
+  pocketbase@0.28.2: {}
 
   possible-typed-array-names@1.1.0: {}
 

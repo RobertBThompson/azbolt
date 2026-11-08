@@ -1,43 +1,34 @@
 <script>
 	/**
 	 * F1 Directory — D4 Organisations.
-	 * Each described by what it does rather than by its entity type. The word
-	 * "entity" does not appear.
+	 * An organisation is a workspace with records attached, not a menu
+	 * tile — so these are the same records the context switcher offers.
+	 * Each is described by what it does rather than by its entity type;
+	 * the word "entity" does not appear.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Row, Btn } from '$lib/kit';
+	import { Alert, Row, Btn, SourceNote } from '$lib/kit';
+	import { listWorkspaces } from '$lib/pb.js';
+
+	const load = listWorkspaces();
 </script>
 
 <svelte:head><title>Organisations · Chief</title></svelte:head>
 
 <Screen back="/people" nav={false}>
-	<Row
-		t="cool"
-		href="/organisations/tn"
-		title="TN Holdings"
-		meta="Holding · owns 4 entities"
-		trailing="›"
-	/>
-	<Row
-		t="cool"
-		href="/organisations/azbolt"
-		title="Azbolt"
-		meta="Software · 12 people"
-		trailing="›"
-	/>
-	<Row
-		t="cool"
-		href="/organisations/eagle"
-		title="Eagle DAO"
-		meta="Decentralised work network"
-		trailing="›"
-	/>
-	<Row
-		t="cool"
-		href="/organisations/save"
-		title="SAVE"
-		meta="Nonprofit · charity projects"
-		trailing="›"
-	/>
-	<Btn t="cool" label="Add organisation" />
+	{#await load}
+		<Row t="cool" title="Loading organisations…" dot={false} />
+	{:then { data, source }}
+		{#each data as o (o.id)}
+			<Row t="cool" href="/organisations/{o.id}" title={o.name} meta={o.meta} trailing="›" />
+		{/each}
+		<SourceNote {source} />
+	{:catch}
+		<Alert
+			title="Could not load organisations"
+			meta="Neither the backend nor the local fixtures answered."
+		/>
+	{/await}
+
+	<Btn t="cool" href="/organisations/new" label="Add organisation" />
 </Screen>

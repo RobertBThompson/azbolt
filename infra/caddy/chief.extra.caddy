@@ -1,0 +1,9 @@
+	# PocketBase, proxied under Chief's own origin rather than given a
+	# subdomain of its own. Same origin means the browser client needs no
+	# base URL, no CORS allowlist naming every app, and no second
+	# certificate. /_/ is the admin UI; it is reachable but protected by
+	# PocketBase's own superuser login.
+	@pb path /api/* /_/*
+	handle @pb {
+		reverse_proxy 127.0.0.1:8091
+	}
