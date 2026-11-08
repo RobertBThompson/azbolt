@@ -15,8 +15,27 @@
 <Screen search>
 	<Field label="Search people" placeholder="Name, relationship, organisation" />
 	<Chips t="cool" items={['All', 'Personal', 'Work']} />
-	<Row t="cool" title="My daughter" meta="Family · follow-up tonight" trailing="›" />
-	<Row t="cool" title="Carmen Mendez" meta="Azbolt · 2 shared endeavors" trailing="›" />
-	<Row t="cool" title="Pamela Anderson" meta="TN Holdings · owner" trailing="›" />
-	<Btn t="cool" label="Add person" />
+	<Row
+		t="cool"
+		href="/people/daughter"
+		title="My daughter"
+		meta="Family · follow-up tonight"
+		trailing="›"
+	/>
+	<Row
+		t="cool"
+		href="/people/carmen"
+		title="Carmen Mendez"
+		meta="Azbolt · 2 shared endeavors"
+		trailing="›"
+	/>
+	<Row
+		t="cool"
+		href="/people/pamela"
+		title="Pamela Anderson"
+		meta="TN Holdings · owner"
+		trailing="›"
+	/>
+	<Row t="cool" href="/organisations" title="Organisations" meta="4 organisations" trailing="›" />
+	<Btn t="cool" href="/people/add" label="Add person" />
 </Screen>

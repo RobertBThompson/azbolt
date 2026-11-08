@@ -1,8 +1,9 @@
 # Chief — the rules the code must honour
 
 Source of truth is the **Layer 2 mobile experience map, v3** ("A tree, not
-a list") in the claude.ai project. This file is the short version: the
-decisions a change to `apps/chief` can get wrong without anyone noticing.
+a list") in the claude.ai project — 109 screens across eleven branches.
+This file is the short version: the decisions a change to `apps/chief` can
+get wrong without anyone noticing.
 
 Chief was first built in Flutter in 2021 and never launched. That app is
 **not** the target — v3 is a deliberate redesign of it. Do not port the
@@ -84,15 +85,32 @@ everywhere they appear.
 - **Contrast** — tinted panels always use full ink. Mid grey on a 10%
   accent tint lands near or under 4.5:1.
 
+## Three rules that are easy to break by accident
+
+- **Movement is not ownership.** Custody changes in B5 never change title,
+  and the movement screen says so at the decision point.
+- **Deletion gets two screens.** G15 explains scope and offers an export;
+  G16 requires the account name typed before the destructive button arms.
+  No default focus lands on Delete.
+- **Business Plan borrows Capture's recorder.** It must not own one —
+  that would be the first crack in the branch boundary.
+
 ## What is built
 
-`/` Today (T1) · `/work` Work queue (W4) · `/jot` Quick Jot (Q1) ·
-`/people` People (D1) · `/records` Records (T3).
+Every destination on the map, as its own route. Shell in
+`src/lib/shell/`, components in `src/lib/kit/`.
 
-Shell in `src/lib/shell/`, components in `src/lib/kit/`. The kit is
-app-local because the tone language is proven on Chief only — if a second
-app adopts it, move the folder to `packages/ui` rather than copying it.
+**State variants are states, not routes.** The map shows four screens in
+three states each (Quick Jot, Endeavors, Assets, Cash flow). Those are
+selected with `?state=` — `/records/assets?state=attention`,
+`?state=empty`, `/jot?state=offline` — because in a running app they come
+from data. Do not turn them into routes.
 
-All data on these screens is placeholder, taken from the wireframes. There
-is no backend yet: PocketBase is the near-term target on the existing VPS,
-with Supabase once the box has the RAM for it.
+The kit is app-local because the tone language is proven on Chief only —
+if a second app adopts it, move the folder to `packages/ui` rather than
+copying it.
+
+All content is placeholder taken from the map, including its dashed `$—`
+figures: the map deliberately does not invent numbers, and neither does
+this build. There is no backend yet — PocketBase is the near-term target
+on the existing VPS, with Supabase once the box has the RAM for it.

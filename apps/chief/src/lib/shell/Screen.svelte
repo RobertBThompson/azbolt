@@ -6,12 +6,12 @@
 	import ContextBar from './ContextBar.svelte';
 	import BottomNav from './BottomNav.svelte';
 
-	/** @type {{ search?: boolean, nav?: boolean, children: import('svelte').Snippet }} */
-	let { search = false, nav = true, children } = $props();
+	/** @type {{ search?: boolean, back?: string|null, nav?: boolean, children: import('svelte').Snippet }} */
+	let { search = false, back = null, nav = true, children } = $props();
 </script>
 
 <div class="screen">
-	<ContextBar {search} />
+	<ContextBar {search} {back} />
 	<main>{@render children()}</main>
 	{#if nav}<BottomNav />{/if}
 </div>
