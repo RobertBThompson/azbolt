@@ -1,55 +1,34 @@
 <script>
-	import { Card, Button, InstallPrompt } from '@azbolt/ui';
-
-	let count = $state(0);
+	/**
+	 * B2 Today — T1.
+	 * Attention first, then today's two commitments, then the counts.
+	 */
+	import Screen from '$lib/shell/Screen.svelte';
+	import { Banner, Row, Stats, Btn } from '$lib/kit';
 </script>
 
-<svelte:head>
-	<title>Chief</title>
-</svelte:head>
+<svelte:head><title>Today · Chief</title></svelte:head>
 
-<div class="stack">
-	<InstallPrompt />
+<Screen>
+	<!-- Teal: the waiting-placement banner is the only AI moment on this screen. -->
+	<Banner t="ai" title="2 placements waiting" meta="From your 6:12 PM jot. Nothing created yet." />
 
-	<Card label="Status">
-		<h2>Chief is running.</h2>
-		<p class="note">
-			Static SvelteKit PWA, installable, offline-capable. Shared shell, tokens and components come
-			from <code>@azbolt/ui</code> and <code>@azbolt/config</code>.
-		</p>
-	</Card>
+	<Row t="cool" href="/work" title="Talk to Carmen" meta="Azbolt · today 3:30 PM" trailing="›" />
+	<Row
+		t="cool"
+		href="/work"
+		title="Call my daughter"
+		meta="Personal · tonight 7:00 PM"
+		trailing="›"
+	/>
 
-	<Card label="Workspace check">
-		<p class="note">Confirms shared components render and state is reactive.</p>
-		<p class="num big">{count}</p>
-		<Button variant="solid" onclick={() => (count += 1)}>Increment</Button>
-	</Card>
-</div>
+	<Stats
+		items={[
+			['3', 'Needs you'],
+			['5', 'On track'],
+			['1', 'Overdue']
+		]}
+	/>
 
-<style>
-	.stack {
-		display: flex;
-		flex-direction: column;
-		gap: 14px;
-	}
-	h2 {
-		font-size: 20px;
-		margin-bottom: 6px;
-	}
-	.note {
-		font-size: var(--size-body);
-		line-height: 1.55;
-		color: var(--muted);
-		margin: 0 0 10px;
-	}
-	.big {
-		font: 600 var(--size-display) / 1.1 var(--font-serif);
-		margin: 0 0 12px;
-	}
-	code {
-		font-size: 12px;
-		background: var(--paper);
-		padding: 1px 4px;
-		border-radius: 3px;
-	}
-</style>
+	<Btn t="ai" primary={false} href="/jot" label="Quick Jot" />
+</Screen>
