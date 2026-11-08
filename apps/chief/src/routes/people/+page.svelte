@@ -5,9 +5,15 @@
 	 * reason you open a person is almost always temporal. Search appears
 	 * here because this list gets long — it is deliberately absent from
 	 * the short lists elsewhere.
+	 *
+	 * Reads from PocketBase when one is reachable and falls back to the
+	 * design fixtures otherwise, saying which it used.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Field, Chips, Row, Btn } from '$lib/kit';
+	import { Alert, Field, Chips, Row, Btn, SourceNote } from '$lib/kit';
+	import { listPeople } from '$lib/pb.js';
+
+	const load = listPeople();
 </script>
 
 <svelte:head><title>People · Chief</title></svelte:head>
@@ -15,27 +21,27 @@
 <Screen search>
 	<Field label="Search people" placeholder="Name, relationship, organisation" />
 	<Chips t="cool" items={['All', 'Personal', 'Work']} />
+
+	{#await load}
+		<Row t="cool" title="Loading people…" dot={false} />
+	{:then { data, source }}
+		{#each data as p (p.id)}
+			<Row t="cool" href="/people/{p.id}" title={p.name} meta={p.meta} trailing="›" />
+		{/each}
+		<SourceNote {source} />
+	{:catch}
+		<Alert
+			title="Could not load people"
+			meta="Neither the backend nor the local fixtures answered."
+		/>
+	{/await}
+
 	<Row
 		t="cool"
-		href="/people/daughter"
-		title="My daughter"
-		meta="Family · follow-up tonight"
+		href="/organisations"
+		title="Organisations"
+		meta="Workspaces with records attached"
 		trailing="›"
 	/>
-	<Row
-		t="cool"
-		href="/people/carmen"
-		title="Carmen Mendez"
-		meta="Azbolt · 2 shared endeavors"
-		trailing="›"
-	/>
-	<Row
-		t="cool"
-		href="/people/pamela"
-		title="Pamela Anderson"
-		meta="TN Holdings · owner"
-		trailing="›"
-	/>
-	<Row t="cool" href="/organisations" title="Organisations" meta="4 organisations" trailing="›" />
 	<Btn t="cool" href="/people/add" label="Add person" />
 </Screen>

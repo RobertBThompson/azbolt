@@ -1,0 +1,25 @@
+# PocketBase for Chief. A second instance rather than collections added to
+# the existing one on 8090: Chief's records and the QC tracker's have no
+# reason to share a database, a backup schedule or an admin account, and
+# an instance costs ~40MB.
+[Unit]
+Description=PocketBase (Chief)
+After=network.target
+
+[Service]
+Type=simple
+User=deploy
+Group=www-data
+WorkingDirectory=/var/lib/azbolt/chief-pb
+ExecStart=/usr/local/bin/pocketbase serve --http=127.0.0.1:8091 --dir=/var/lib/azbolt/chief-pb/pb_data
+Restart=on-failure
+RestartSec=5
+
+# Bound to loopback above, so it is reachable only through Caddy.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/var/lib/azbolt/chief-pb
+
+[Install]
+WantedBy=multi-user.target

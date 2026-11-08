@@ -3,25 +3,30 @@
 # Deployed to /etc/caddy/azbolt/<app>.caddy
 
 peace.155.138.240.74.nip.io {
-	root * /var/www/azbolt/peace
-
 	encode zstd gzip
 
-	# Precompressed .br/.gz emitted by the SvelteKit build
-	file_server {
-		precompressed br gzip
+	# Everything not claimed above is the static build. handle blocks are
+	# mutually exclusive and run in written order, which is what keeps
+	# try_files from rewriting a proxied path before the proxy sees it.
+	handle {
+		root * /var/www/azbolt/peace
+
+		# Precompressed .br/.gz emitted by the SvelteKit build
+		file_server {
+			precompressed br gzip
+		}
+
+		# Immutable hashed build assets
+		@immutable path /_app/immutable/*
+		header @immutable Cache-Control "public, max-age=31536000, immutable"
+
+		# Never cache the service worker or the manifest
+		@no-cache path /sw.js /registerSW.js /manifest.webmanifest
+		header @no-cache Cache-Control "no-cache, no-store, must-revalidate"
+
+		# SPA fallback for client-side routes
+		try_files {path} {path}.html {path}/index.html /200.html
 	}
-
-	# Immutable hashed build assets
-	@immutable path /_app/immutable/*
-	header @immutable Cache-Control "public, max-age=31536000, immutable"
-
-	# Never cache the service worker or the manifest
-	@no-cache path /sw.js /registerSW.js /manifest.webmanifest
-	header @no-cache Cache-Control "no-cache, no-store, must-revalidate"
-
-	# SPA fallback for client-side routes
-	try_files {path} {path}.html {path}/index.html /200.html
 
 	header {
 		X-Content-Type-Options nosniff
