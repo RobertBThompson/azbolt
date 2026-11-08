@@ -6,14 +6,19 @@
 	 * here because this list gets long — it is deliberately absent from
 	 * the short lists elsewhere.
 	 *
-	 * Reads from PocketBase when one is reachable and falls back to the
-	 * design fixtures otherwise, saying which it used.
+	 * Reads from PocketBase when one is reachable and a session is live,
+	 * and falls back to the design fixtures otherwise, saying which it used.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Alert, Field, Chips, Row, Btn, SourceNote } from '$lib/kit';
-	import { listPeople } from '$lib/pb.js';
+	import { Alert, Field, Chips, Row, Btn, SourceNote, EmptyLive } from '$lib/kit';
+	import { listPeople, seedDirectory } from '$lib/pb.js';
 
-	const load = listPeople();
+	let load = $state(listPeople());
+
+	async function seed() {
+		await seedDirectory();
+		load = listPeople();
+	}
 </script>
 
 <svelte:head><title>People · Chief</title></svelte:head>
@@ -25,10 +30,14 @@
 	{#await load}
 		<Row t="cool" title="Loading people…" dot={false} />
 	{:then { data, source }}
-		{#each data as p (p.id)}
-			<Row t="cool" href="/people/{p.id}" title={p.name} meta={p.meta} trailing="›" />
-		{/each}
-		<SourceNote {source} />
+		{#if source === 'live' && data.length === 0}
+			<EmptyLive what="people" onseed={seed} />
+		{:else}
+			{#each data as p (p.id)}
+				<Row t="cool" href="/people/{p.id}" title={p.name} meta={p.meta} trailing="›" />
+			{/each}
+			<SourceNote {source} />
+		{/if}
 	{:catch}
 		<Alert
 			title="Could not load people"

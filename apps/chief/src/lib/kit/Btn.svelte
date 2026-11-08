@@ -1,14 +1,38 @@
 <script>
-	/** @type {{ label: string, primary?: boolean, t?: string, href?: string|null, onclick?: (() => void)|null }} */
-	let { label, primary = true, t = 'neutral', href = null, onclick = null } = $props();
+	/**
+	 * @type {{
+	 *   label: string,
+	 *   primary?: boolean,
+	 *   t?: string,
+	 *   href?: string|null,
+	 *   onclick?: (() => void)|null,
+	 *   type?: 'button'|'submit',
+	 *   disabled?: boolean
+	 * }}
+	 */
+	let {
+		label,
+		primary = true,
+		t = 'neutral',
+		href = null,
+		onclick = null,
+		type = 'button',
+		disabled = false
+	} = $props();
 	import { tone } from './tone.js';
 	const c = $derived(tone(t));
 </script>
 
 {#if href}
 	<a class="btn" class:primary {href} style="--t-ink:{c.ink}">{label}</a>
+{:else if type === 'submit'}
+	<button type="submit" class="btn" class:primary {onclick} {disabled} style="--t-ink:{c.ink}"
+		>{label}</button
+	>
 {:else}
-	<button type="button" class="btn" class:primary {onclick} style="--t-ink:{c.ink}">{label}</button>
+	<button type="button" class="btn" class:primary {onclick} {disabled} style="--t-ink:{c.ink}"
+		>{label}</button
+	>
 {/if}
 
 <style>
@@ -31,5 +55,8 @@
 		background: var(--t-ink);
 		border-color: var(--t-ink);
 		color: #ffffff;
+	}
+	.btn:disabled {
+		opacity: 0.5;
 	}
 </style>

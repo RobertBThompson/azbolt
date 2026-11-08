@@ -7,10 +7,15 @@
 	 * the word "entity" does not appear.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Alert, Row, Btn, SourceNote } from '$lib/kit';
-	import { listWorkspaces } from '$lib/pb.js';
+	import { Alert, Row, Btn, SourceNote, EmptyLive } from '$lib/kit';
+	import { listWorkspaces, seedDirectory } from '$lib/pb.js';
 
-	const load = listWorkspaces();
+	let load = $state(listWorkspaces());
+
+	async function seed() {
+		await seedDirectory();
+		load = listWorkspaces();
+	}
 </script>
 
 <svelte:head><title>Organisations · Chief</title></svelte:head>
@@ -19,10 +24,14 @@
 	{#await load}
 		<Row t="cool" title="Loading organisations…" dot={false} />
 	{:then { data, source }}
-		{#each data as o (o.id)}
-			<Row t="cool" href="/organisations/{o.id}" title={o.name} meta={o.meta} trailing="›" />
-		{/each}
-		<SourceNote {source} />
+		{#if source === 'live' && data.length === 0}
+			<EmptyLive what="organisations" onseed={seed} />
+		{:else}
+			{#each data as o (o.id)}
+				<Row t="cool" href="/organisations/{o.id}" title={o.name} meta={o.meta} trailing="›" />
+			{/each}
+			<SourceNote {source} />
+		{/if}
 	{:catch}
 		<Alert
 			title="Could not load organisations"
