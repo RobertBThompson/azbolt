@@ -68,15 +68,26 @@ def main():
     )["token"]
     print("authenticated")
 
-    existing = {
-        c["name"]: c["id"]
-        for c in call("/api/collections?perPage=200", token=token)["items"]
-    }
+    collections = call("/api/collections?perPage=200", token=token)["items"]
+    existing = {c["name"]: c["id"] for c in collections}
 
     users_id = existing.get("users")
     if not users_id:
         print("no 'users' collection found; aborting")
         sys.exit(1)
+
+    # Chief's sign-up screen creates a users record directly. That only
+    # works if the collection's createRule is open; PocketBase ships it
+    # open but an edited instance may not be, and the failure would look
+    # like a bug in the app rather than a rule.
+    users = next(c for c in collections if c["id"] == users_id)
+    create_rule = users.get("createRule")
+    if create_rule is None:
+        print("note: users.createRule is superuser-only, so in-app sign-up "
+              "will fail. Create the account under Collections > users in "
+              "the admin UI, or open the rule.")
+    else:
+        print("users sign-up rule: %s" % (create_rule or "open to anyone"))
 
     if "workspaces" in existing:
         workspaces_id = existing["workspaces"]

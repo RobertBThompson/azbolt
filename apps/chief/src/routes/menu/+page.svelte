@@ -9,6 +9,7 @@
 	import { Banner, Row, Btn } from '$lib/kit';
 	import { CONTEXTS } from '$lib/contexts.js';
 	import { shell } from '$lib/state.svelte.js';
+	import { session } from '$lib/session.svelte.js';
 
 	const ctx = $derived(CONTEXTS[shell.context] ?? CONTEXTS.all);
 </script>
@@ -26,5 +27,10 @@
 		trailing="↗"
 	/>
 	<Row href="/context" title="Switch workspace" meta="Open the context switcher" trailing="↗" />
-	<Btn primary={false} href="/onboarding/welcome" label="Sign out" />
+	{#if session.signedIn}
+		<Row href="/signin" title="Account" meta={session.label} trailing="↗" />
+		<Btn primary={false} label="Sign out" onclick={() => session.signOut()} />
+	{:else}
+		<Btn t="cool" href="/signin" label="Sign in" />
+	{/if}
 </Screen>

@@ -1,4 +1,4 @@
-import PocketBase from 'pocketbase';
+import PocketBase, { LocalAuthStore } from 'pocketbase';
 
 /**
  * Browser-side PocketBase client.
@@ -15,26 +15,13 @@ import PocketBase from 'pocketbase';
  * @param {string} storageKey  unique per app, e.g. 'azbolt.chief.pb'
  */
 export function createPocketBase(url = '', storageKey = 'azbolt.pb') {
-	const pb = new PocketBase(url || undefined);
-	// Default LocalAuthStore uses one shared key; override so two apps
-	// served from one origin during development cannot clobber each other.
-	pb.authStore.save = wrapSave(pb, storageKey);
-	return pb;
-}
-
-/** @param {import('pocketbase').default} pb @param {string} key */
-function wrapSave(pb, key) {
-	const original = pb.authStore.save.bind(pb.authStore);
-	/** @param {string} token @param {any} record */
-	return (token, record) => {
-		original(token, record);
-		try {
-			localStorage.setItem(key, JSON.stringify({ token: pb.authStore.token }));
-		} catch {
-			// Private browsing, cleared site data, or storage disabled.
-			// The session still works for this page load.
-		}
-	};
+	// Each app gets its own storage key. The SDK's default LocalAuthStore
+	// uses one shared key, so two apps served from the same origin during
+	// development would sign each other out. Passing the store to the
+	// constructor is what makes the key real for both reads and writes —
+	// patching `save` after the fact only changed writing, leaving restore
+	// on the shared key.
+	return new PocketBase(url || undefined, new LocalAuthStore(storageKey));
 }
 
 /**
