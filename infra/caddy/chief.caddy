@@ -3,25 +3,39 @@
 # Deployed to /etc/caddy/azbolt/<app>.caddy
 
 chief.155.138.240.74.nip.io {
-	root * /var/www/azbolt/chief
-
 	encode zstd gzip
 
-	# Precompressed .br/.gz emitted by the SvelteKit build
-	file_server {
-		precompressed br gzip
+	# PocketBase, proxied under Chief's own origin rather than given a
+	# subdomain of its own. Same origin means the browser client needs no
+	# base URL, no CORS allowlist naming every app, and no second
+	# certificate. /_/ is the admin UI; it is reachable but protected by
+	# PocketBase's own superuser login.
+	@pb path /api/* /_/*
+	handle @pb {
+		reverse_proxy 127.0.0.1:8091
 	}
+	# Everything not claimed above is the static build. handle blocks are
+	# mutually exclusive and run in written order, which is what keeps
+	# try_files from rewriting a proxied path before the proxy sees it.
+	handle {
+		root * /var/www/azbolt/chief
 
-	# Immutable hashed build assets
-	@immutable path /_app/immutable/*
-	header @immutable Cache-Control "public, max-age=31536000, immutable"
+		# Precompressed .br/.gz emitted by the SvelteKit build
+		file_server {
+			precompressed br gzip
+		}
 
-	# Never cache the service worker or the manifest
-	@no-cache path /sw.js /registerSW.js /manifest.webmanifest
-	header @no-cache Cache-Control "no-cache, no-store, must-revalidate"
+		# Immutable hashed build assets
+		@immutable path /_app/immutable/*
+		header @immutable Cache-Control "public, max-age=31536000, immutable"
 
-	# SPA fallback for client-side routes
-	try_files {path} {path}.html {path}/index.html /200.html
+		# Never cache the service worker or the manifest
+		@no-cache path /sw.js /registerSW.js /manifest.webmanifest
+		header @no-cache Cache-Control "no-cache, no-store, must-revalidate"
+
+		# SPA fallback for client-side routes
+		try_files {path} {path}.html {path}/index.html /200.html
+	}
 
 	header {
 		X-Content-Type-Options nosniff
