@@ -51,16 +51,37 @@ class Session {
 	 *
 	 * @param {string} email
 	 * @param {string} password
+	 * @param {string} [name] optional; without it the UI falls back to the
+	 *   email's local part, which reads badly
 	 */
-	async signUp(email, password) {
+	async signUp(email, password, name = '') {
 		return this.#attempt(async () => {
 			await pb.collection('users').create({
 				email,
 				password,
 				passwordConfirm: password,
-				emailVisibility: false
+				emailVisibility: false,
+				// Only send it when filled: an empty string would overwrite
+				// nothing here, but it keeps the payload honest.
+				...(name ? { name } : {})
 			});
 			await pb.collection('users').authWithPassword(email, password);
+		});
+	}
+
+	/**
+	 * Updates the signed-in user's own record. Separate from signUp so the
+	 * name can be set later by someone whose account already exists.
+	 *
+	 * @param {string} name
+	 */
+	async setName(name) {
+		if (!this.user) return false;
+		return this.#attempt(async () => {
+			const row = await pb.collection('users').update(this.user?.id ?? '', { name });
+			// update() does not touch the auth store, so the rune would keep
+			// showing the old value until the next page load.
+			this.user = row;
 		});
 	}
 

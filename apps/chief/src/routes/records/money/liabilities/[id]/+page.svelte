@@ -21,7 +21,7 @@
 			['Fri', 'Next due']
 		]}
 	/>
-	<Row t="warm" href="/organisations" title="Lender" meta="Linked organisation" trailing="↗" />
+	<Row t="warm" href="/organizations" title="Lender" meta="Linked organization" trailing="↗" />
 	<Row t="warm" title="Terms" meta="Rate, frequency and end date" trailing="›" />
 	<Row
 		t="warm"

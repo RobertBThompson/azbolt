@@ -11,7 +11,7 @@
 <svelte:head><title>Welcome · Chief</title></svelte:head>
 
 <Screen back="/onboarding" nav={false}>
-	<Hero title="Your life and your work, in one place" meta="Capture first. Organise with help." />
+	<Hero title="Your life and your work, in one place" meta="Capture first. Organize with help." />
 	<Btn href="/onboarding/focus" label="Continue with Apple" />
 	<Btn primary={false} href="/onboarding/focus" label="Continue with Google" />
 	<Note>

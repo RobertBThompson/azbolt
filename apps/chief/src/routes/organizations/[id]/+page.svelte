@@ -1,6 +1,6 @@
 <script>
 	/**
-	 * F1 Directory — D5/D6/D7 Organisation profile.
+	 * F1 Directory — D5/D6/D7 Organization profile.
 	 * One component, three structures. Azbolt is a company, Eagle DAO is
 	 * member-governed and SAVE is a nonprofit: the same slots hold members,
 	 * governance and oversight without changing the page architecture.
@@ -22,7 +22,7 @@
 
 <svelte:head><title>{org.name} · Chief</title></svelte:head>
 
-<Screen back="/organisations" nav={false}>
+<Screen back="/organizations" nav={false}>
 	<Banner t="cool" title={org.name} meta={org.blurb} />
 	<Stats items={org.stats} />
 	{#each org.rows as r (r.t)}
