@@ -11,7 +11,7 @@ export default {
 				slug: 'chief',
 				name: 'Chief',
 				description: 'AZBOLT Chief',
-				themeColor: '#17181a'
+				themeColor: '#efebe7'
 			}),
 			workbox: {
 				globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],

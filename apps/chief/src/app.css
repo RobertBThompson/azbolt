@@ -7,32 +7,78 @@
    If Chaim or Peace adopt the same language, move this block into
    packages/config/tokens.css rather than copying it. */
 :root {
-	--app-accent: #b68235;
-	--app-accent-text: #92682a;
-	--app-accent-tint: rgba(182, 130, 53, 0.15);
+	/* ── Brand ──────────────────────────────────────────────────────────
+	   Three hues, sampled from the Chief mark rather than guessed:
 
-	/* Surfaces — warmer and lower-contrast than the shared neutrals */
-	--paper: #efece6;
+	     wine   #9f3e49   the upper arc
+	     taupe  #b5a8a1   the bar
+	     blue   #6699ce   the lower arc
+
+	   The mark's own blue and taupe are too light to carry text — 2.54:1
+	   and 1.96:1 on paper. So each role below keeps the sampled hue and
+	   drops lightness only until it clears 4.5:1 on paper, on white, and
+	   on its own tint. The wine needed no change; it already clears. */
+	--brand-wine: #9f3e49;
+	--brand-taupe: #b5a8a1;
+	--brand-blue: #6699ce;
+
+	--app-accent: #9f3e49;
+	--app-accent-text: #82333c;
+	--app-accent-tint: rgba(159, 62, 73, 0.12);
+
+	/* ── Tones ──────────────────────────────────────────────────────────
+	   Roles are unchanged; only the hues moved onto the mark. Chief keeps
+	   these here rather than in packages/config because they are Chief's
+	   branding, and the other four apps should not inherit it. */
+	--tone-graphite: #78675e; /* default — the mark's taupe, darkened */
+	--tone-graphite-tint: #f3f0ef;
+	--tone-cool: #366ea8; /* arranging — the mark's blue, darkened */
+	--tone-cool-tint: #eaf1f8;
+	--tone-clay: #8e6035; /* committing something of value */
+	--tone-clay-tint: #f7f1eb;
+	--tone-ai: #6b4f87; /* reserved, without exception, for AI moments */
+	--tone-ai-tint: #f1edf5;
+	--tone-alert: #9f3e49; /* attention required — the mark's wine, as-is */
+	--tone-alert-tint: #f7ebec;
+	--tone-alert-ink: #82333c;
+
+	/* AI was teal, which the mark has no answer for. Violet sits between
+	   the wine and the blue, so it reads as neither section colour while
+	   still belonging to the same family. */
+
+	/* ── Surfaces ───────────────────────────────────────────────────────
+	   Re-hued onto the mark's taupe (21°) at the lightness levels the
+	   wireframes already used, so contrast is unchanged and the greys
+	   stop fighting the logo. */
+	--paper: #efebe7;
 	--card: #ffffff;
-	--sunk: #fbfaf8;
-	--ink: #1c1b19;
-	--ink-2: #3a3631;
-	--ink-3: #6b6660;
-	--ink-4: #8b857d;
-	--line: #cfc9c0;
-	--line-2: #ddd8d1;
-	--line-3: #e6e1da;
-	--line-4: #ece8e2;
+	--sunk: #faf8f6;
+	--ink: #1e1a18;
+	--ink-2: #3b352f;
+	--ink-3: #6d655e;
+	--ink-4: #8d847c;
+	--line: #d1c9c3;
+	--line-2: #ded8d3;
+	--line-3: #e8e3de;
+	--line-4: #eee9e5;
+
+	/* Washes. One opacity ladder for every translucent surface in the
+	   app, so a tint is never typed as a one-off rgba(). */
+	--wash-1: rgba(120, 103, 94, 0.05);
+	--wash-2: rgba(120, 103, 94, 0.09);
+	--wash-3: rgba(120, 103, 94, 0.15);
+	--wash-blue: rgba(102, 153, 206, 0.14);
+	--wash-wine: rgba(159, 62, 73, 0.12);
 
 	/* Context swatches. Three redundant channels carry context — a muted
 	   hue, a swatch shape, and the name in permanent mono caps — so colour
 	   alone never has to survive colour-blindness, sunlight or a glance. */
-	--ctx-all: linear-gradient(90deg, #8d867c 0 50%, #c3b7a5 50%);
+	--ctx-all: linear-gradient(90deg, #9f3e49 0 50%, #6699ce 50%);
 	--ctx-azbolt: #46688f;
-	--ctx-tn: #3f6b57;
-	--ctx-ame: #8a7340;
-	--ctx-personal: repeating-linear-gradient(45deg, #6f5f8c 0 3px, #a99ec0 3px 6px);
-	--ctx-account: #6b6660;
+	--ctx-tn: #4b7a63;
+	--ctx-ame: #8e6035;
+	--ctx-personal: repeating-linear-gradient(45deg, #7b5a9c 0 3px, #b4a3c6 3px 6px);
+	--ctx-account: #6d655e;
 
 	/* Type */
 	--font-sans: 'Instrument Sans', system-ui, -apple-system, sans-serif;
@@ -45,7 +91,7 @@
 	   the 44pt minimum. */
 	--band: 9px;
 	--appbar: 44px;
-	--nav: 58px;
+	--nav: 72px;
 	--tap-min: 45px;
 }
 
