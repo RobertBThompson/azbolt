@@ -132,10 +132,26 @@ dashboard about them:
 
 An **endeavor** is a group of tasks. It is never required.
 
-**Sphere** replaced **Workspace** throughout. One collision is still open:
-the `spheres` collection holds what the Organizations screen lists, while
-Sphere It selects from the context list in `contexts.js`. Those are the same
-four names (Azbolt, TN Holdings, AME, Personal) reached two different ways.
-If a sphere and an organization are genuinely different things, the
-collection needs splitting; if they are the same thing, `contexts.js` should
-read from it. Left as-is deliberately rather than guessed at.
+## Sphere and organization
+
+**Sphere** replaced **Workspace** throughout. A sphere is an *area of a
+life* — Family, Business, Church, Career, Hobby, Children, Spouse. It is
+the lens a Chief is looking through, and it is the app's subject rather
+than one of its fields: spheres overlap, compete for the same hours, and
+run up against each other, and choosing between them is the Chief's
+central dilemma.
+
+Spheres are personal. The seven in `spheres.js` are a prototype
+stand-in, not a set the app decides; real spheres will be records a
+Chief writes.
+
+An **organization** is a person or a grouping of people, and need not
+include the Chief at all. Inside the Spouse sphere there might be an
+organization called "Wife" and another called "Chief and Wife". It is a
+separate axis from the sphere, and it is parked for now — when it is
+picked up it brings control, ownership and interests with it, tied back
+to actions, people and assets.
+
+The collection once called `workspaces` holds organizations, so it is
+named `organizations`. There is no spheres collection yet, deliberately:
+the concept is still being worked out, and a schema would freeze it.

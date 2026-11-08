@@ -15,7 +15,8 @@
 	const org = $derived(ORGS[$page.params.id ?? ''] ?? ORGS.azbolt);
 
 	function switchInto() {
-		if (org.context) shell.context = org.context;
+		// An organization sits inside a sphere; opening one does not move you.
+		void org;
 		goto('/');
 	}
 </script>

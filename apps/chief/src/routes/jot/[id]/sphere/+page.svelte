@@ -19,14 +19,11 @@
 	import { page } from '$app/stores';
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Btn, Note, Row, SectionHead } from '$lib/kit';
-	import { CONTEXTS } from '$lib/contexts.js';
+	import { PLACEABLE } from '$lib/spheres.js';
 	import { UNSPHERED, PEOPLE, ORGS, ASSETS } from '$lib/data.js';
 
 	const id = $derived($page.params.id ?? '');
 	const jot = $derived(UNSPHERED[id] ?? { text: 'Untitled jot', meta: 'No sphere', thrown: '' });
-
-	/** 'all' and 'account' are shell states, not places a jot can live. */
-	const spheres = Object.entries(CONTEXTS).filter(([k]) => k !== 'all' && k !== 'account');
 
 	/** @type {string|null} */
 	let sphere = $state(null);
@@ -53,7 +50,7 @@
 
 	<SectionHead label="Select sphere" t="clay" />
 	<div class="grid">
-		{#each spheres as [key, ctx] (key)}
+		{#each PLACEABLE as [key, sph] (key)}
 			<button
 				type="button"
 				class="pick"
@@ -61,8 +58,8 @@
 				aria-pressed={sphere === key}
 				onclick={() => (sphere = sphere === key ? null : key)}
 			>
-				<span class="swatch" style="background:{ctx.swatch}"></span>
-				<span class="nm">{ctx.name}</span>
+				<span class="swatch" style="background:{sph.swatch}"></span>
+				<span class="nm">{sph.name}</span>
 			</button>
 		{/each}
 	</div>

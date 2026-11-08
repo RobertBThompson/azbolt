@@ -94,21 +94,22 @@ def main():
     # An instance set up before the rename has this collection under its
     # old name. Renaming keeps the records and the relation from people;
     # creating a second collection would silently orphan them.
-    if "workspaces" in existing and "spheres" not in existing:
-        renamed = call("/api/collections/%s" % existing["workspaces"],
-                       {"name": "spheres"}, token=token, method="PATCH")
-        existing["spheres"] = renamed["id"]
-        print("renamed workspaces -> spheres")
+    for old in ("workspaces", "spheres"):
+        if old in existing and "organizations" not in existing:
+            renamed = call("/api/collections/%s" % existing[old],
+                           {"name": "organizations"}, token=token, method="PATCH")
+            existing["organizations"] = renamed["id"]
+            print("renamed %s -> organizations" % old)
 
-    if "spheres" in existing:
-        spheres_id = existing["spheres"]
-        print("spheres already exists")
+    if "organizations" in existing:
+        organizations_id = existing["organizations"]
+        print("organizations already exists")
     else:
         created = call(
             "/api/collections",
             dict(
                 RULES,
-                name="spheres",
+                name="organizations",
                 type="base",
                 fields=[
                     {"name": "name", "type": "text", "required": True,
@@ -123,14 +124,14 @@ def main():
                     owner_field(users_id),
                 ],
                 indexes=[
-                    "CREATE UNIQUE INDEX idx_spheres_owner_name "
-                    "ON spheres (owner, name)"
+                    "CREATE UNIQUE INDEX idx_organizations_owner_name "
+                    "ON organizations (owner, name)"
                 ],
             ),
             token=token,
         )
-        spheres_id = created["id"]
-        print("created spheres %s" % spheres_id)
+        organizations_id = created["id"]
+        print("created organizations %s" % organizations_id)
 
     if "people" in existing:
         print("people already exists")
@@ -139,12 +140,15 @@ def main():
         # other field untouched.
         people = next(c for c in collections if c["id"] == existing["people"])
         fields = people.get("fields", [])
-        stale = next((f for f in fields if f.get("name") == "workspace"), None)
+        stale = next(
+            (f for f in fields if f.get("name") in ("workspace", "sphere")), None
+        )
         if stale:
-            stale["name"] = "sphere"
+            was = stale["name"]
+            stale["name"] = "organization"
             call("/api/collections/%s" % existing["people"],
                  {"fields": fields}, token=token, method="PATCH")
-            print("renamed people.workspace -> people.sphere")
+            print("renamed people.%s -> people.organization" % was)
     else:
         call(
             "/api/collections",
@@ -159,9 +163,9 @@ def main():
                     {"name": "role", "type": "text", "max": 120},
                     {"name": "relationship", "type": "text", "max": 80},
                     {"name": "is_me", "type": "bool"},
-                    {"name": "sphere", "type": "relation", "required": False,
+                    {"name": "organization", "type": "relation", "required": False,
                      "maxSelect": 1, "cascadeDelete": False,
-                     "collectionId": spheres_id},
+                     "collectionId": organizations_id},
                     {"name": "next_interaction", "type": "date"},
                     {"name": "notes", "type": "text", "max": 2000},
                     owner_field(users_id),

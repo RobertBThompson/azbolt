@@ -3,7 +3,7 @@
 	 * The frame every screen renders inside. No branch renders its own
 	 * app bar or nav — that is the whole reason Shell is a branch.
 	 */
-	import ContextBar from './ContextBar.svelte';
+	import SphereBar from './SphereBar.svelte';
 	import BottomNav from './BottomNav.svelte';
 
 	/** @type {{ search?: boolean, back?: string|null, nav?: boolean, children: import('svelte').Snippet }} */
@@ -11,7 +11,7 @@
 </script>
 
 <div class="screen">
-	<ContextBar {search} {back} />
+	<SphereBar {search} {back} />
 	<main>{@render children()}</main>
 	{#if nav}<BottomNav />{/if}
 </div>

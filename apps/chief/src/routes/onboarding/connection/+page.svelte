@@ -8,7 +8,7 @@
 	import { Prog, Banner, Field, Btn } from '$lib/kit';
 	import { shell } from '$lib/state.svelte.js';
 
-	shell.context = 'azbolt';
+	shell.sphere = 'business';
 </script>
 
 <svelte:head><title>One connection · Chief</title></svelte:head>
