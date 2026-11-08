@@ -13,7 +13,7 @@
 
 <Screen back="/work" nav={false}>
 	<Field label="Task" placeholder="What needs to happen" />
-	<Row t="cool" title="Context" meta="Azbolt · from the active workspace" trailing="›" />
+	<Row t="cool" title="Context" meta="Azbolt · from the active sphere" trailing="›" />
 	<Row t="cool" title="When" meta="No date yet" trailing="›" />
 	<Row t="cool" href="/people" title="Who" meta="Unassigned" trailing="↗" />
 	<Row t="cool" href="/work/endeavors" title="Endeavor" meta="Not linked" trailing="›" />

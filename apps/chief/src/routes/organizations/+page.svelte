@@ -1,20 +1,20 @@
 <script>
 	/**
 	 * F1 Directory — D4 Organizations.
-	 * An organization is a workspace with records attached, not a menu
+	 * An organization is a sphere with records attached, not a menu
 	 * tile — so these are the same records the context switcher offers.
 	 * Each is described by what it does rather than by its entity type;
 	 * the word "entity" does not appear.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Alert, Row, Btn, SourceNote, EmptyLive } from '$lib/kit';
-	import { listWorkspaces, seedDirectory } from '$lib/pb.js';
+	import { listSpheres, seedDirectory } from '$lib/pb.js';
 
-	let load = $state(listWorkspaces());
+	let load = $state(listSpheres());
 
 	async function seed() {
 		await seedDirectory();
-		load = listWorkspaces();
+		load = listSpheres();
 	}
 </script>
 

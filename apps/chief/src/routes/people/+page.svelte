@@ -49,7 +49,7 @@
 		t="cool"
 		href="/organizations"
 		title="Organizations"
-		meta="Workspaces with records attached"
+		meta="Spheres with records attached"
 		trailing="›"
 	/>
 	<Btn t="cool" href="/people/add" label="Add person" />

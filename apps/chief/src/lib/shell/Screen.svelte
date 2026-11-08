@@ -30,7 +30,9 @@
 		display: flex;
 		flex-direction: column;
 		gap: 9px;
-		padding: 13px 15px 20px;
+		/* The mark is lifted 18px above the nav, so content needs more
+		   clearance at the bottom than a flat bar would have asked for. */
+		padding: 13px 15px 28px;
 		overflow-x: hidden;
 	}
 </style>

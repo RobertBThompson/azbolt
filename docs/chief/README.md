@@ -20,7 +20,7 @@ reads from them and none of them read back.
 | F0  | Shell & Context       | context switching, app bar, bottom nav, search, notifications |
 | F1  | Directory             | the only place a person or an organization exists             |
 | F2  | Capture (Quick Jot)   | jot input, the proposal model, placement rules and history    |
-| B1  | Onboarding            | auth, workspace creation, first-run permissions               |
+| B1  | Onboarding            | auth, sphere creation, first-run permissions               |
 | B2  | Today                 | the daily feed, attention ranking, the Records landing page   |
 | B3  | Work & Calendar       | endeavors, tasks, calendar, external sync                     |
 | B4  | Structure & Ownership | reporting links, ownership records                            |
@@ -114,3 +114,28 @@ All content is placeholder taken from the map, including its dashed `$—`
 figures: the map deliberately does not invent numbers, and neither does
 this build. There is no backend yet — PocketBase is the near-term target
 on the existing VPS, with Supabase once the box has the RAM for it.
+
+## The jot lifecycle
+
+A jot has three stages, and Today is those three stages rather than a
+dashboard about them:
+
+1. **Throw it** — the text field, voice or typed. A jot does not start in a
+   sphere and is never blocked on choosing one. Throwing must cost nothing.
+2. **Sphere it** — select a sphere, then any people or organizations, then
+   any assets. Everything is optional. "Untitled" and "not selected" are
+   valid resting states, not defects, and a jot left that way stays in the
+   queue rather than being lost or nagged about.
+3. **Task it** — offered as a choice at the end of Sphere It, never as a
+   step. Most jots record something rather than commit to it, and promoting
+   every jot to a task is how a capture tool becomes a backlog.
+
+An **endeavor** is a group of tasks. It is never required.
+
+**Sphere** replaced **Workspace** throughout. One collision is still open:
+the `spheres` collection holds what the Organizations screen lists, while
+Sphere It selects from the context list in `contexts.js`. Those are the same
+four names (Azbolt, TN Holdings, AME, Personal) reached two different ways.
+If a sphere and an organization are genuinely different things, the
+collection needs splitting; if they are the same thing, `contexts.js` should
+read from it. Left as-is deliberately rather than guessed at.

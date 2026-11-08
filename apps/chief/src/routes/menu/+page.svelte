@@ -17,7 +17,7 @@
 <svelte:head><title>Menu · Chief</title></svelte:head>
 
 <Screen back="/" nav={false}>
-	<Banner title={ctx.name} meta="Workspace controls and account actions." />
+	<Banner title={ctx.name} meta="Sphere controls and account actions." />
 	<Row href="/settings" title="Settings" meta="AI, privacy and integrations" trailing="↗" />
 	<Row href="/settings/help" title="Help" meta="Guides and support" trailing="↗" />
 	<Row
@@ -26,7 +26,7 @@
 		meta="Profile, export and terms"
 		trailing="↗"
 	/>
-	<Row href="/context" title="Switch workspace" meta="Open the context switcher" trailing="↗" />
+	<Row href="/context" title="Switch sphere" meta="Open the context switcher" trailing="↗" />
 	{#if session.signedIn}
 		<Row href="/signin" title="Account" meta={session.label} trailing="↗" />
 		<Btn primary={false} label="Sign out" onclick={() => session.signOut()} />

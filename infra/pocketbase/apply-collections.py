@@ -19,8 +19,10 @@ import urllib.request
 BASE = (sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8091").rstrip("/")
 
 
-def call(path, data=None, token=None):
-    req = urllib.request.Request(BASE + path, method="POST" if data else "GET")
+def call(path, data=None, token=None, method=None):
+    req = urllib.request.Request(
+        BASE + path, method=method or ("POST" if data else "GET")
+    )
     req.add_header("Content-Type", "application/json")
     if token:
         req.add_header("Authorization", token)
@@ -89,15 +91,24 @@ def main():
     else:
         print("users sign-up rule: %s" % (create_rule or "open to anyone"))
 
-    if "workspaces" in existing:
-        workspaces_id = existing["workspaces"]
-        print("workspaces already exists")
+    # An instance set up before the rename has this collection under its
+    # old name. Renaming keeps the records and the relation from people;
+    # creating a second collection would silently orphan them.
+    if "workspaces" in existing and "spheres" not in existing:
+        renamed = call("/api/collections/%s" % existing["workspaces"],
+                       {"name": "spheres"}, token=token, method="PATCH")
+        existing["spheres"] = renamed["id"]
+        print("renamed workspaces -> spheres")
+
+    if "spheres" in existing:
+        spheres_id = existing["spheres"]
+        print("spheres already exists")
     else:
         created = call(
             "/api/collections",
             dict(
                 RULES,
-                name="workspaces",
+                name="spheres",
                 type="base",
                 fields=[
                     {"name": "name", "type": "text", "required": True,
@@ -112,17 +123,28 @@ def main():
                     owner_field(users_id),
                 ],
                 indexes=[
-                    "CREATE UNIQUE INDEX idx_workspaces_owner_name "
-                    "ON workspaces (owner, name)"
+                    "CREATE UNIQUE INDEX idx_spheres_owner_name "
+                    "ON spheres (owner, name)"
                 ],
             ),
             token=token,
         )
-        workspaces_id = created["id"]
-        print("created workspaces %s" % workspaces_id)
+        spheres_id = created["id"]
+        print("created spheres %s" % spheres_id)
 
     if "people" in existing:
         print("people already exists")
+        # The relation field carries the old name on an instance built
+        # before the rename. Patch just that field, by id, leaving every
+        # other field untouched.
+        people = next(c for c in collections if c["id"] == existing["people"])
+        fields = people.get("fields", [])
+        stale = next((f for f in fields if f.get("name") == "workspace"), None)
+        if stale:
+            stale["name"] = "sphere"
+            call("/api/collections/%s" % existing["people"],
+                 {"fields": fields}, token=token, method="PATCH")
+            print("renamed people.workspace -> people.sphere")
     else:
         call(
             "/api/collections",
@@ -137,9 +159,9 @@ def main():
                     {"name": "role", "type": "text", "max": 120},
                     {"name": "relationship", "type": "text", "max": 80},
                     {"name": "is_me", "type": "bool"},
-                    {"name": "workspace", "type": "relation", "required": False,
+                    {"name": "sphere", "type": "relation", "required": False,
                      "maxSelect": 1, "cascadeDelete": False,
-                     "collectionId": workspaces_id},
+                     "collectionId": spheres_id},
                     {"name": "next_interaction", "type": "date"},
                     {"name": "notes", "type": "text", "max": 2000},
                     owner_field(users_id),

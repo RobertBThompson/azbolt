@@ -6,7 +6,7 @@
 	 * forget it.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Hero, Banner, Field, Seg, Appr, Alert, Row, Btn, Note } from '$lib/kit';
+	import { Hero, Banner, Field, Seg, Appr, Alert, Row, Btn } from '$lib/kit';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 
@@ -88,7 +88,10 @@
 			bind:active={mode}
 			onpick={(i) => i === 0 && goto('/jot/listening')}
 		/>
-		<Btn t="ai" href="/jot/split" label="Analyze this jot" />
-		<Note>Capture never blocks on the network. Only analysis does.</Note>
+		<!-- No Analyze button. Throwing is the whole of this screen; what
+		     happens to a jot afterwards is Sphere It's business, and a
+		     second verb here asked people to decide at the one moment the
+		     stage exists to let them not decide. -->
+		<Btn t="cool" href="/" label="Throw it" />
 	{/if}
 </Screen>

@@ -21,7 +21,7 @@
 	/>
 	<Banner
 		title="Pamela Anderson · personal account"
-		meta="All connected workspaces and records in scope are listed before production release."
+		meta="All connected spheres and records in scope are listed before production release."
 	/>
 	<Field label="Type DELETE to confirm" placeholder="DELETE" bind:value={typed} />
 	<Row title="Current account" meta="Pamela Anderson · signed in" trailing="✓" />

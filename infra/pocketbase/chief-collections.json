@@ -1,6 +1,6 @@
 [
 	{
-		"name": "workspaces",
+		"name": "spheres",
 		"type": "base",
 		"listRule": "owner = @request.auth.id",
 		"viewRule": "owner = @request.auth.id",
@@ -34,7 +34,7 @@
 				"collectionId": "_pb_users_auth_"
 			}
 		],
-		"indexes": ["CREATE UNIQUE INDEX idx_workspaces_owner_name ON workspaces (owner, name)"]
+		"indexes": ["CREATE UNIQUE INDEX idx_spheres_owner_name ON spheres (owner, name)"]
 	},
 	{
 		"name": "people",
@@ -51,12 +51,12 @@
 			{ "name": "relationship", "type": "text", "max": 80 },
 			{ "name": "is_me", "type": "bool" },
 			{
-				"name": "workspace",
+				"name": "sphere",
 				"type": "relation",
 				"required": false,
 				"maxSelect": 1,
 				"cascadeDelete": false,
-				"collectionId": "workspaces"
+				"collectionId": "spheres"
 			},
 			{ "name": "next_interaction", "type": "date" },
 			{ "name": "notes", "type": "text", "max": 2000 },
@@ -71,7 +71,7 @@
 		],
 		"indexes": [
 			"CREATE INDEX idx_people_owner ON people (owner)",
-			"CREATE INDEX idx_people_workspace ON people (workspace)"
+			"CREATE INDEX idx_people_sphere ON people (sphere)"
 		]
 	}
 ]

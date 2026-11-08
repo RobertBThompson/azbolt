@@ -80,11 +80,11 @@ export function listPeople() {
 	);
 }
 
-/** F1 Directory — D4. An organization is a workspace with records attached. */
-export function listWorkspaces() {
+/** F1 Directory — D4. An organization is a sphere with records attached. */
+export function listSpheres() {
 	return readOr(
 		async () => {
-			const rows = await pb.collection('workspaces').getFullList({ sort: 'name' });
+			const rows = await pb.collection('spheres').getFullList({ sort: 'name' });
 			return rows.map((r) => ({ id: r.id, name: r.name, meta: r.blurb, kind: r.kind }));
 		},
 		() =>
@@ -99,7 +99,7 @@ export function listWorkspaces() {
 
 /**
  * @param {{ first_name: string, last_name?: string, role?: string,
- *           relationship?: string, workspace?: string, notes?: string }} fields
+ *           relationship?: string, sphere?: string, notes?: string }} fields
  */
 export function createPerson(fields) {
 	return pb.collection('people').create({ ...fields, owner: ownerId() });
@@ -109,8 +109,8 @@ export function createPerson(fields) {
  * @param {{ name: string, kind: string, blurb?: string,
  *           swatch?: string, hue?: string }} fields
  */
-export function createWorkspace(fields) {
-	return pb.collection('workspaces').create({
+export function createSphere(fields) {
+	return pb.collection('spheres').create({
 		swatch: 'solid',
 		...fields,
 		owner: ownerId()
@@ -126,18 +126,18 @@ export function createWorkspace(fields) {
  * the screens stop saying they are showing placeholders.
  *
  * Not idempotent by itself — the unique index on (owner, name) is what
- * stops a second run duplicating workspaces, and the caller only offers
+ * stops a second run duplicating spheres, and the caller only offers
  * it when the live lists come back empty.
  *
- * @returns {Promise<{ people: number, workspaces: number }>}
+ * @returns {Promise<{ people: number, spheres: number }>}
  */
 export async function seedDirectory() {
 	const owner = ownerId();
 
 	/** @type {Record<string, string>} */
-	const workspaceIds = {};
+	const sphereIds = {};
 	for (const [key, o] of Object.entries(ORGS)) {
-		const row = await pb.collection('workspaces').create({
+		const row = await pb.collection('spheres').create({
 			name: o.name,
 			kind: 'company',
 			blurb: o.blurb,
@@ -145,7 +145,7 @@ export async function seedDirectory() {
 			hue: o.context ?? '',
 			owner
 		});
-		workspaceIds[key] = row.id;
+		sphereIds[key] = row.id;
 	}
 
 	let people = 0;
@@ -164,11 +164,11 @@ export async function seedDirectory() {
 			last_name: rest.join(' '),
 			role,
 			relationship: p.tags?.[0] ?? '',
-			workspace: match ? workspaceIds[match[0]] : '',
+			sphere: match ? sphereIds[match[0]] : '',
 			owner
 		});
 		people += 1;
 	}
 
-	return { people, workspaces: Object.keys(workspaceIds).length };
+	return { people, spheres: Object.keys(sphereIds).length };
 }
