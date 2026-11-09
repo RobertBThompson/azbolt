@@ -133,6 +133,17 @@ def main():
         organizations_id = created["id"]
         print("created organizations %s" % organizations_id)
 
+    EXTRA_FIELDS = [
+        # Spheres are JSON, not a relation: a Chief can invent one for a
+        # single contact ("Australian Rugby"), and a relation would demand
+        # a record exist before the thought is finished.
+        {"name": "spheres", "type": "json", "maxSize": 2000},
+        {"name": "email", "type": "text", "max": 160},
+        {"name": "phone", "type": "text", "max": 40},
+        {"name": "last_contact", "type": "date"},
+        {"name": "cadence", "type": "text", "max": 40},
+    ]
+
     if "people" in existing:
         print("people already exists")
         # The relation field carries the old name on an instance built
@@ -149,6 +160,13 @@ def main():
             call("/api/collections/%s" % existing["people"],
                  {"fields": fields}, token=token, method="PATCH")
             print("renamed people.%s -> people.organization" % was)
+
+        names = {f.get("name") for f in fields}
+        missing = [f for f in EXTRA_FIELDS if f["name"] not in names]
+        if missing:
+            call("/api/collections/%s" % existing["people"],
+                 {"fields": fields + missing}, token=token, method="PATCH")
+            print("added to people: %s" % ", ".join(f["name"] for f in missing))
     else:
         call(
             "/api/collections",
@@ -168,6 +186,7 @@ def main():
                      "collectionId": organizations_id},
                     {"name": "next_interaction", "type": "date"},
                     {"name": "notes", "type": "text", "max": 2000},
+                    *EXTRA_FIELDS,
                     owner_field(users_id),
                 ],
                 indexes=["CREATE INDEX idx_people_owner ON people (owner)"],

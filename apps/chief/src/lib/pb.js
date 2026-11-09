@@ -68,14 +68,19 @@ export function listPeople() {
 			return rows.map((r) => ({
 				id: r.id,
 				name: fullName(r),
-				meta: [r.role, r.relationship].filter(Boolean).join(' · ')
+				meta: [r.role, r.relationship].filter(Boolean).join(' · '),
+				// Stored as JSON because spheres are not a collection: a
+				// Chief can invent one for a single contact, and a relation
+				// would demand a record before the thought is finished.
+				spheres: Array.isArray(r.spheres) ? r.spheres : []
 			}));
 		},
 		() =>
 			Object.entries(PEOPLE).map(([id, p]) => ({
 				id,
 				name: p.name,
-				meta: `${p.role} · ${p.next}`
+				meta: `${p.role} · ${p.next}`,
+				spheres: p.spheres
 			}))
 	);
 }
@@ -161,17 +166,15 @@ export async function seedDirectory() {
 		// stored shape matches what the form writes rather than dumping
 		// everything into first_name.
 		const [first, ...rest] = String(p.name).split(' ');
-		// "Operations · Azbolt" — the part after the separator names the org.
-		const [role, orgName] = String(p.role)
-			.split('·')
-			.map((s) => s.trim());
-		const match = Object.entries(ORGS).find(([, o]) => o.name === orgName);
 		await pb.collection('people').create({
 			first_name: first,
 			last_name: rest.join(' '),
-			role,
-			relationship: p.tags?.[0] ?? '',
-			organization: match ? orgIds[match[0]] : '',
+			role: p.role,
+			spheres: p.spheres,
+			relationship: p.strength,
+			email: p.email === '—' ? '' : p.email,
+			phone: p.phone,
+			notes: p.notes,
 			owner
 		});
 		people += 1;
