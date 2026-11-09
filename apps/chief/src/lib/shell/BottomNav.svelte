@@ -77,6 +77,7 @@
 
 		<a href="/?throw" class="jot" aria-label="Throw a jot">
 			<img src="/logo.png" alt="" width="40" height="40" />
+			<span class="jot-label">Throw a jot</span>
 		</a>
 
 		{#each right as tab (tab.href)}
@@ -194,9 +195,95 @@
 		width: 40px;
 		height: 40px;
 	}
+	/* Only the bar shows this label; on a phone the mark is the label. */
+	.jot-label {
+		display: none;
+	}
+
 	@media (prefers-reduced-motion: no-preference) {
 		.jot {
 			transition: box-shadow 140ms ease;
+		}
+	}
+
+	/* ── Desktop: a rail, not a bar ──────────────────────────────────── */
+	@media (min-width: 900px) {
+		nav {
+			width: 236px;
+			flex: none;
+			height: auto;
+			padding: 26px 0 0;
+			position: sticky;
+			top: 0;
+			background-image: none;
+		}
+		/* The wave belongs to an edge of the screen. There is no edge here. */
+		.curve {
+			display: none;
+		}
+		.rule {
+			display: none;
+		}
+		.row {
+			display: flex;
+			flex-direction: column;
+			align-items: stretch;
+			height: auto;
+			gap: 2px;
+		}
+		a {
+			flex-direction: row;
+			justify-content: flex-start;
+			align-items: center;
+			gap: 13px;
+			padding: 0 13px;
+			min-height: 46px;
+			border-radius: 11px;
+		}
+		.label,
+		.today .label {
+			font-family: var(--font-sans);
+			font-size: 14px;
+			font-weight: 600;
+			letter-spacing: 0;
+			text-transform: none;
+		}
+		/* A 17px underline under a left-aligned row marks nothing. The
+		   whole row carries the state instead. */
+		.rail {
+			display: none;
+		}
+		a[aria-current='page'] {
+			background: var(--tone-brand-tint);
+		}
+
+		/* Capture leads the rail, as it leads the page. */
+		.jot {
+			order: -1;
+			width: 100%;
+			height: auto;
+			min-height: 50px;
+			margin: 0 0 10px;
+			padding: 0 13px;
+			border-radius: 13px;
+			background: var(--tone-brand);
+			flex-direction: row;
+			justify-content: flex-start;
+			gap: 11px;
+			box-shadow: 0 2px 6px rgba(159, 62, 73, 0.25);
+		}
+		.jot img {
+			width: 28px;
+			height: 28px;
+			background: var(--paper);
+			border-radius: 50%;
+			padding: 2px;
+		}
+		.jot-label {
+			display: block;
+			font-size: 14.5px;
+			font-weight: 600;
+			color: #ffffff;
 		}
 	}
 </style>
