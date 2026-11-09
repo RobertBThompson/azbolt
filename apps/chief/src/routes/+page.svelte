@@ -7,16 +7,18 @@
 	 * view of where everything stands. Jot leads because the cost of a
 	 * thought being lost is higher than the cost of a number going unseen.
 	 *
-	 * Inside Jot, only Throw It is open. The other two are work that has
-	 * already been captured and can wait; opening all three would put a
-	 * queue in front of someone whose only intent was to get a sentence
-	 * out of their head.
+	 * The greeting is not decoration and is not static. The second line
+	 * is always the most pressing real thing — overdue first, then what
+	 * is due today, then a standing reminder — so the space pays for
+	 * itself instead of saying hello twice a day. It falls back to the
+	 * tagline only when there is genuinely nothing waiting.
 	 *
-	 * Three sections, three tints, each the tone its work belongs to:
-	 * capture is neutral, placing is arranging, tasking is committing.
+	 * Inside Jot, only Throw It is open. The other two are work already
+	 * captured and can wait; opening all three would put a queue in front
+	 * of someone whose only intent was to get a sentence out of their head.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Banner, Btn, Expander, Row, Seg, Stats } from '$lib/kit';
+	import { Banner, Expander, Icon, Row, StateSwitch, Stats } from '$lib/kit';
 	import { UNSPHERED } from '$lib/data.js';
 
 	/** 0 = Jot, 1 = Dash. */
@@ -29,22 +31,71 @@
 	const canThrow = $derived(draft.trim().length > 0);
 
 	const now = new Date();
+	const hour = now.getHours();
+	const greeting = hour < 12 ? 'Good morning,' : hour < 17 ? 'Good afternoon,' : 'Good evening,';
 	const weekday = now.toLocaleDateString(undefined, { weekday: 'long' });
 	const date = now.toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
+
+	/**
+	 * What the second line says. Ordered by what would hurt most to miss.
+	 * @type {{ text: string, tone: string }[]}
+	 */
+	const PRESSING = [
+		{ text: '1 overdue since Friday — storage walkthrough', tone: 'alert' },
+		{ text: 'Carmen at 3:30 PM, then your daughter at 7:00', tone: 'warm' }
+	];
+	const lead = PRESSING[0] ?? {
+		text: 'Capture thoughts. Organize life. Live fully.',
+		tone: 'neutral'
+	};
 </script>
 
 <svelte:head><title>Today · Chief</title></svelte:head>
 
 <Screen>
-	<Seg a="Jot" b="Dash" t="cool" bind:active={view} />
+	<StateSwitch
+		a="Jot"
+		b="Dash"
+		aIcon="spark"
+		bIcon="dash"
+		labelledby="Home view"
+		bind:active={view}
+	/>
+
+	<header class="hello">
+		<h1>{greeting}</h1>
+		<p class="lead" class:urgent={lead.tone === 'alert'}>{lead.text}</p>
+	</header>
 
 	{#if view === 0}
 		<Expander
 			label="Throw it"
+			icon="throw"
+			t="brand"
 			open
-			lede="Say it or type it. No title, nothing to choose — it lands in All life."
+			lede="No title, nothing to choose — it lands in All life."
 		>
-			<Seg a="Text" b="Voice" bind:active={input} />
+			<div class="how">
+				<button
+					type="button"
+					class="mode"
+					class:on={input === 0}
+					aria-pressed={input === 0}
+					onclick={() => (input = 0)}
+				>
+					<Icon name="keyboard" size={16} /> Text
+				</button>
+				<button
+					type="button"
+					class="mode"
+					class:on={input === 1}
+					aria-pressed={input === 1}
+					onclick={() => (input = 1)}
+				>
+					<Icon name="mic" size={16} /> Voice
+				</button>
+			</div>
+
 			{#if input === 0}
 				<form
 					onsubmit={(e) => {
@@ -57,30 +108,30 @@
 						bind:value={draft}
 						placeholder="I need to call my daughter. Oh and I need to talk to Carmen ASAP."
 					></textarea>
-					<Btn t="cool" type="submit" disabled={!canThrow} label="Throw it" />
+					<button class="go" type="submit" disabled={!canThrow}>
+						<Icon name="throw" size={18} /> Throw it
+					</button>
 				</form>
 			{:else}
-				<Btn t="cool" href="/jot/listening" label="Hold to speak" />
+				<a class="go" href="/jot/listening">
+					<Icon name="mic" size={18} /> Hold to speak
+				</a>
 			{/if}
 		</Expander>
 
 		<Expander
 			label="Sphere it"
+			icon="sphere"
 			t="cool"
 			count={queue.length}
-			lede="Thrown and kept. All life until you say otherwise."
+			lede="Organize your spheres"
 		>
 			{#each queue as [id, jot] (id)}
 				<Row t="cool" href="/jot/{id}/sphere" title={jot.text} meta={jot.meta} trailing="›" />
 			{/each}
 		</Expander>
 
-		<Expander
-			label="Task it"
-			t="warm"
-			count={2}
-			lede="An endeavor groups tasks when one helps. It is never required."
-		>
+		<Expander label="Task it" icon="task" t="warm" count={2} lede="Turn into action">
 			<Row
 				t="warm"
 				href="/work/tasks/carmen"
@@ -97,10 +148,7 @@
 			/>
 		</Expander>
 	{:else}
-		<header class="day">
-			<p class="eyebrow">{weekday}</p>
-			<h1>{date}</h1>
-		</header>
+		<p class="eyebrow date">{weekday} · {date}</p>
 
 		<Banner
 			t="ai"
@@ -130,7 +178,6 @@
 			meta="Children · tonight 7:00 PM"
 			trailing="›"
 		/>
-
 		<Row
 			t="cool"
 			href="/opportunities"
@@ -142,6 +189,60 @@
 </Screen>
 
 <style>
+	.hello {
+		padding: 4px 2px 0;
+	}
+	.hello h1 {
+		margin: 0;
+		font-family: var(--font-serif);
+		font-weight: 500;
+		font-size: 31px;
+		line-height: 1.08;
+		letter-spacing: -0.015em;
+		color: var(--ink);
+	}
+	.lead {
+		margin: 5px 0 0;
+		font-size: 13px;
+		line-height: 1.4;
+		color: var(--ink-3);
+	}
+	.lead.urgent {
+		color: var(--tone-alert-ink);
+		font-weight: 600;
+	}
+	.date {
+		margin: 0 2px;
+	}
+
+	/* Two modes side by side, then a full-width action. The mode buttons
+	   are deliberately smaller than the throw button: picking how to
+	   capture is a setting, throwing is the act. */
+	.how {
+		display: flex;
+		gap: 7px;
+	}
+	.mode {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 7px;
+		min-height: 40px;
+		border-radius: 10px;
+		border: 1px solid var(--line-2);
+		background: var(--sunk);
+		font-family: inherit;
+		font-size: 13.5px;
+		font-weight: 600;
+		color: var(--ink-3);
+		cursor: pointer;
+	}
+	.mode.on {
+		border-color: var(--tone-brand);
+		background: var(--tone-brand-tint);
+		color: var(--tone-brand);
+	}
 	form {
 		display: flex;
 		flex-direction: column;
@@ -151,10 +252,10 @@
 		width: 100%;
 		border: 1px solid var(--line-2);
 		border-radius: 10px;
-		background: var(--card);
+		background: var(--sunk);
 		padding: 10px 13px;
 		font-family: inherit;
-		font-size: 13.5px;
+		font-size: 14px;
 		line-height: 1.5;
 		color: var(--ink);
 		resize: vertical;
@@ -162,16 +263,26 @@
 	textarea::placeholder {
 		color: var(--ink-4);
 	}
-	.day {
-		padding: 2px 2px 0;
+	.go {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 9px;
+		width: 100%;
+		min-height: 54px;
+		border: 0;
+		border-radius: 13px;
+		background: var(--tone-cool);
+		color: #ffffff;
+		font-family: inherit;
+		font-size: 16px;
+		font-weight: 600;
+		text-decoration: none;
+		cursor: pointer;
+		box-shadow: 0 2px 8px rgba(54, 110, 168, 0.3);
 	}
-	.day h1 {
-		margin: 1px 0 0;
-		font-family: var(--font-serif);
-		font-weight: 500;
-		font-size: 29px;
-		line-height: 1.1;
-		letter-spacing: -0.015em;
-		color: var(--ink);
+	.go:disabled {
+		opacity: 0.45;
+		box-shadow: none;
 	}
 </style>

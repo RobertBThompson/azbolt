@@ -38,9 +38,16 @@
 	--tone-clay-tint: #f7f1eb;
 	--tone-ai: #6b4f87; /* reserved, without exception, for AI moments */
 	--tone-ai-tint: #f1edf5;
-	--tone-alert: #9f3e49; /* attention required — the mark's wine, as-is */
-	--tone-alert-tint: #f7ebec;
-	--tone-alert-ink: #82333c;
+	--tone-brand: #9f3e49; /* the mark's wine — identity, not meaning */
+	--tone-brand-tint: #f7ebec;
+	--tone-alert: #82333c; /* attention required — deeper than the brand */
+	--tone-alert-tint: #f6e9ea;
+	--tone-alert-ink: #6d2a32;
+
+	/* Brand and alert share the mark's hue, which a system that spends
+	   hue on meaning cannot leave ambiguous. They are separated by depth
+	   instead: the brand sits at the mark's own wine, attention sits a
+	   step darker, and the two never appear on the same surface. */
 
 	/* AI was teal, which the mark has no answer for. Violet sits between
 	   the wine and the blue, so it reads as neither section colour while

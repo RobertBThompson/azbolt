@@ -9,6 +9,7 @@
 	 */
 	import { SPHERES } from '$lib/spheres.js';
 	import { shell } from '$lib/state.svelte.js';
+	import Icon from '$lib/kit/Icon.svelte';
 
 	/** @type {{ search?: boolean, back?: string|null, onSwitch?: (() => void)|null }} */
 	let { search = false, back = null, onSwitch = null } = $props();
@@ -21,16 +22,20 @@
 	{#if back}
 		<a class="back" href={back} aria-label="Back">‹</a>
 	{/if}
+	{#if !back}
+		<img class="mark" src="/logo.png" alt="" width="26" height="26" />
+	{/if}
 	<button class="sph" onclick={onSwitch} aria-label="Switch sphere, currently {sphere.name}">
-		<span class="swatch" style="background:{sphere.swatch}"></span>
 		<span class="name">{sphere.name}</span>
 		<span class="caret" aria-hidden="true">▾</span>
 	</button>
 	<span class="spacer"></span>
 	{#if search}
-		<a class="act" href="/search" aria-label="Search">⌕</a>
+		<a class="act" href="/search" aria-label="Search"><Icon name="search" size={17} /></a>
 	{/if}
-	<a class="act" href="/menu" aria-label="More">⋯</a>
+	<a class="act" href="/menu" aria-label="Account and settings">
+		<Icon name="user" size={17} />
+	</a>
 </header>
 
 <style>
@@ -65,24 +70,26 @@
 	.sph {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: 6px;
 		background: none;
 		border: 0;
 		padding: 6px 0;
 		cursor: pointer;
 	}
-	.swatch {
-		width: 14px;
-		height: 14px;
-		border-radius: 4px;
+	.mark {
+		width: 26px;
+		height: 26px;
 		flex: none;
 	}
+	/* Serif, not mono. The sphere name is the masthead of the screen and
+	   reads as one; the hue channel it used to share with a swatch now
+	   lives in the band above, which is larger and harder to miss. */
 	.name {
-		font-family: var(--font-mono);
-		font-size: 12px;
-		font-weight: 700;
-		letter-spacing: 0.1em;
-		color: var(--tone-graphite);
+		font-family: var(--font-serif);
+		font-size: 19px;
+		font-weight: 500;
+		letter-spacing: 0.08em;
+		color: var(--ink);
 	}
 	.caret {
 		font-size: 10px;
@@ -92,12 +99,14 @@
 		flex: 1;
 	}
 	.act {
-		width: 36px;
-		height: 36px;
+		width: 34px;
+		height: 34px;
+		border-radius: 50%;
 		display: grid;
 		place-items: center;
-		font-size: 17px;
-		color: var(--ink-4);
+		background: var(--card);
+		border: 1px solid var(--line-3);
+		color: var(--ink-2);
 		text-decoration: none;
 	}
 </style>

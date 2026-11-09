@@ -18,14 +18,15 @@
 	 * the palette reserves hue for meaning, and "which tab" is not one.
 	 */
 	import { page } from '$app/stores';
+	import Icon from '$lib/kit/Icon.svelte';
 
 	const left = [
-		{ label: 'Today', href: '/' },
-		{ label: 'Action', href: '/work' }
+		{ label: 'Today', href: '/', icon: 'today' },
+		{ label: 'Action', href: '/work', icon: 'action' }
 	];
 	const right = [
-		{ label: 'People', href: '/people' },
-		{ label: 'Asset', href: '/records' }
+		{ label: 'People', href: '/people', icon: 'people' },
+		{ label: 'Asset', href: '/records', icon: 'asset' }
 	];
 
 	/**
@@ -60,8 +61,9 @@
 			{#each left as tab, i (tab.href)}
 				{@const on = active(tab.href)}
 				<a href={tab.href} class:today={i === 0} aria-current={on ? 'page' : undefined}>
-					<span class="mark" class:filled={i === 0} class:on></span>
+					<span class="glyph" class:on><Icon name={tab.icon} size={19} /></span>
 					<span class="label" class:on>{tab.label}</span>
+					<span class="rail" class:on aria-hidden="true"></span>
 				</a>
 				{#if i === 0}<span class="rule" aria-hidden="true"></span>{/if}
 			{/each}
@@ -75,8 +77,9 @@
 			{#each right as tab (tab.href)}
 				{@const on = active(tab.href)}
 				<a href={tab.href} aria-current={on ? 'page' : undefined}>
-					<span class="mark" class:on></span>
+					<span class="glyph" class:on><Icon name={tab.icon} size={19} /></span>
 					<span class="label" class:on>{tab.label}</span>
+					<span class="rail" class:on aria-hidden="true"></span>
 				</a>
 			{/each}
 		</div>
@@ -125,25 +128,30 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: flex-end;
-		gap: 5px;
+		gap: 3px;
 		min-width: 52px;
 		min-height: var(--tap-min);
 		text-decoration: none;
 	}
 	/* ink-3, not ink-4: at this size the lighter grey lands at 3.09:1 on
 	   paper, under the 4.5 the rest of the system holds to. */
-	.mark {
-		width: 7px;
-		height: 7px;
-		border-radius: 50%;
-		border: 1.5px solid var(--ink-3);
+	.glyph {
+		color: var(--ink-3);
 	}
-	.mark.filled {
-		background: var(--ink-3);
+	.glyph.on {
+		color: var(--brand-wine);
 	}
-	.mark.on {
-		border-color: var(--ink);
-		background: var(--ink);
+	/* The active rail is the only place a tab uses colour. It marks where
+	   you are, which is state rather than meaning, so it does not spend
+	   one of the tones the palette reserves for what a record is. */
+	.rail {
+		width: 17px;
+		height: 2px;
+		border-radius: 2px;
+		background: transparent;
+	}
+	.rail.on {
+		background: var(--brand-wine);
 	}
 	.label {
 		font-size: 10.5px;
@@ -151,14 +159,14 @@
 		letter-spacing: 0.01em;
 		color: var(--ink-3);
 	}
+	.label.on {
+		color: var(--brand-wine);
+	}
 	.today .label {
 		font-family: var(--font-mono);
 		font-size: 10px;
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
-	}
-	.label.on {
-		color: var(--ink);
 	}
 
 	/* The mark sits on the crest, overlapping the curve it rises from. */
