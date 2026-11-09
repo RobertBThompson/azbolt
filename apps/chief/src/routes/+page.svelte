@@ -238,29 +238,29 @@
 	   fourth section. */
 	.switch {
 		width: 75%;
-		margin: 0 auto;
+		/* Measured, not guessed: main's own gap is 9px, so 9 more here
+		   makes the real distance 18 — double. Same below the greeting. */
+		margin: 0 auto 9px;
 	}
 
-	/* One flexible gap, not two. Splitting the slack evenly between all
-	   three left a void above each of the bottom pair; keeping them
-	   together means the spare room collects in a single break after the
-	   section that matters, and the pair still lands above the nav. */
+	/* No forced distribution. Spreading the slack to reach the nav put a
+	   hole in the middle of the page; one uniform rhythm puts whatever is
+	   left below the last section, beside the nav, where it reads as the
+	   page ending instead of a gap. */
 	.stages {
-		flex: 1;
 		display: flex;
 		flex-direction: column;
-		gap: 16px;
-		min-height: 0;
+		gap: 24px;
 	}
 	.rest {
-		margin-top: auto;
 		display: flex;
 		flex-direction: column;
-		gap: 10px;
+		gap: 24px;
 	}
 
 	.hello {
 		padding: 4px 2px 0;
+		margin-bottom: 9px;
 	}
 	/* Lighter and smaller than it was. A 31px near-black serif was the
 	   heaviest thing on the page and pulled the eye away from the one
@@ -307,7 +307,7 @@
 		background: transparent;
 		padding: 9px 9px 4px;
 		font-family: inherit;
-		font-size: 14px;
+		font-size: 15px;
 		line-height: 1.5;
 		color: var(--ink);
 		resize: none;

@@ -32,7 +32,7 @@
 		gap: 9px;
 		/* The mark is lifted 18px above the nav, so content needs more
 		   clearance at the bottom than a flat bar would have asked for. */
-		padding: 13px 15px 28px;
+		padding: 22px 15px 28px;
 		overflow-x: hidden;
 	}
 </style>
