@@ -35,6 +35,8 @@
 
 	/** @type {HTMLTextAreaElement|null} */
 	let box = $state(null);
+	/** Lifts the composer's border while typing, since it is now one field. */
+	let focused = $state(false);
 
 	/**
 	 * The mark in the nav arrives here as /?throw. Honour it by showing
@@ -97,49 +99,64 @@
 				open
 				lede="No title, nothing to choose — it lands in All life."
 			>
-				<div class="how">
-					<button
-						type="button"
-						class="mode"
-						class:on={input === 0}
-						aria-pressed={input === 0}
-						onclick={() => (input = 0)}
-					>
-						<Icon name="keyboard" size={16} /> Text
-					</button>
-					<button
-						type="button"
-						class="mode"
-						class:on={input === 1}
-						aria-pressed={input === 1}
-						onclick={() => (input = 1)}
-					>
-						<Icon name="mic" size={16} /> Voice
-					</button>
-				</div>
-
-				{#if input === 0}
-					<form
-						onsubmit={(e) => {
-							e.preventDefault();
-							draft = '';
-						}}
-					>
+				<!--
+				One composer rather than three stacked controls. The mode
+				chips and the action live inside the same bordered field as
+				the text, because they all act on the same thing — splitting
+				them into separate blocks made choosing how to type look like
+				a step before typing, which it is not.
+			-->
+				<div class="composer" class:focused>
+					{#if input === 0}
 						<textarea
 							rows="2"
 							bind:this={box}
 							bind:value={draft}
+							onfocus={() => (focused = true)}
+							onblur={() => (focused = false)}
 							placeholder="I need to call my daughter. Oh and I need to talk to Carmen ASAP."
 						></textarea>
-						<button class="go" type="submit" disabled={!canThrow}>
-							<Icon name="throw" size={18} /> Throw it
-						</button>
-					</form>
-				{:else}
-					<a class="go" href="/jot/listening">
-						<Icon name="mic" size={18} /> Hold to speak
-					</a>
-				{/if}
+					{:else}
+						<p class="listening">Hold the button to speak. Release and it is thrown.</p>
+					{/if}
+
+					<div class="tools">
+						<div class="modes" role="group" aria-label="How to capture">
+							<button
+								type="button"
+								class="mode"
+								class:on={input === 0}
+								aria-pressed={input === 0}
+								onclick={() => (input = 0)}
+							>
+								<Icon name="keyboard" size={15} />
+								<span>Text</span>
+							</button>
+							<button
+								type="button"
+								class="mode"
+								class:on={input === 1}
+								aria-pressed={input === 1}
+								onclick={() => (input = 1)}
+							>
+								<Icon name="mic" size={15} />
+								<span>Voice</span>
+							</button>
+						</div>
+
+						{#if input === 0}
+							<button class="go" type="button" disabled={!canThrow} onclick={() => (draft = '')}>
+								<Icon name="throw" size={16} />
+								Throw it
+							</button>
+						{:else}
+							<a class="go" href="/jot/listening">
+								<Icon name="mic" size={16} />
+								Speak
+							</a>
+						{/if}
+					</div>
+				</div>
 			</Expander>
 
 			<Expander
@@ -259,74 +276,97 @@
 		margin: 0 2px;
 	}
 
-	/* Two modes side by side, then a full-width action. The mode buttons
-	   are deliberately smaller than the throw button: picking how to
-	   capture is a setting, throwing is the act. */
-	.how {
-		display: flex;
-		gap: 7px;
+	/* One field: text, mode chips and action share a border. */
+	.composer {
+		border: 1px solid var(--line-2);
+		border-radius: 12px;
+		background: var(--sunk);
+		padding: 4px 4px 4px;
 	}
-	.mode {
-		flex: 1;
+	.composer.focused {
+		border-color: var(--tone-brand);
+		box-shadow: 0 0 0 3px var(--tone-brand-tint);
+	}
+	textarea {
+		display: block;
+		width: 100%;
+		border: 0;
+		background: transparent;
+		padding: 9px 9px 4px;
+		font-family: inherit;
+		font-size: 14px;
+		line-height: 1.5;
+		color: var(--ink);
+		resize: none;
+	}
+	textarea:focus {
+		outline: none;
+	}
+	textarea::placeholder {
+		color: var(--ink-4);
+	}
+	.listening {
+		margin: 0;
+		padding: 13px 9px 9px;
+		font-size: 13.5px;
+		line-height: 1.5;
+		color: var(--ink-3);
+	}
+	.tools {
 		display: flex;
 		align-items: center;
-		justify-content: center;
 		gap: 7px;
-		min-height: 40px;
-		border-radius: 10px;
-		border: 1px solid var(--line-2);
-		background: var(--sunk);
+		padding: 2px 2px 0;
+	}
+	.modes {
+		display: flex;
+		gap: 3px;
+		padding: 3px;
+		border-radius: 9px;
+		background: var(--wash-1);
+	}
+	.mode {
+		display: flex;
+		align-items: center;
+		gap: 5px;
+		min-height: 30px;
+		padding: 0 9px;
+		border: 0;
+		border-radius: 7px;
+		background: transparent;
 		font-family: inherit;
-		font-size: 13.5px;
+		font-size: 12.5px;
 		font-weight: 600;
 		color: var(--ink-3);
 		cursor: pointer;
 	}
 	.mode.on {
-		border-color: var(--tone-brand);
-		background: var(--tone-brand-tint);
+		background: var(--card);
 		color: var(--tone-brand);
+		box-shadow: 0 1px 2px rgba(30, 26, 24, 0.1);
 	}
-	form {
-		display: flex;
-		flex-direction: column;
-		gap: 9px;
-	}
-	textarea {
-		width: 100%;
-		border: 1px solid var(--line-2);
-		border-radius: 10px;
-		background: var(--sunk);
-		padding: 10px 13px;
-		font-family: inherit;
-		font-size: 14px;
-		line-height: 1.5;
-		color: var(--ink);
-		resize: vertical;
-	}
-	textarea::placeholder {
-		color: var(--ink-4);
-	}
+	/* Smaller and darker than the full-width slab it replaces: it is the
+	   end of a field, not a section of the page. */
 	.go {
+		margin-left: auto;
 		display: flex;
 		align-items: center;
-		justify-content: center;
-		gap: 9px;
-		width: 100%;
-		min-height: 54px;
+		gap: 7px;
+		min-height: 38px;
+		padding: 0 15px;
 		border: 0;
-		border-radius: 13px;
-		background: var(--tone-cool);
+		border-radius: 9px;
+		background: #26527d;
 		color: #ffffff;
 		font-family: inherit;
-		font-size: 16px;
+		font-size: 14px;
 		font-weight: 600;
 		text-decoration: none;
 		cursor: pointer;
-		box-shadow: 0 2px 8px rgba(54, 110, 168, 0.3);
 	}
 	.go:disabled {
-		opacity: 0.45;
-		box-shadow: none;
+		background: var(--line);
+		color: var(--ink-4);
+		cursor: default;
 	}
 </style>

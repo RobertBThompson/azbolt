@@ -101,8 +101,8 @@
 	}
 	.label {
 		font-family: var(--font-mono);
-		font-size: 11.5px;
-		font-weight: 700;
+		font-size: 12px;
+		font-weight: 800;
 		letter-spacing: 0.13em;
 		text-transform: uppercase;
 		color: var(--t-ink);

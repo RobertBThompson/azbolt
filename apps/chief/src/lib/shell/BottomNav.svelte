@@ -45,9 +45,9 @@
 </script>
 
 <nav aria-label="Primary">
-	<svg class="curve" viewBox="0 0 390 72" preserveAspectRatio="none" aria-hidden="true">
+	<svg class="curve" viewBox="0 0 390 94" preserveAspectRatio="none" aria-hidden="true">
 		<path
-			d="M0 32 C 74 32, 112 4, 195 4 C 278 4, 316 32, 390 32 L390 72 L0 72 Z"
+			d="M0 32 C 74 32, 112 4, 195 4 C 278 4, 316 32, 390 32 L390 94 L0 94 Z"
 			fill="var(--wash-2)"
 		/>
 		<path
@@ -96,12 +96,24 @@
 		position: relative;
 		height: calc(var(--nav) + env(safe-area-inset-bottom));
 		padding-bottom: env(safe-area-inset-bottom);
+		/* The SVG stops at the bar's own height; this paints the home
+		   indicator strip beneath it in the same wash, so the surface does
+		   not end in a line part-way down the gesture area. */
+		background-image: linear-gradient(var(--wash-2), var(--wash-2));
+		background-size: 100% env(safe-area-inset-bottom);
+		background-position: bottom;
+		background-repeat: no-repeat;
 	}
+	/* The viewBox is the bar's full height, not the wave's, so the fill
+	   reaches the bottom edge under every icon. Keeping the element the
+	   same height as the viewBox means preserveAspectRatio="none" only
+	   ever stretches horizontally, so the wave never distorts. */
 	.curve {
 		position: absolute;
-		inset: 0;
+		top: 0;
+		left: 0;
 		width: 100%;
-		height: 72px;
+		height: var(--nav);
 		pointer-events: none;
 	}
 	.row {
