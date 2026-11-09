@@ -18,7 +18,7 @@
 
 	/** @type {Record<string, string>} */
 	const BLURBS = {
-		all: 'Every sphere at once',
+		all: 'Every sphere at once — and the default',
 		family: 'The household as a whole',
 		spouse: 'The two of you',
 		children: 'Each of them, and all of them',

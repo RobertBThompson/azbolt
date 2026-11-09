@@ -11,5 +11,12 @@ export const TONE = {
 	alert: { ink: 'var(--tone-alert)', tint: 'var(--tone-alert-tint)' }
 };
 
-/** @param {string} t */
+/**
+ * Unknown keys fall back to neutral rather than throwing, because a tone
+ * is decoration and a typo should not blank a screen. The trade is that a
+ * wrong key is invisible, so the valid set is: neutral, cool, ai, warm,
+ * alert. There is no 'clay' or 'graphite' key — those are token names.
+ *
+ * @param {keyof typeof TONE | string} t
+ */
 export const tone = (t) => TONE[t] ?? TONE.neutral;

@@ -115,17 +115,32 @@ figures: the map deliberately does not invent numbers, and neither does
 this build. There is no backend yet — PocketBase is the near-term target
 on the existing VPS, with Supabase once the box has the RAM for it.
 
+## Home: two states
+
+Home switches between **Jot** and **Dash**. Jot is the default, because
+the cost of a thought being lost is higher than the cost of a number
+going unseen. Dash is the read-only view of where things stand.
+
+Inside Jot, only Throw It is open. Sphere It and Task It are work already
+captured and can wait — opening all three puts a queue in front of
+someone whose only intent was to get a sentence out of their head.
+
+Three sections, three light separations, each carrying the tone its work
+belongs to: capture is neutral, placing is arranging, tasking is
+committing.
+
 ## The jot lifecycle
 
-A jot has three stages, and Today is those three stages rather than a
-dashboard about them:
+A jot has three stages, and the Jot state is those three stages rather
+than a dashboard about them:
 
 1. **Throw it** — the text field, voice or typed. A jot does not start in a
    sphere and is never blocked on choosing one. Throwing must cost nothing.
 2. **Sphere it** — select a sphere, then any people or organizations, then
-   any assets. Everything is optional. "Untitled" and "not selected" are
-   valid resting states, not defects, and a jot left that way stays in the
-   queue rather than being lost or nagged about.
+   any assets. Everything is optional. A jot is in **All life** until told
+   otherwise: that is every sphere at once *and* the absence of one, which
+   is why there is no separate "unsphered" state in the app. The default
+   is a real answer, not a blank waiting to be filled.
 3. **Task it** — offered as a choice at the end of Sphere It, never as a
    step. Most jots record something rather than commit to it, and promoting
    every jot to a task is how a capture tool becomes a backlog.

@@ -217,26 +217,26 @@ export const ASSETS = {
 /**
  * Jots that have been thrown and not yet sphered.
  *
- * "Untitled" and "no sphere" are the normal state of a fresh jot, not a
- * defect — throwing is meant to cost nothing. This is the queue Sphere It
- * works through.
+ * A fresh jot is untitled and in All life. Neither is a defect — throwing
+ * is meant to cost nothing, and All life is a real placement rather than
+ * a blank. This is the queue Sphere It works through.
  *
  * @type {Record<string, { text: string, meta: string, thrown: string }>}
  */
 export const UNSPHERED = {
 	'j-2041': {
 		text: 'Call my daughter, and talk to Carmen ASAP',
-		meta: 'Untitled · no sphere · 6:12 PM',
+		meta: 'Untitled · all life · 6:12 PM',
 		thrown: '6:12 PM'
 	},
 	'j-2039': {
 		text: 'Check storage before Friday',
-		meta: 'Untitled · no sphere · 2:48 PM',
+		meta: 'Untitled · all life · 2:48 PM',
 		thrown: '2:48 PM'
 	},
 	'j-2036': {
 		text: 'Ask about the thing before it closes',
-		meta: 'Untitled · no sphere · yesterday',
+		meta: 'Untitled · all life · yesterday',
 		thrown: 'yesterday'
 	}
 };
