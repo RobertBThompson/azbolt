@@ -25,8 +25,12 @@
 	const id = $derived($page.params.id ?? '');
 	const jot = $derived(UNSPHERED[id] ?? { text: 'Untitled jot', meta: 'No sphere', thrown: '' });
 
-	/** @type {string|null} */
-	let sphere = $state(null);
+	/**
+	 * A jot is in All life until it is told otherwise. That is a real
+	 * placement, not an empty one, so there is nothing to clear and
+	 * nothing to warn about.
+	 */
+	let sphere = $state('all');
 	/** @type {string[]} */
 	let who = $state([]);
 	/** @type {string[]} */
@@ -48,7 +52,7 @@
 		<span class="said">Your words, kept exactly · thrown {jot.thrown}</span>
 	</blockquote>
 
-	<SectionHead label="Select sphere" t="clay" />
+	<SectionHead label="Select sphere" t="warm" />
 	<div class="grid">
 		{#each PLACEABLE as [key, sph] (key)}
 			<button
@@ -56,7 +60,7 @@
 				class="pick"
 				class:on={sphere === key}
 				aria-pressed={sphere === key}
-				onclick={() => (sphere = sphere === key ? null : key)}
+				onclick={() => (sphere = key)}
 			>
 				<span class="swatch" style="background:{sph.swatch}"></span>
 				<span class="nm">{sph.name}</span>
@@ -106,13 +110,13 @@
 	</div>
 
 	<div class="done">
-		<Btn t="clay" href="/" label={sphere ? 'Sphere it' : 'Save without a sphere'} />
+		<Btn t="warm" href="/" label={sphere === 'all' ? 'Keep it in all life' : 'Sphere it'} />
 		<Btn primary={false} href="/work/tasks/new" label="Task it" />
 	</div>
 
 	<Note>
 		{attached === 0
-			? 'Nothing attached yet. A jot with no sphere stays in the queue — it is not lost.'
+			? 'Nothing attached yet. All life is a real answer, not a blank — a jot can stay there.'
 			: `${attached} attached. Everything here is optional and can change later.`}
 	</Note>
 </Screen>

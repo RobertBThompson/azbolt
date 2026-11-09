@@ -13,6 +13,11 @@
  * "Spouse" is a sphere, while "Wife" and "Chief and Wife" are
  * organizations inside it.
  *
+ * 'all' is both every sphere at once and the absence of one. A jot that
+ * has not been placed is in All life, which is why there is no separate
+ * "unsphered" state anywhere in the app: the default is a real answer,
+ * not a blank waiting to be filled.
+ *
  * This list is the prototype's stand-in. Real spheres are personal and
  * will be records a Chief writes, not a set shipped in the binary — the
  * seven below are illustrative, not canonical.
@@ -34,5 +39,9 @@ export const SPHERES = {
 	hobby: { name: 'HOBBY', swatch: 'var(--sph-hobby)' }
 };
 
-/** Everything a jot can actually be placed in — 'all' is a view, not a home. */
-export const PLACEABLE = Object.entries(SPHERES).filter(([key]) => key !== 'all');
+/**
+ * Every sphere a jot can be placed in, All life included — it is the
+ * default rather than an empty slot, so it belongs in the list it is the
+ * default of.
+ */
+export const PLACEABLE = Object.entries(SPHERES);
