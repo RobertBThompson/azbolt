@@ -110,7 +110,7 @@
 				<div class="composer" class:focused>
 					{#if input === 0}
 						<textarea
-							rows="2"
+							rows="3"
 							bind:this={box}
 							bind:value={draft}
 							onfocus={() => (focused = true)}
