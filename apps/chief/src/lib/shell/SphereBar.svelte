@@ -44,12 +44,14 @@
 		flex: none;
 	}
 	header {
-		height: var(--appbar);
+		min-height: var(--appbar);
 		flex: none;
 		display: flex;
 		align-items: center;
 		gap: 8px;
-		padding: 0 13px;
+		/* The band and the row were touching, which read as one thick
+		   stripe rather than a sphere marker above a toolbar. */
+		padding: 12px 13px 2px;
 		/* Paper, not card. The bottom nav is now continuous with the page,
 		   and a white strip at the top would reinstate exactly the seam
 		   the nav just lost. The context band above still does the
