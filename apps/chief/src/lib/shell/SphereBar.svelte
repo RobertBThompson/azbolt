@@ -34,7 +34,7 @@
 		<a class="act" href="/search" aria-label="Search"><Icon name="search" size={17} /></a>
 	{/if}
 	<a class="act avatar" href="/menu" aria-label="Account and settings">
-		<Icon name="user-solid" size={19} />
+		<Icon name="user-solid" size={18} />
 	</a>
 </header>
 
@@ -117,11 +117,5 @@
 		background: var(--tone-brand-tint);
 		box-shadow: inset 0 0 0 1.5px var(--tone-brand);
 		color: var(--tone-brand);
-		/* The glyph is drawn to the circle's edge, so it needs clipping
-		   rather than padding to sit inside one. */
-		overflow: hidden;
-	}
-	.avatar :global(svg) {
-		margin-bottom: -4px;
 	}
 </style>

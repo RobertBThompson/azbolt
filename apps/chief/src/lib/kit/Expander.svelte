@@ -23,6 +23,7 @@
 	 *   t?: string,
 	 *   open?: boolean,
 	 *   lede?: string,
+	 *   lead?: boolean,
 	 *   children: import('svelte').Snippet
 	 * }}
 	 */
@@ -33,6 +34,7 @@
 		t = 'neutral',
 		open = false,
 		lede = '',
+		lead = false,
 		children
 	} = $props();
 	import { tone } from './tone.js';
@@ -40,7 +42,7 @@
 	const c = $derived(tone(t));
 </script>
 
-<details class="panel" {open} style="--t-ink:{c.ink}; --t-tint:{c.tint}">
+<details class="panel" class:lead {open} style="--t-ink:{c.ink}; --t-tint:{c.tint}">
 	<summary>
 		{#if icon}
 			<span class="glyph"><Icon name={icon} size={17} /></span>
@@ -58,6 +60,10 @@
 </details>
 
 <style>
+	/* Two levels, deliberately. The leading section is raised and ringed;
+	   the others sit almost flat so the page has one obvious place to
+	   start. Equal weight on all three is what made Throw It disappear
+	   into a list of its own siblings. */
 	.panel {
 		background: var(--card);
 		border: 1px solid var(--line-3);
@@ -66,9 +72,24 @@
 		border-left: 4px solid var(--t-ink);
 		border-radius: 4px 14px 14px 4px;
 		overflow: hidden;
+		box-shadow: 0 1px 2px rgba(30, 26, 24, 0.04);
+	}
+	.panel.lead {
+		border-color: color-mix(in srgb, var(--t-ink) 35%, transparent);
 		box-shadow:
-			0 1px 2px rgba(30, 26, 24, 0.04),
-			0 5px 14px rgba(30, 26, 24, 0.06);
+			0 0 0 3px color-mix(in srgb, var(--t-ink) 9%, transparent),
+			0 2px 4px rgba(30, 26, 24, 0.06),
+			0 14px 30px rgba(30, 26, 24, 0.13);
+	}
+	.panel.lead summary {
+		min-height: 60px;
+	}
+	.panel.lead .label {
+		font-size: 13px;
+	}
+	.panel.lead .glyph {
+		width: 36px;
+		height: 36px;
 	}
 	summary {
 		display: flex;

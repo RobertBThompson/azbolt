@@ -96,6 +96,7 @@
 				label="Throw it"
 				icon="throw"
 				t="brand"
+				lead
 				open
 				lede="No title, nothing to choose — it lands in All life."
 			>
@@ -159,34 +160,36 @@
 				</div>
 			</Expander>
 
-			<Expander
-				label="Sphere it"
-				icon="sphere"
-				t="cool"
-				count={queue.length}
-				lede="Organize your spheres"
-			>
-				{#each queue as [id, jot] (id)}
-					<Row t="cool" href="/jot/{id}/sphere" title={jot.text} meta={jot.meta} trailing="›" />
-				{/each}
-			</Expander>
+			<div class="rest">
+				<Expander
+					label="Sphere it"
+					icon="sphere"
+					t="cool"
+					count={queue.length}
+					lede="Organize your spheres"
+				>
+					{#each queue as [id, jot] (id)}
+						<Row t="cool" href="/jot/{id}/sphere" title={jot.text} meta={jot.meta} trailing="›" />
+					{/each}
+				</Expander>
 
-			<Expander label="Task it" icon="task" t="warm" count={2} lede="Turn into action">
-				<Row
-					t="warm"
-					href="/work/tasks/carmen"
-					title="Talk to Carmen"
-					meta="Business · today 3:30 PM"
-					trailing="›"
-				/>
-				<Row
-					t="warm"
-					href="/work"
-					title="Call my daughter"
-					meta="Children · tonight 7:00 PM"
-					trailing="›"
-				/>
-			</Expander>
+				<Expander label="Task it" icon="task" t="warm" count={2} lede="Turn into action">
+					<Row
+						t="warm"
+						href="/work/tasks/carmen"
+						title="Talk to Carmen"
+						meta="Business · today 3:30 PM"
+						trailing="›"
+					/>
+					<Row
+						t="warm"
+						href="/work"
+						title="Call my daughter"
+						meta="Children · tonight 7:00 PM"
+						trailing="›"
+					/>
+				</Expander>
+			</div>
 		</div>
 	{:else}
 		<p class="eyebrow date">{weekday} · {date}</p>
@@ -238,38 +241,48 @@
 		margin: 0 auto;
 	}
 
-	/* The three stages share whatever room is left. When they are closed
-	   that spreads them down to the nav instead of stranding them at the
-	   top; when they open, the gap floors it and the page scrolls. */
+	/* One flexible gap, not two. Splitting the slack evenly between all
+	   three left a void above each of the bottom pair; keeping them
+	   together means the spare room collects in a single break after the
+	   section that matters, and the pair still lands above the nav. */
 	.stages {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
-		justify-content: space-between;
 		gap: 16px;
 		min-height: 0;
+	}
+	.rest {
+		margin-top: auto;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
 	}
 
 	.hello {
 		padding: 4px 2px 0;
 	}
+	/* Lighter and smaller than it was. A 31px near-black serif was the
+	   heaviest thing on the page and pulled the eye away from the one
+	   section meant to hold it. */
 	.hello h1 {
 		margin: 0;
 		font-family: var(--font-serif);
-		font-weight: 500;
-		font-size: 31px;
-		line-height: 1.08;
-		letter-spacing: -0.015em;
-		color: var(--ink);
-	}
-	.lead {
-		margin: 5px 0 0;
-		font-size: 13px;
-		line-height: 1.4;
+		font-weight: 400;
+		font-size: 25px;
+		line-height: 1.1;
+		letter-spacing: -0.01em;
 		color: var(--ink-3);
 	}
+	.lead {
+		margin: 3px 0 0;
+		font-size: 12.5px;
+		line-height: 1.4;
+		color: var(--ink-4);
+	}
+	/* The one line here that still earns full weight. */
 	.lead.urgent {
-		color: var(--tone-alert-ink);
+		color: var(--tone-alert);
 		font-weight: 600;
 	}
 	.date {
