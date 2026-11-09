@@ -8,14 +8,15 @@ export const TONE = {
 	cool: { ink: 'var(--tone-cool)', tint: 'var(--tone-cool-tint)' },
 	ai: { ink: 'var(--tone-ai)', tint: 'var(--tone-ai-tint)' },
 	warm: { ink: 'var(--tone-clay)', tint: 'var(--tone-clay-tint)' },
-	alert: { ink: 'var(--tone-alert)', tint: 'var(--tone-alert-tint)' }
+	alert: { ink: 'var(--tone-alert)', tint: 'var(--tone-alert-tint)' },
+	brand: { ink: 'var(--tone-brand)', tint: 'var(--tone-brand-tint)' }
 };
 
 /**
  * Unknown keys fall back to neutral rather than throwing, because a tone
  * is decoration and a typo should not blank a screen. The trade is that a
  * wrong key is invisible, so the valid set is: neutral, cool, ai, warm,
- * alert. There is no 'clay' or 'graphite' key — those are token names.
+ * alert, brand. There is no 'clay' or 'graphite' key — those are token names.
  *
  * @param {keyof typeof TONE | string} t
  */
