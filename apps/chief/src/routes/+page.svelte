@@ -258,6 +258,24 @@
 		gap: 24px;
 	}
 
+	/* Side by side once there is width for it. Throw It keeps the larger
+	   share because it is the one thing on the page you type into. */
+	@media (min-width: 900px) {
+		.stages {
+			display: grid;
+			grid-template-columns: 1.25fr 1fr;
+			align-items: start;
+			gap: 24px;
+		}
+		.rest {
+			gap: 16px;
+		}
+		.switch {
+			width: 320px;
+			margin-left: 0;
+		}
+	}
+
 	.hello {
 		padding: 4px 2px 0;
 		margin-bottom: 9px;

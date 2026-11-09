@@ -70,15 +70,17 @@
 				{/each}
 			</div>
 
-			{#each shown as p (p.id)}
-				<a class="person" href="/people/{p.id}">
-					<span class="who">
-						<span class="nm">{p.name}</span>
-						<span class="mt">{p.meta}</span>
-					</span>
-					<SphereTags keys={p.spheres ?? []} size="sm" />
-				</a>
-			{/each}
+			<div class="grid">
+				{#each shown as p (p.id)}
+					<a class="person" href="/people/{p.id}">
+						<span class="who">
+							<span class="nm">{p.name}</span>
+							<span class="mt">{p.meta}</span>
+						</span>
+						<SphereTags keys={p.spheres ?? []} size="sm" />
+					</a>
+				{/each}
+			</div>
 
 			{#if shown.length === 0}
 				<p class="none">Nobody in that sphere yet.</p>
@@ -170,11 +172,30 @@
 		font-size: 12px;
 		color: var(--ink-3);
 	}
+	.grid {
+		display: flex;
+		flex-direction: column;
+		gap: 9px;
+	}
 	.none {
 		margin: 0;
 		padding: 14px 2px;
 		text-align: center;
 		font-size: 12.5px;
 		color: var(--ink-3);
+	}
+	/* Desktop. The filter has room to wrap, so nothing hides off the
+	   right edge, and the cards pair up rather than each stretching to a
+	   full-width band with one name in it. */
+	@media (min-width: 900px) {
+		.filter {
+			flex-wrap: wrap;
+			overflow-x: visible;
+		}
+		.grid {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 10px;
+		}
 	}
 </style>
