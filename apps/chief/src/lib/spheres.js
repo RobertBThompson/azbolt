@@ -45,3 +45,32 @@ export const SPHERES = {
  * default of.
  */
 export const PLACEABLE = Object.entries(SPHERES);
+
+/**
+ * Spheres a person can be placed in are not limited to the list above.
+ * A contact may belong to an area of life the Chief does not otherwise
+ * deal in — "Australian Rugby" — and inventing one should cost nothing
+ * more than typing it.
+ *
+ * Known keys keep their swatch. Anything else gets a stable colour
+ * derived from the name itself, so the same custom sphere looks the same
+ * everywhere without being stored anywhere.
+ *
+ * @param {string} key
+ * @returns {{ name: string, swatch: string, custom: boolean }}
+ */
+export function sphereOf(key) {
+	const known = SPHERES[key];
+	if (known) return { ...known, custom: false };
+
+	// Muted, in the same saturation and lightness band as the set above,
+	// so an invented sphere never looks louder than a real one.
+	const HUES = ['#7a6a86', '#6b7f8c', '#8a6a5c', '#6f8060', '#87707f', '#6e7a95'];
+	let h = 0;
+	for (const ch of key) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+	return {
+		name: key.toUpperCase(),
+		swatch: HUES[h % HUES.length],
+		custom: true
+	};
+}

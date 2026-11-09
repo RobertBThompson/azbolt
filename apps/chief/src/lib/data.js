@@ -4,42 +4,139 @@
  * There is no backend yet — see docs/chief/README.md.
  */
 
-/** @type {Record<string, { first: string, name: string, role: string, tags: string[], next: string, endeavors: string, notes: string }>} */
+/**
+ * @type {Record<string, {
+ *   first: string, name: string, role: string, spheres: string[],
+ *   strength: string, last: string, next: string, cadence: string,
+ *   email: string, phone: string, endeavors: string, notes: string
+ * }>}
+ */
 export const PEOPLE = {
 	carmen: {
 		first: 'Carmen',
-		name: 'Carmen Mendez',
-		role: 'Operations · Azbolt',
-		tags: ['Coworker', 'Decision maker'],
+		name: 'Carmen Ruiz',
+		role: 'Operations lead',
+		spheres: ['business', 'career'],
+		strength: 'steady',
+		last: '4 days ago',
 		next: 'Today 3:30 PM',
-		endeavors: 'Website launch + 1',
-		notes: '3 notes'
+		cadence: 'Weekly',
+		email: 'carmen@azbolt.example',
+		phone: '+1 555 0148',
+		endeavors: 'Storage build-out',
+		notes: 'Prefers a call to a message. Reads nothing after 8 PM.'
 	},
-	daughter: {
-		first: 'My daughter',
-		name: 'My daughter',
-		role: 'Family',
-		tags: ['Family'],
+	maia: {
+		first: 'Maia',
+		name: 'Maia Thompson',
+		role: 'Daughter',
+		spheres: ['children', 'family'],
+		strength: 'strong',
+		last: 'Yesterday',
 		next: 'Tonight 7:00 PM',
-		endeavors: 'None',
-		notes: '1 note'
+		cadence: 'Every few days',
+		email: 'maia@example.com',
+		phone: '+1 555 0102',
+		endeavors: '—',
+		notes: 'Finals in three weeks. Ask about the recital, not the grades.'
 	},
-	pamela: {
-		first: 'Pamela',
-		name: 'Pamela Anderson',
-		role: 'CEO · TN Holdings',
-		tags: ['Owner', 'Decision maker'],
-		next: 'No next interaction',
-		endeavors: 'None',
-		notes: '2 notes'
+	june: {
+		first: 'June',
+		name: 'June Okafor',
+		role: 'Spouse',
+		spheres: ['spouse', 'family'],
+		strength: 'strong',
+		last: 'Today',
+		next: 'Saturday morning',
+		cadence: 'Daily',
+		email: 'june@example.com',
+		phone: '+1 555 0111',
+		endeavors: 'House refinance',
+		notes: 'Anniversary 14 June. Hates surprises, loves plans.'
+	},
+	bishop: {
+		first: 'Elias',
+		name: 'Elias Moreau',
+		role: 'Bishop',
+		spheres: ['church'],
+		strength: 'steady',
+		last: 'Sunday',
+		next: 'Sunday after the meeting',
+		cadence: 'Weekly',
+		email: 'elias@example.org',
+		phone: '+1 555 0163',
+		endeavors: 'Service rota',
+		notes: 'Asked twice about the welfare visit. Follow through.'
+	},
+	dev: {
+		first: 'Dev',
+		name: 'Dev Patel',
+		role: 'Co-founder',
+		spheres: ['business'],
+		strength: 'fading',
+		last: '6 weeks ago',
+		next: 'Not scheduled',
+		cadence: 'Monthly',
+		email: 'dev@example.com',
+		phone: '+1 555 0177',
+		endeavors: 'Series A memo',
+		notes: 'Went quiet after the valuation conversation.'
+	},
+	nan: {
+		first: 'Nan',
+		name: 'Nan Whitfield',
+		role: 'Grandmother',
+		spheres: ['family'],
+		strength: 'fading',
+		last: '5 weeks ago',
+		next: 'Not scheduled',
+		cadence: 'Fortnightly',
+		email: '—',
+		phone: '+1 555 0190',
+		endeavors: '—',
+		notes: 'Landline only. Mornings are better.'
+	},
+	koa: {
+		first: 'Koa',
+		name: 'Koa Fifita',
+		role: 'Club captain',
+		/* A sphere the Chief does not otherwise deal in. Invented on the
+		   spot, and nothing had to be configured first. */
+		spheres: ['australian rugby'],
+		strength: 'new',
+		last: 'Last month',
+		next: 'Not scheduled',
+		cadence: 'Occasional',
+		email: 'koa@example.au',
+		phone: '+61 400 555 012',
+		endeavors: '—',
+		notes: 'Met at the tournament. Said to call if ever in Brisbane.'
+	},
+	sofia: {
+		first: 'Sofia',
+		name: 'Sofia Lindqvist',
+		role: 'Mentor',
+		spheres: ['career', 'hobby'],
+		strength: 'steady',
+		last: '2 weeks ago',
+		next: 'Month end',
+		cadence: 'Monthly',
+		email: 'sofia@example.se',
+		phone: '+46 70 555 0133',
+		endeavors: 'Woodwork bench',
+		notes: 'Always asks what you stopped doing, not what you started.'
 	}
 };
 
 /**
- * D5-D7 prove the organization profile does not assume a parent company,
- * employees or conventional shares: the same slots hold members,
- * governance and oversight without changing the page architecture.
- * @type {Record<string, { name: string, context: string|null, blurb: string, stats: [string,string][], rows: { t: string, m: string, x: string, href?: string, tone?: string }[] }>}
+ * context is null for an organization that belongs to no sphere of the
+ * Chief's own, and a row has no href when it is not yet a destination.
+ *
+ * @type {Record<string, {
+ *   name: string, context: string|null, blurb: string,
+ *   stats: [string, string][],
+ *   rows: { t: string, m: string, x: string, href?: string, tone: string }[]
+ * }>}
  */
 export const ORGS = {
 	azbolt: {
