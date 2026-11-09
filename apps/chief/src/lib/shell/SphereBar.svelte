@@ -33,8 +33,8 @@
 	{#if search}
 		<a class="act" href="/search" aria-label="Search"><Icon name="search" size={17} /></a>
 	{/if}
-	<a class="act" href="/menu" aria-label="Account and settings">
-		<Icon name="user" size={17} />
+	<a class="act avatar" href="/menu" aria-label="Account and settings">
+		<Icon name="user-solid" size={19} />
 	</a>
 </header>
 
@@ -108,5 +108,20 @@
 		border: 1px solid var(--line-3);
 		color: var(--ink-2);
 		text-decoration: none;
+	}
+	/* A hairline person at this size read as an unfinished wireframe. A
+	   solid silhouette on a tinted disc, ringed in the mark's own wine,
+	   reads as an account rather than a placeholder. */
+	.avatar {
+		border: 0;
+		background: var(--tone-brand-tint);
+		box-shadow: inset 0 0 0 1.5px var(--tone-brand);
+		color: var(--tone-brand);
+		/* The glyph is drawn to the circle's edge, so it needs clipping
+		   rather than padding to sit inside one. */
+		overflow: hidden;
+	}
+	.avatar :global(svg) {
+		margin-bottom: -4px;
 	}
 </style>

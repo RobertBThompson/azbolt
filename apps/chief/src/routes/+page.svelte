@@ -20,6 +20,9 @@
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Banner, Expander, Icon, Row, StateSwitch, Stats } from '$lib/kit';
 	import { UNSPHERED } from '$lib/data.js';
+	import { page } from '$app/stores';
+	import { replaceState } from '$app/navigation';
+	import { tick } from 'svelte';
 
 	/** 0 = Jot, 1 = Dash. */
 	let view = $state(0);
@@ -29,6 +32,22 @@
 
 	const queue = Object.entries(UNSPHERED);
 	const canThrow = $derived(draft.trim().length > 0);
+
+	/** @type {HTMLTextAreaElement|null} */
+	let box = $state(null);
+
+	/**
+	 * The mark in the nav arrives here as /?throw. Honour it by showing
+	 * Jot and putting the cursor in the box, then drop the parameter so
+	 * a back press does not re-fire it and a reload is just Today.
+	 */
+	$effect(() => {
+		if (!$page.url.searchParams.has('throw')) return;
+		view = 0;
+		input = 0;
+		tick().then(() => box?.focus());
+		replaceState('/', {});
+	});
 
 	const now = new Date();
 	const hour = now.getHours();
@@ -53,14 +72,16 @@
 <svelte:head><title>Today · Chief</title></svelte:head>
 
 <Screen>
-	<StateSwitch
-		a="Jot"
-		b="Dash"
-		aIcon="spark"
-		bIcon="dash"
-		labelledby="Home view"
-		bind:active={view}
-	/>
+	<div class="switch">
+		<StateSwitch
+			a="Jot"
+			b="Dash"
+			aIcon="spark"
+			bIcon="dash"
+			labelledby="Home view"
+			bind:active={view}
+		/>
+	</div>
 
 	<header class="hello">
 		<h1>{greeting}</h1>
@@ -68,85 +89,88 @@
 	</header>
 
 	{#if view === 0}
-		<Expander
-			label="Throw it"
-			icon="throw"
-			t="brand"
-			open
-			lede="No title, nothing to choose — it lands in All life."
-		>
-			<div class="how">
-				<button
-					type="button"
-					class="mode"
-					class:on={input === 0}
-					aria-pressed={input === 0}
-					onclick={() => (input = 0)}
-				>
-					<Icon name="keyboard" size={16} /> Text
-				</button>
-				<button
-					type="button"
-					class="mode"
-					class:on={input === 1}
-					aria-pressed={input === 1}
-					onclick={() => (input = 1)}
-				>
-					<Icon name="mic" size={16} /> Voice
-				</button>
-			</div>
-
-			{#if input === 0}
-				<form
-					onsubmit={(e) => {
-						e.preventDefault();
-						draft = '';
-					}}
-				>
-					<textarea
-						rows="2"
-						bind:value={draft}
-						placeholder="I need to call my daughter. Oh and I need to talk to Carmen ASAP."
-					></textarea>
-					<button class="go" type="submit" disabled={!canThrow}>
-						<Icon name="throw" size={18} /> Throw it
+		<div class="stages">
+			<Expander
+				label="Throw it"
+				icon="throw"
+				t="brand"
+				open
+				lede="No title, nothing to choose — it lands in All life."
+			>
+				<div class="how">
+					<button
+						type="button"
+						class="mode"
+						class:on={input === 0}
+						aria-pressed={input === 0}
+						onclick={() => (input = 0)}
+					>
+						<Icon name="keyboard" size={16} /> Text
 					</button>
-				</form>
-			{:else}
-				<a class="go" href="/jot/listening">
-					<Icon name="mic" size={18} /> Hold to speak
-				</a>
-			{/if}
-		</Expander>
+					<button
+						type="button"
+						class="mode"
+						class:on={input === 1}
+						aria-pressed={input === 1}
+						onclick={() => (input = 1)}
+					>
+						<Icon name="mic" size={16} /> Voice
+					</button>
+				</div>
 
-		<Expander
-			label="Sphere it"
-			icon="sphere"
-			t="cool"
-			count={queue.length}
-			lede="Organize your spheres"
-		>
-			{#each queue as [id, jot] (id)}
-				<Row t="cool" href="/jot/{id}/sphere" title={jot.text} meta={jot.meta} trailing="›" />
-			{/each}
-		</Expander>
+				{#if input === 0}
+					<form
+						onsubmit={(e) => {
+							e.preventDefault();
+							draft = '';
+						}}
+					>
+						<textarea
+							rows="2"
+							bind:this={box}
+							bind:value={draft}
+							placeholder="I need to call my daughter. Oh and I need to talk to Carmen ASAP."
+						></textarea>
+						<button class="go" type="submit" disabled={!canThrow}>
+							<Icon name="throw" size={18} /> Throw it
+						</button>
+					</form>
+				{:else}
+					<a class="go" href="/jot/listening">
+						<Icon name="mic" size={18} /> Hold to speak
+					</a>
+				{/if}
+			</Expander>
 
-		<Expander label="Task it" icon="task" t="warm" count={2} lede="Turn into action">
-			<Row
-				t="warm"
-				href="/work/tasks/carmen"
-				title="Talk to Carmen"
-				meta="Business · today 3:30 PM"
-				trailing="›"
-			/>
-			<Row
-				t="warm"
-				href="/work"
-				title="Call my daughter"
-				meta="Children · tonight 7:00 PM"
-				trailing="›"
-			/>
-		</Expander>
+			<Expander
+				label="Sphere it"
+				icon="sphere"
+				t="cool"
+				count={queue.length}
+				lede="Organize your spheres"
+			>
+				{#each queue as [id, jot] (id)}
+					<Row t="cool" href="/jot/{id}/sphere" title={jot.text} meta={jot.meta} trailing="›" />
+				{/each}
+			</Expander>
+
+			<Expander label="Task it" icon="task" t="warm" count={2} lede="Turn into action">
+				<Row
+					t="warm"
+					href="/work/tasks/carmen"
+					title="Talk to Carmen"
+					meta="Business · today 3:30 PM"
+					trailing="›"
+				/>
+				<Row
+					t="warm"
+					href="/work"
+					title="Call my daughter"
+					meta="Children · tonight 7:00 PM"
+					trailing="›"
+				/>
+			</Expander>
+		</div>
 	{:else}
 		<p class="eyebrow date">{weekday} · {date}</p>
 
@@ -189,6 +213,26 @@
 </Screen>
 
 <style>
+	/* Narrower than the content it governs: it is a control over the page,
+	   not one of the page's own blocks, and full width made it read as a
+	   fourth section. */
+	.switch {
+		width: 75%;
+		margin: 0 auto;
+	}
+
+	/* The three stages share whatever room is left. When they are closed
+	   that spreads them down to the nav instead of stranding them at the
+	   top; when they open, the gap floors it and the page scrolls. */
+	.stages {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		gap: 16px;
+		min-height: 0;
+	}
+
 	.hello {
 		padding: 4px 2px 0;
 	}

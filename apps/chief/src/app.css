@@ -102,7 +102,7 @@
 	   the 44pt minimum. */
 	--band: 9px;
 	--appbar: 44px;
-	--nav: 72px;
+	--nav: 94px; /* the icons ride the curve, so the bar is deeper than the wave */
 	--tap-min: 45px;
 }
 
