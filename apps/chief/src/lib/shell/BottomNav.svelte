@@ -2,31 +2,36 @@
 	/**
 	 * v4 nav: Today · Action · [mark] · People · Asset.
 	 *
-	 * Three things make this different from the slab it replaces.
-	 *
 	 * It is not a separate surface. No white fill, no top border — the
 	 * bar sits on the page background and a single drawn curve is the
-	 * only thing dividing them, so the page appears to rise into it
-	 * rather than stop at it.
+	 * only thing dividing them, so the page appears to rise into it.
 	 *
-	 * The centre slot is the Chief mark, unlabelled, lifted onto the
-	 * crest of that curve. Capture is the one action worth a landmark.
+	 * The four icons sit just under that curve and follow it. Their
+	 * offsets are the curve's own y at each icon's centre, solved from
+	 * the same cubic the SVG draws, so they cannot drift apart from it:
+	 * Today and Asset ride the low shoulders, Action and People ride
+	 * higher as the wave climbs toward the crest.
 	 *
-	 * Today stands apart from the other three: it keeps its own group on
-	 * the left, behind a hairline, and carries a filled marker where the
-	 * rest carry hollow ones. The separation is structural, not coloured —
-	 * the palette reserves hue for meaning, and "which tab" is not one.
+	 * The mark is a capture action, not a tab. It takes you to Throw It
+	 * on Today with the field focused, and it never claims aria-current,
+	 * because "where am I" and "do the thing" are different questions and
+	 * two current items in one bar answers neither.
+	 *
+	 * Today stands apart from the other three: its own group behind a
+	 * hairline, mono caps where the rest are sentence case.
 	 */
 	import { page } from '$app/stores';
 	import Icon from '$lib/kit/Icon.svelte';
 
+	/* Curve y at each icon centre, for a 390-wide viewBox with a 56px
+	   centre column. Solved from M0 32 C 74 32, 112 4, 195 4. */
 	const left = [
-		{ label: 'Today', href: '/', icon: 'today' },
-		{ label: 'Action', href: '/work', icon: 'action' }
+		{ label: 'Today', href: '/', icon: 'today', y: 29 },
+		{ label: 'Action', href: '/work', icon: 'action', y: 11 }
 	];
 	const right = [
-		{ label: 'People', href: '/people', icon: 'people' },
-		{ label: 'Asset', href: '/records', icon: 'asset' }
+		{ label: 'People', href: '/people', icon: 'people', y: 11 },
+		{ label: 'Asset', href: '/records', icon: 'asset', y: 29 }
 	];
 
 	/**
@@ -40,8 +45,6 @@
 </script>
 
 <nav aria-label="Primary">
-	<!-- The curve. Drawn once, behind everything, so the hairline and the
-	     wash share exactly the same path and cannot drift apart. -->
 	<svg class="curve" viewBox="0 0 390 72" preserveAspectRatio="none" aria-hidden="true">
 		<path
 			d="M0 32 C 74 32, 112 4, 195 4 C 278 4, 316 32, 390 32 L390 72 L0 72 Z"
@@ -57,32 +60,33 @@
 	</svg>
 
 	<div class="row">
-		<div class="group">
-			{#each left as tab, i (tab.href)}
-				{@const on = active(tab.href)}
-				<a href={tab.href} class:today={i === 0} aria-current={on ? 'page' : undefined}>
-					<span class="glyph" class:on><Icon name={tab.icon} size={19} /></span>
-					<span class="label" class:on>{tab.label}</span>
-					<span class="rail" class:on aria-hidden="true"></span>
-				</a>
-				{#if i === 0}<span class="rule" aria-hidden="true"></span>{/if}
-			{/each}
-		</div>
+		{#each left as tab, i (tab.href)}
+			{@const on = active(tab.href)}
+			<a
+				href={tab.href}
+				class:today={i === 0}
+				style="--y:{tab.y}px"
+				aria-current={on ? 'page' : undefined}
+			>
+				<span class="glyph" class:on><Icon name={tab.icon} size={19} /></span>
+				<span class="label" class:on>{tab.label}</span>
+				<span class="rail" class:on aria-hidden="true"></span>
+			</a>
+			{#if i === 0}<span class="rule" aria-hidden="true"></span>{/if}
+		{/each}
 
-		<a href="/jot" class="jot" aria-label="Jot" aria-current={active('/jot') ? 'page' : undefined}>
+		<a href="/?throw" class="jot" aria-label="Throw a jot">
 			<img src="/logo.png" alt="" width="40" height="40" />
 		</a>
 
-		<div class="group">
-			{#each right as tab (tab.href)}
-				{@const on = active(tab.href)}
-				<a href={tab.href} aria-current={on ? 'page' : undefined}>
-					<span class="glyph" class:on><Icon name={tab.icon} size={19} /></span>
-					<span class="label" class:on>{tab.label}</span>
-					<span class="rail" class:on aria-hidden="true"></span>
-				</a>
-			{/each}
-		</div>
+		{#each right as tab (tab.href)}
+			{@const on = active(tab.href)}
+			<a href={tab.href} style="--y:{tab.y}px" aria-current={on ? 'page' : undefined}>
+				<span class="glyph" class:on><Icon name={tab.icon} size={19} /></span>
+				<span class="label" class:on>{tab.label}</span>
+				<span class="rail" class:on aria-hidden="true"></span>
+			</a>
+		{/each}
 	</div>
 </nav>
 
@@ -92,34 +96,27 @@
 		position: relative;
 		height: calc(var(--nav) + env(safe-area-inset-bottom));
 		padding-bottom: env(safe-area-inset-bottom);
-		/* No background and no border: the page shows through, and the
-		   drawn curve is the only edge. */
 	}
 	.curve {
 		position: absolute;
 		inset: 0;
 		width: 100%;
-		height: var(--nav);
+		height: 72px;
 		pointer-events: none;
 	}
 	.row {
 		position: relative;
 		height: var(--nav);
 		display: grid;
-		grid-template-columns: 1fr auto 1fr;
-		align-items: end;
-	}
-	.group {
-		display: flex;
-		align-items: flex-end;
-		justify-content: space-evenly;
-		height: 100%;
-		padding: 0 6px 9px;
+		/* Today | rule | Action | mark | People | Asset */
+		grid-template-columns: 1fr auto 1fr 56px 1fr 1fr;
+		align-items: start;
 	}
 	.rule {
+		justify-self: center;
 		width: 1px;
 		height: 17px;
-		margin-bottom: 13px;
+		margin-top: 34px;
 		background: var(--line);
 		opacity: 0.8;
 	}
@@ -127,23 +124,18 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		justify-content: flex-end;
 		gap: 3px;
-		min-width: 52px;
 		min-height: var(--tap-min);
 		text-decoration: none;
+		/* Just under the curve at this icon's x. */
+		padding-top: calc(var(--y, 20px) + 7px);
 	}
-	/* ink-3, not ink-4: at this size the lighter grey lands at 3.09:1 on
-	   paper, under the 4.5 the rest of the system holds to. */
 	.glyph {
 		color: var(--ink-3);
 	}
 	.glyph.on {
-		color: var(--brand-wine);
+		color: var(--tone-brand);
 	}
-	/* The active rail is the only place a tab uses colour. It marks where
-	   you are, which is state rather than meaning, so it does not spend
-	   one of the tones the palette reserves for what a record is. */
 	.rail {
 		width: 17px;
 		height: 2px;
@@ -151,7 +143,7 @@
 		background: transparent;
 	}
 	.rail.on {
-		background: var(--brand-wine);
+		background: var(--tone-brand);
 	}
 	.label {
 		font-size: 10.5px;
@@ -160,7 +152,7 @@
 		color: var(--ink-3);
 	}
 	.label.on {
-		color: var(--brand-wine);
+		color: var(--tone-brand);
 	}
 	.today .label {
 		font-family: var(--font-mono);
@@ -171,13 +163,12 @@
 
 	/* The mark sits on the crest, overlapping the curve it rises from. */
 	.jot {
-		align-self: start;
+		padding-top: 0;
 		margin-top: -18px;
 		width: 56px;
 		height: 56px;
 		border-radius: 50%;
 		background: var(--paper);
-		border: 0;
 		align-items: center;
 		justify-content: center;
 		gap: 0;
@@ -191,15 +182,6 @@
 		width: 40px;
 		height: 40px;
 	}
-	/* Current state is a ring in the mark's own taupe, outside the paper
-	   halo so it reads at a glance without a border appearing from nowhere. */
-	.jot[aria-current='page'] {
-		box-shadow:
-			0 0 0 6px var(--paper),
-			0 0 0 7.5px var(--brand-taupe),
-			0 8px 20px rgba(30, 26, 24, 0.1);
-	}
-
 	@media (prefers-reduced-motion: no-preference) {
 		.jot {
 			transition: box-shadow 140ms ease;

@@ -13,6 +13,9 @@
 	/** @type {{ name: string, size?: number }} */
 	let { name, size = 18 } = $props();
 
+	/** Solid glyphs read as objects rather than diagrams at small sizes. */
+	const solid = $derived(name.endsWith('-solid'));
+
 	/** @type {Record<string, string>} */
 	const PATHS = {
 		// Throw it — a paper plane, mid-flight rather than at rest.
@@ -32,7 +35,11 @@
 		mic: 'M12 2.5a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0v-6a3 3 0 0 1 3-3ZM5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21',
 		keyboard: 'M3 6.5h18v11H3v-11ZM7 10h.01M11 10h.01M15 10h.01M17 13.5h.01M7 13.5h6.5',
 		spark: 'M12 3l1.8 4.9L18.5 9.7l-4.7 1.8L12 16.4l-1.8-4.9L5.5 9.7l4.7-1.8L12 3Z',
-		dash: 'M3.5 4.5h7v7h-7v-7ZM13.5 4.5h7v7h-7v-7ZM3.5 14.5h7v6h-7v-6ZM13.5 14.5h7v6h-7v-6Z'
+		dash: 'M3.5 4.5h7v7h-7v-7ZM13.5 4.5h7v7h-7v-7ZM3.5 14.5h7v6h-7v-6ZM13.5 14.5h7v6h-7v-6Z',
+		// Filled. A hairline person at 17px reads as a wireframe placeholder;
+		// a solid silhouette reads as somebody.
+		'user-solid':
+			'M12 12.4a4.45 4.45 0 1 0 0-8.9 4.45 4.45 0 0 0 0 8.9ZM12 14.2c-4.3 0-7.3 2.5-7.3 5.6 0 .9.7 1.2 1.5 1.2h11.6c.8 0 1.5-.3 1.5-1.2 0-3.1-3-5.6-7.3-5.6Z'
 	};
 </script>
 
@@ -40,8 +47,8 @@
 	width={size}
 	height={size}
 	viewBox="0 0 24 24"
-	fill="none"
-	stroke="currentColor"
+	fill={solid ? 'currentColor' : 'none'}
+	stroke={solid ? 'none' : 'currentColor'}
 	stroke-width="1.7"
 	stroke-linecap="round"
 	stroke-linejoin="round"
