@@ -1,19 +1,4 @@
 <script>
-	/**
-	 * The frame every screen renders inside. No branch renders its own
-	 * app bar or nav — that is the whole reason Shell is a branch.
-	 *
-	 * One shell, two shapes. Below 900px it is a phone: a column with the
-	 * bar on top and the nav riding the bottom edge. At 900px and above
-	 * the nav becomes a rail down the left and the content gets room to
-	 * breathe beside it.
-	 *
-	 * Being a PWA has nothing to do with this. Installability, offline
-	 * and the home-screen icon come from the manifest and the service
-	 * worker; what a layout does at 1400px is ordinary CSS and has to be
-	 * written. Nobody had written it, so the app was a phone column
-	 * stranded in the middle of a desktop.
-	 */
 	import SphereBar from './SphereBar.svelte';
 	import BottomNav from './BottomNav.svelte';
 
@@ -31,11 +16,11 @@
 
 <style>
 	.screen {
+		--shell-gutter: clamp(15px, calc(5vw - 9px), 28px);
 		display: flex;
 		flex-direction: column;
+		min-height: 100vh;
 		min-height: 100dvh;
-		max-width: 480px;
-		margin: 0 auto;
 		background: var(--paper);
 	}
 	.body {
@@ -46,38 +31,45 @@
 	}
 	main {
 		flex: 1;
+		min-width: 0;
 		display: flex;
 		flex-direction: column;
 		gap: 9px;
 		/* The mark is lifted 18px above the nav, so content needs more
 		   clearance at the bottom than a flat bar would have asked for. */
-		padding: 22px 15px 28px;
+		padding: 22px var(--shell-gutter) 28px;
 		overflow-x: hidden;
 	}
 
-	/* ── Desktop ─────────────────────────────────────────────────────── */
-	@media (min-width: 900px) {
+	@media (min-width: 48rem) {
 		.screen {
-			max-width: 1120px;
+			--shell-width: 74rem;
+			--shell-gutter: clamp(20px, 3vw, 36px);
 		}
-		/* row-reverse, not row: the nav comes after main in the markup so
-		   that a screen reader and the tab order meet the content first,
-		   which is the right order on a phone and stays right here. */
 		.body {
-			flex-direction: row-reverse;
-			align-items: flex-start;
-			gap: 30px;
-			padding: 0 26px 40px;
+			width: 100%;
+			max-width: var(--shell-width);
+			margin-inline: auto;
+			padding: 24px var(--shell-gutter) 40px;
+		}
+		.railed .body {
+			display: grid;
+			grid-template-areas: 'primary content';
+			grid-template-columns: clamp(10rem, 18vw, 13rem) minmax(0, 1fr);
+			align-items: start;
+			gap: clamp(20px, 2.75vw, 36px);
 		}
 		main {
-			/* Measure, not width. A line of body text past ~70 characters
-			   is harder to read, and the page has no more to say at 1100px
-			   than it does at 720. */
-			max-width: 720px;
-			padding: 26px 0 0;
+			padding: 0;
+			overflow: visible;
 		}
 		.railed main {
-			flex: 1;
+			grid-area: content;
+		}
+		.screen:not(.railed) main {
+			width: 100%;
+			max-width: 44rem;
+			margin-inline: auto;
 		}
 	}
 </style>
