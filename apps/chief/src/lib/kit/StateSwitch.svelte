@@ -1,49 +1,34 @@
 <script>
 	/**
-	 * The Jot / Dash state switch.
-	 *
-	 * Its own component rather than a variant of Seg, because it is not a
-	 * choice inside a form — it swaps the whole page. It reads as a raised
-	 * physical control: one track, a lifted thumb on the active half, and
-	 * a shadow that puts it above the sections rather than among them.
-	 *
-	 * role="tablist" is accurate here: two panels, one visible, state kept
-	 * on the page. That gives arrow-key movement and the right
-	 * announcement for free.
-	 */
-	/**
 	 * @type {{
 	 *   a: string, b: string, aIcon?: string, bIcon?: string,
-	 *   active?: number, labelledby?: string
+	 *   active?: number, id: string, label?: string
 	 * }}
 	 */
-	let { a, b, aIcon = '', bIcon = '', active = $bindable(0), labelledby = 'Page state' } = $props();
+	let { a, b, aIcon = '', bIcon = '', active = $bindable(0), id, label = 'Page state' } = $props();
 	import Icon from './Icon.svelte';
 
 	/** @type {HTMLButtonElement[]} */
 	let tabs = $state([]);
 
-	/**
-	 * Roving tabindex: the tablist itself is not focusable, the tabs are,
-	 * and arrow keys both switch and move focus. Putting the handler on
-	 * the list instead would need the list focusable, which is the wrong
-	 * half of the pattern.
-	 *
-	 * @param {KeyboardEvent} e
-	 */
+	/** @param {KeyboardEvent} e */
 	function keys(e) {
-		if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+		if (e.key === 'Home') active = 0;
+		else if (e.key === 'End') active = 1;
+		else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') active = active === 0 ? 1 : 0;
+		else return;
 		e.preventDefault();
-		active = active === 0 ? 1 : 0;
 		tabs[active]?.focus();
 	}
 </script>
 
-<div class="track" role="tablist" aria-label={labelledby}>
+<div class="track" role="tablist" aria-label={label}>
 	<button
 		bind:this={tabs[0]}
+		id="{id}-tab-0"
 		role="tab"
 		type="button"
+		aria-controls="{id}-panel-0"
 		aria-selected={active === 0}
 		tabindex={active === 0 ? 0 : -1}
 		class:on={active === 0}
@@ -55,8 +40,10 @@
 	</button>
 	<button
 		bind:this={tabs[1]}
+		id="{id}-tab-1"
 		role="tab"
 		type="button"
+		aria-controls="{id}-panel-1"
 		aria-selected={active === 1}
 		tabindex={active === 1 ? 0 : -1}
 		class:on={active === 1}
@@ -69,12 +56,9 @@
 </div>
 
 <style>
-	/* One size for every switch in the app. 75% on a phone so it reads as
-	   a control over the page rather than another band of content; a
-	   fixed width on the left at desktop, where centring it in a wide
-	   column would leave it stranded. */
 	.track {
 		width: 75%;
+		max-width: 22rem;
 		margin: 0 auto;
 		display: flex;
 		gap: 4px;
@@ -107,10 +91,17 @@
 		color: #ffffff;
 		box-shadow: 0 1px 3px rgba(30, 26, 24, 0.18);
 	}
-	@media (min-width: 900px) {
+	button:focus-visible {
+		outline: 2px solid var(--tone-cool);
+		outline-offset: 2px;
+	}
+	@media (min-width: 48rem) {
 		.track {
-			width: 340px;
-			margin-left: 0;
+			width: 12rem;
+			margin: 0;
+		}
+		button {
+			min-height: 42px;
 		}
 	}
 

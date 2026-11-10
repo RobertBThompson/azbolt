@@ -1,27 +1,9 @@
 <script>
-	/**
-	 * B2 Today — T1.
-	 *
-	 * Home has two states. Jot is the default and is the lifecycle a jot
-	 * moves through: throw it, sphere it, task it. Dash is the read-only
-	 * view of where everything stands. Jot leads because the cost of a
-	 * thought being lost is higher than the cost of a number going unseen.
-	 *
-	 * The greeting is not decoration and is not static. The second line
-	 * is always the most pressing real thing — overdue first, then what
-	 * is due today, then a standing reminder — so the space pays for
-	 * itself instead of saying hello twice a day. It falls back to the
-	 * tagline only when there is genuinely nothing waiting.
-	 *
-	 * Inside Jot, only Throw It is open. The other two are work already
-	 * captured and can wait; opening all three would put a queue in front
-	 * of someone whose only intent was to get a sentence out of their head.
-	 */
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Banner, Expander, Icon, Row, StateSwitch, Stats } from '$lib/kit';
 	import { UNSPHERED } from '$lib/data.js';
 
-	/** 0 = Jot, 1 = Dash. */
+	const viewId = 'home-view';
 	let view = $state(0);
 	/** 0 = text, 1 = voice. Text is first because it needs no permission. */
 	let input = $state(0);
@@ -30,12 +12,9 @@
 	const queue = Object.entries(UNSPHERED);
 	const canThrow = $derived(draft.trim().length > 0);
 
-	/** Lifts the composer's border while typing, since it is now one field. */
-	let focused = $state(false);
-
 	const now = new Date();
 	const hour = now.getHours();
-	const greeting = hour < 12 ? 'Good morning,' : hour < 17 ? 'Good afternoon,' : 'Good evening,';
+	const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 	const weekday = now.toLocaleDateString(undefined, { weekday: 'long' });
 	const date = now.toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
 
@@ -56,44 +35,47 @@
 <svelte:head><title>Today · Chief</title></svelte:head>
 
 <Screen>
-	<StateSwitch
-		a="Jot"
-		b="Dash"
-		aIcon="spark"
-		bIcon="dash"
-		labelledby="Home view"
-		bind:active={view}
-	/>
+	<div class="home-top">
+		<div class="home-switch">
+			<StateSwitch
+				a="Jot"
+				b="Dash"
+				aIcon="spark"
+				bIcon="dash"
+				id={viewId}
+				label="Home view"
+				bind:active={view}
+			/>
+		</div>
 
-	<header class="hello">
-		<h1>{greeting}</h1>
-		<p class="lead" class:urgent={lead.tone === 'alert'}>{lead.text}</p>
-	</header>
+		<header class="hello">
+			<p class="eyebrow hello-date">{weekday} · {date}</p>
+			<h1>{greeting}</h1>
+			<p class="lead" class:urgent={lead.tone === 'alert'}>{lead.text}</p>
+		</header>
+	</div>
 
-	{#if view === 0}
+	<div
+		class="jot-panel"
+		role="tabpanel"
+		id="{viewId}-panel-0"
+		aria-labelledby="{viewId}-tab-0"
+		hidden={view !== 0}
+	>
 		<div class="stages">
 			<Expander
 				label="Throw it"
 				icon="throw"
 				t="brand"
 				lead
-				open
 				lede="No title, nothing to choose — it lands in All life."
 			>
-				<!--
-				One composer rather than three stacked controls. The mode
-				chips and the action live inside the same bordered field as
-				the text, because they all act on the same thing — splitting
-				them into separate blocks made choosing how to type look like
-				a step before typing, which it is not.
-			-->
-				<div class="composer" class:focused>
+				<div class="composer">
 					{#if input === 0}
 						<textarea
 							rows="3"
 							bind:value={draft}
-							onfocus={() => (focused = true)}
-							onblur={() => (focused = false)}
+							aria-label="Jot text"
 							placeholder="I need to call my daughter. Oh and I need to talk to Carmen ASAP."
 						></textarea>
 					{:else}
@@ -170,7 +152,14 @@
 				</Expander>
 			</div>
 		</div>
-	{:else}
+	</div>
+	<div
+		class="dash-panel"
+		role="tabpanel"
+		id="{viewId}-panel-1"
+		aria-labelledby="{viewId}-tab-1"
+		hidden={view !== 1}
+	>
 		<p class="eyebrow date">{weekday} · {date}</p>
 
 		<Banner
@@ -208,46 +197,33 @@
 			meta="Patterns across records you already have"
 			trailing="›"
 		/>
-	{/if}
+	</div>
 </Screen>
 
 <style>
-	/* No forced distribution. Spreading the slack to reach the nav put a
-	   hole in the middle of the page; one uniform rhythm puts whatever is
-	   left below the last section, beside the nav, where it reads as the
-	   page ending instead of a gap. */
-	.stages {
+	.home-top,
+	.dash-panel:not([hidden]) {
 		display: flex;
 		flex-direction: column;
-		gap: 24px;
+		gap: 9px;
 	}
+	.jot-panel {
+		container-type: inline-size;
+	}
+	.stages,
 	.rest {
-		display: flex;
-		flex-direction: column;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
 		gap: 24px;
-	}
-
-	/* Side by side once there is width for it. Throw It keeps the larger
-	   share because it is the one thing on the page you type into. */
-	@media (min-width: 900px) {
-		.stages {
-			display: grid;
-			grid-template-columns: 1.25fr 1fr;
-			align-items: start;
-			gap: 24px;
-		}
-		.rest {
-			gap: 16px;
-		}
 	}
 
 	.hello {
 		padding: 4px 2px 0;
 		margin-bottom: 9px;
 	}
-	/* Lighter and smaller than it was. A 31px near-black serif was the
-	   heaviest thing on the page and pulled the eye away from the one
-	   section meant to hold it. */
+	.hello-date {
+		display: none;
+	}
 	.hello h1 {
 		margin: 0;
 		font-family: var(--font-serif);
@@ -263,7 +239,6 @@
 		line-height: 1.4;
 		color: var(--ink-4);
 	}
-	/* The one line here that still earns full weight. */
 	.lead.urgent {
 		color: var(--tone-alert);
 		font-weight: 600;
@@ -272,14 +247,13 @@
 		margin: 0 2px;
 	}
 
-	/* One field: text, mode chips and action share a border. */
 	.composer {
 		border: 1px solid var(--line-2);
 		border-radius: 12px;
 		background: var(--sunk);
-		padding: 4px 4px 4px;
+		padding: 4px;
 	}
-	.composer.focused {
+	.composer:focus-within {
 		border-color: var(--tone-brand);
 		box-shadow: 0 0 0 3px var(--tone-brand-tint);
 	}
@@ -310,6 +284,7 @@
 	}
 	.tools {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
 		gap: 7px;
 		padding: 2px 2px 0;
@@ -341,8 +316,6 @@
 		color: var(--tone-brand);
 		box-shadow: 0 1px 2px rgba(30, 26, 24, 0.1);
 	}
-	/* Smaller and darker than the full-width slab it replaces: it is the
-	   end of a field, not a section of the page. */
 	.go {
 		margin-left: auto;
 		display: flex;
@@ -364,5 +337,98 @@
 		background: var(--line);
 		color: var(--ink-4);
 		cursor: default;
+	}
+	.mode:focus-visible,
+	.go:focus-visible {
+		outline: 2px solid var(--tone-cool);
+		outline-offset: 2px;
+	}
+
+	@media (max-width: 22rem) {
+		.mode {
+			padding-inline: 7px;
+		}
+		.go {
+			padding-inline: 11px;
+		}
+	}
+
+	@media (min-width: 48rem) {
+		.home-top {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) auto;
+			grid-template-areas: 'greeting switch';
+			align-items: start;
+			gap: 18px;
+			padding: clamp(20px, 2.5vw, 32px);
+			margin-bottom: 9px;
+			border: 1px solid var(--line-2);
+			border-radius: 18px;
+			background:
+				radial-gradient(ellipse at 86% 0%, #ffedcd, transparent 65%),
+				linear-gradient(115deg, var(--sunk) 25%, var(--tone-brand-tint) 72%, var(--tone-cool-tint));
+		}
+		.home-switch {
+			grid-area: switch;
+		}
+		.hello {
+			grid-area: greeting;
+			margin: 0;
+			padding: 0;
+		}
+		.hello-date {
+			display: block;
+			margin: 0 0 9px;
+			color: var(--ink-3);
+		}
+		.hello h1 {
+			font-size: clamp(2.125rem, 3.6vw, 3rem);
+			color: var(--ink);
+		}
+		.lead {
+			margin-top: 8px;
+			font-size: 14px;
+			color: var(--ink-3);
+		}
+		.dash-panel .date {
+			display: none;
+		}
+		.stages,
+		.rest {
+			gap: 16px;
+		}
+		.composer {
+			padding: 6px;
+		}
+		textarea,
+		.listening {
+			min-height: 8rem;
+			padding: 12px;
+			font-size: 16px;
+		}
+		textarea {
+			resize: vertical;
+		}
+		textarea::placeholder {
+			color: var(--ink-3);
+		}
+		.mode {
+			min-height: 38px;
+		}
+		.go {
+			min-height: 44px;
+		}
+		.go:disabled {
+			background: var(--line-2);
+			color: var(--ink-3);
+		}
+
+		@container (min-width: 42rem) {
+			.stages {
+				grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+				align-items: start;
+				gap: 20px;
+			}
+		}
 	}
 </style>

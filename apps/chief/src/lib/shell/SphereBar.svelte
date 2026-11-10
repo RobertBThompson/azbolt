@@ -51,7 +51,7 @@
 		gap: 8px;
 		/* The band and the row were touching, which read as one thick
 		   stripe rather than a sphere marker above a toolbar. */
-		padding: 12px 13px 2px;
+		padding: 12px calc(var(--shell-gutter) - 2px) 2px;
 		/* Paper, not card. The bottom nav is now continuous with the page,
 		   and a white strip at the top would reinstate exactly the seam
 		   the nav just lost. The context band above still does the
@@ -120,5 +120,22 @@
 		background: var(--tone-brand-tint);
 		box-shadow: inset 0 0 0 1.5px var(--tone-brand);
 		color: var(--tone-brand);
+	}
+
+	@media (min-width: 48rem) {
+		header {
+			width: 100%;
+			max-width: var(--shell-width);
+			margin-inline: auto;
+			padding: 12px var(--shell-gutter) 0;
+		}
+		.sph {
+			min-height: var(--tap-min);
+		}
+		.act {
+			width: 40px;
+			height: 40px;
+			flex: none;
+		}
 	}
 </style>

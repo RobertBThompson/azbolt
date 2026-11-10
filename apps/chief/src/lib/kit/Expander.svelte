@@ -1,21 +1,5 @@
 <script>
 	/**
-	 * A stage panel on Today: a raised card with a coloured left edge and
-	 * a heading that opens.
-	 *
-	 * The left edge is the section's identity and is the one part that
-	 * stays visible when the panel is closed, so a glance down the page
-	 * reads as three stages whether they are open or not. The raise is
-	 * what separates stages from the rows inside them — the page has two
-	 * levels, and shadow is what says which is which.
-	 *
-	 * Built on <details>/<summary> rather than a button and a boolean.
-	 * The native element already answers to Enter and Space, announces
-	 * its own expanded state, and is findable by in-page search while
-	 * closed — all of which a hand-rolled accordion has to reimplement
-	 * and usually doesn't.
-	 */
-	/**
 	 * @type {{
 	 *   label: string,
 	 *   icon?: string,
@@ -42,29 +26,45 @@
 	const c = $derived(tone(t));
 </script>
 
-<details class="panel" class:lead {open} style="--t-ink:{c.ink}; --t-tint:{c.tint}">
-	<summary>
-		{#if icon}
-			<span class="glyph"><Icon name={icon} size={17} /></span>
-		{/if}
-		<span class="titles">
-			<span class="label">{label}</span>
-			{#if lede}<span class="lede">{lede}</span>{/if}
-		</span>
-		{#if count !== null}<span class="count">{count}</span>{/if}
-		<span class="chev" aria-hidden="true"></span>
-	</summary>
+{#snippet glyph()}
+	{#if icon}
+		<span class="glyph"><Icon name={icon} size={17} /></span>
+	{/if}
+{/snippet}
+
+{#snippet content()}
 	<div class="body">
 		{@render children()}
 	</div>
-</details>
+{/snippet}
+
+{#if lead}
+	<section class="panel lead" style="--t-ink:{c.ink}">
+		<header class="head">
+			{@render glyph()}
+			<div class="titles">
+				<h2 class="label">{label}</h2>
+				{#if lede}<span class="lede">{lede}</span>{/if}
+			</div>
+		</header>
+		{@render content()}
+	</section>
+{:else}
+	<details class="panel" {open} style="--t-ink:{c.ink}; --t-tint:{c.tint}">
+		<summary class="head">
+			{@render glyph()}
+			<span class="titles">
+				<span class="label">{label}</span>
+				{#if lede}<span class="lede">{lede}</span>{/if}
+			</span>
+			{#if count !== null}<span class="count">{count}</span>{/if}
+			<span class="chev" aria-hidden="true"></span>
+		</summary>
+		{@render content()}
+	</details>
+{/if}
 
 <style>
-	/* Two levels, deliberately. Hierarchy comes from size and value, not
-	   from shadow: paper and card sit about 4% apart in lightness, so no
-	   amount of elevation was ever going to separate them. The leading
-	   section carries its tone as a filled header with white on it; the
-	   others shrink to a single compact line. */
 	.panel {
 		background: var(--card);
 		border: 1px solid var(--line-3);
@@ -75,15 +75,21 @@
 		overflow: hidden;
 		box-shadow: 0 1px 2px rgba(30, 26, 24, 0.04);
 	}
-	summary {
+	.head {
 		display: flex;
 		align-items: center;
 		gap: 10px;
 		min-height: 54px;
 		padding: 7px 13px;
+		background: var(--t-tint);
+	}
+	summary {
 		cursor: pointer;
 		list-style: none;
-		background: var(--t-tint);
+	}
+	summary:focus-visible {
+		outline: 2px solid var(--t-ink);
+		outline-offset: -3px;
 	}
 	summary::-webkit-details-marker {
 		display: none;
@@ -163,7 +169,7 @@
 			0 3px 6px rgba(30, 26, 24, 0.1),
 			0 18px 36px rgba(30, 26, 24, 0.18);
 	}
-	.panel.lead summary {
+	.panel.lead .head {
 		min-height: 68px;
 		background: var(--t-ink);
 	}
@@ -185,16 +191,7 @@
 		width: 21px;
 		height: 21px;
 	}
-	.panel.lead .chev {
-		border-color: rgba(255, 255, 255, 0.8);
-	}
-	/* Inverted so a count stays legible on the filled header. */
-	.panel.lead .count {
-		background: #ffffff;
-		color: var(--t-ink);
-	}
-
-	/* ── Not leading: one compact line ───────────────────────────────── */
+	/* Keep the secondary panels compact on a phone. */
 	.panel:not(.lead) {
 		border-left-width: 3px;
 	}
@@ -215,5 +212,42 @@
 	}
 	.panel:not(.lead) .lede {
 		display: none;
+	}
+
+	@media (min-width: 48rem) {
+		.panel.lead {
+			border-radius: 14px;
+			box-shadow: 0 8px 24px rgba(30, 26, 24, 0.1);
+		}
+		.panel.lead .head {
+			min-height: 76px;
+			padding: 12px 16px;
+			background: linear-gradient(115deg, var(--app-accent-text), var(--t-ink));
+		}
+		.panel.lead .lede {
+			font-size: 13px;
+		}
+		.panel:not(.lead) summary {
+			min-height: 65px;
+			padding: 8px 13px;
+		}
+		.panel:not(.lead) .glyph {
+			width: 34px;
+			height: 34px;
+		}
+		.panel:not(.lead) .glyph :global(svg) {
+			width: 17px;
+			height: 17px;
+		}
+		.panel:not(.lead) .label {
+			font-size: 12px;
+		}
+		.panel:not(.lead) .lede {
+			display: block;
+			font-size: 12px;
+		}
+		.body {
+			padding: 14px;
+		}
 	}
 </style>
