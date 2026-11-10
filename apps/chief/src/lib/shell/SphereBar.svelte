@@ -11,8 +11,8 @@
 	import { shell } from '$lib/state.svelte.js';
 	import Icon from '$lib/kit/Icon.svelte';
 
-	/** @type {{ search?: boolean, back?: string|null, onSwitch?: (() => void)|null }} */
-	let { search = false, back = null, onSwitch = null } = $props();
+	/** @type {{ search?: boolean, back?: string|null }} */
+	let { search = false, back = null } = $props();
 	const sphere = $derived(SPHERES[shell.sphere] ?? SPHERES.all);
 </script>
 
@@ -25,10 +25,10 @@
 	{#if !back}
 		<img class="mark" src="/logo.png" alt="" width="26" height="26" />
 	{/if}
-	<button class="sph" onclick={onSwitch} aria-label="Switch sphere, currently {sphere.name}">
+	<a class="sph" href="/sphere/switch" aria-label="Switch sphere, currently {sphere.name}">
 		<span class="name">{sphere.name}</span>
 		<span class="caret" aria-hidden="true">▾</span>
-	</button>
+	</a>
 	<span class="spacer"></span>
 	{#if search}
 		<a class="act" href="/search" aria-label="Search"><Icon name="search" size={17} /></a>
@@ -70,6 +70,7 @@
 		text-decoration: none;
 	}
 	.sph {
+		text-decoration: none;
 		display: flex;
 		align-items: center;
 		gap: 6px;

@@ -27,7 +27,7 @@
 		trailing="↗"
 	/>
 	<Row
-		href="/sphere"
+		href="/sphere/switch"
 		title="Switch sphere"
 		meta="Family, Business, Church — the area you are in"
 		trailing="↗"
