@@ -7,6 +7,10 @@ export default {
 		sveltekit(),
 		SvelteKitPWA({
 			registerType: 'autoUpdate',
+			// Same reason as the manifest link in app.html: with a single
+			// 200.html fallback there is no page to inject into, so the
+			// registration is imported from the root layout instead.
+			injectRegister: null,
 			manifest: manifest({
 				slug: 'chief',
 				name: 'Chief',

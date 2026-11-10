@@ -69,7 +69,13 @@
 </div>
 
 <style>
+	/* One size for every switch in the app. 75% on a phone so it reads as
+	   a control over the page rather than another band of content; a
+	   fixed width on the left at desktop, where centring it in a wide
+	   column would leave it stranded. */
 	.track {
+		width: 75%;
+		margin: 0 auto;
 		display: flex;
 		gap: 4px;
 		padding: 4px;
@@ -90,16 +96,24 @@
 		border-radius: 999px;
 		background: transparent;
 		font-family: inherit;
-		font-size: 14.5px;
+		font-size: 14px;
 		font-weight: 600;
 		color: var(--ink-3);
 		cursor: pointer;
+		white-space: nowrap;
 	}
 	.on {
 		background: var(--brand-wine);
 		color: #ffffff;
 		box-shadow: 0 1px 3px rgba(30, 26, 24, 0.18);
 	}
+	@media (min-width: 900px) {
+		.track {
+			width: 340px;
+			margin-left: 0;
+		}
+	}
+
 	@media (prefers-reduced-motion: no-preference) {
 		button {
 			transition:

@@ -3,10 +3,21 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-		<meta name="theme-color" content="#efece6" />
+		<meta name="theme-color" content="#efebe7" />
+		<!--
+			The manifest link is written here rather than left to the PWA
+			plugin. This app builds to a single 200.html fallback with
+			prerendering off, so there is no generated page for the plugin
+			to inject into — the manifest was being emitted and then never
+			referenced, which is why nothing ever offered to install it.
+		-->
+		<link rel="manifest" href="%sveltekit.assets%/manifest.webmanifest" />
 		<link rel="icon" href="%sveltekit.assets%/icons/icon-192.png" />
 		<link rel="apple-touch-icon" href="%sveltekit.assets%/icons/icon-192.png" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-title" content="Chief" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="default" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link

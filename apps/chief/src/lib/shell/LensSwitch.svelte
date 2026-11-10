@@ -33,7 +33,13 @@
 </nav>
 
 <style>
+	/* One size for every switch in the app. 75% on a phone so it reads as
+	   a control over the page rather than another band of content; a
+	   fixed width on the left at desktop, where centring it in a wide
+	   column would leave it stranded. */
 	.track {
+		width: 75%;
+		margin: 0 auto;
 		display: flex;
 		gap: 4px;
 		padding: 4px;
@@ -51,10 +57,11 @@
 		gap: 7px;
 		min-height: 40px;
 		border-radius: 999px;
-		font-size: 14.5px;
+		font-size: 14px;
 		font-weight: 600;
 		color: var(--ink-3);
 		text-decoration: none;
+		white-space: nowrap;
 	}
 	.on {
 		background: var(--tone-brand);
@@ -63,7 +70,8 @@
 	}
 	@media (min-width: 900px) {
 		.track {
-			max-width: 380px;
+			width: 340px;
+			margin-left: 0;
 		}
 	}
 </style>
