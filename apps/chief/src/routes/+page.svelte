@@ -18,6 +18,7 @@
 	 * of someone whose only intent was to get a sentence out of their head.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
+	import LensSwitch from '$lib/shell/LensSwitch.svelte';
 	import { Banner, Expander, Icon, Row, StateSwitch, Stats } from '$lib/kit';
 	import { UNSPHERED } from '$lib/data.js';
 	import { page } from '$app/stores';
@@ -28,6 +29,13 @@
 	/** 0 = text, 1 = voice. Text is first because it needs no permission. */
 	let input = $state(0);
 	let draft = $state('');
+
+	/* The rest of the Sphere branch. Jot and Dash are what this screen
+	   does; Notes and Documents are where it keeps things. */
+	const SPHERE_LENSES = [
+		{ label: 'Notes', href: '/notes', icon: 'notes' },
+		{ label: 'Documents', href: '/documents', icon: 'doc' }
+	];
 
 	const queue = Object.entries(UNSPHERED);
 	const canThrow = $derived(draft.trim().length > 0);
@@ -74,16 +82,14 @@
 <svelte:head><title>Today · Chief</title></svelte:head>
 
 <Screen>
-	<div class="switch">
-		<StateSwitch
-			a="Jot"
-			b="Dash"
-			aIcon="spark"
-			bIcon="dash"
-			labelledby="Home view"
-			bind:active={view}
-		/>
-	</div>
+	<StateSwitch
+		a="Jot"
+		b="Dash"
+		aIcon="spark"
+		bIcon="dash"
+		labelledby="Home view"
+		bind:active={view}
+	/>
 
 	<header class="hello">
 		<h1>{greeting}</h1>
@@ -189,6 +195,8 @@
 					/>
 				</Expander>
 			</div>
+
+			<LensSwitch label="Sphere view" items={SPHERE_LENSES} at="/" />
 		</div>
 	{:else}
 		<p class="eyebrow date">{weekday} · {date}</p>
@@ -232,16 +240,6 @@
 </Screen>
 
 <style>
-	/* Narrower than the content it governs: it is a control over the page,
-	   not one of the page's own blocks, and full width made it read as a
-	   fourth section. */
-	.switch {
-		width: 75%;
-		/* Measured, not guessed: main's own gap is 9px, so 9 more here
-		   makes the real distance 18 — double. Same below the greeting. */
-		margin: 0 auto 9px;
-	}
-
 	/* No forced distribution. Spreading the slack to reach the nav put a
 	   hole in the middle of the page; one uniform rhythm puts whatever is
 	   left below the last section, beside the nav, where it reads as the
@@ -268,10 +266,6 @@
 		}
 		.rest {
 			gap: 16px;
-		}
-		.switch {
-			width: 320px;
-			margin-left: 0;
 		}
 	}
 

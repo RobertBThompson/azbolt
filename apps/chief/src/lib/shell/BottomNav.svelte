@@ -17,9 +17,10 @@
 	 * because "where am I" and "do the thing" are different questions and
 	 * two current items in one bar answers neither.
 	 *
-	 * Today stands apart from the other three by its mono caps, where the
-	 * rest are sentence case. It had a hairline beside it too, which read
-	 * as a stray mark rather than a divider once the icons arrived.
+	 * The labels share one treatment. Sphere used to be Today and carried
+	 * mono caps to set it apart, alongside a hairline; with icons on every
+	 * tab and a coloured rail under the current one, both were marking
+	 * something already marked twice over.
 	 */
 	import { page } from '$app/stores';
 	import Icon from '$lib/kit/Icon.svelte';
@@ -27,7 +28,7 @@
 	/* Curve y at each icon centre, for a 390-wide viewBox with a 56px
 	   centre column. Solved from M0 32 C 74 32, 112 4, 195 4. */
 	const left = [
-		{ label: 'Today', href: '/', icon: 'today', y: 29 },
+		{ label: 'Sphere', href: '/', icon: 'globe', y: 29 },
 		{ label: 'Action', href: '/work', icon: 'action', y: 11 }
 	];
 	const right = [
@@ -36,12 +37,15 @@
 	];
 
 	/**
-	 * Today owns '/' exactly; the others own their whole subtree.
+	 * Sphere owns '/' exactly; the others own their whole subtree.
 	 * @param {string} href
 	 */
 	function active(href) {
 		const path = $page.url.pathname;
-		return href === '/' ? path === '/' : path === href || path.startsWith(href + '/');
+		if (href !== '/') return path === href || path.startsWith(href + '/');
+		// Notes and Documents live in the Sphere branch without living
+		// under its path, so Sphere stays current while they are open.
+		return path === '/' || path === '/notes' || path === '/documents';
 	}
 </script>
 
@@ -63,12 +67,7 @@
 	<div class="row">
 		{#each left as tab, i (tab.href)}
 			{@const on = active(tab.href)}
-			<a
-				href={tab.href}
-				class:today={i === 0}
-				style="--y:{tab.y}px"
-				aria-current={on ? 'page' : undefined}
-			>
+			<a href={tab.href} style="--y:{tab.y}px" aria-current={on ? 'page' : undefined}>
 				<span class="glyph" class:on><Icon name={tab.icon} size={19} /></span>
 				<span class="label" class:on>{tab.label}</span>
 				<span class="rail" class:on aria-hidden="true"></span>
@@ -151,19 +150,13 @@
 		background: var(--tone-brand);
 	}
 	.label {
-		font-size: 10.5px;
+		font-size: 11.5px;
 		font-weight: 600;
-		letter-spacing: 0.01em;
+		letter-spacing: 0.005em;
 		color: var(--ink-3);
 	}
 	.label.on {
 		color: var(--tone-brand);
-	}
-	.today .label {
-		font-family: var(--font-mono);
-		font-size: 10px;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
 	}
 
 	/* The mark sits on the crest, overlapping the curve it rises from. */
@@ -229,8 +222,7 @@
 			min-height: 46px;
 			border-radius: 11px;
 		}
-		.label,
-		.today .label {
+		.label {
 			font-family: var(--font-sans);
 			font-size: 14px;
 			font-weight: 600;
