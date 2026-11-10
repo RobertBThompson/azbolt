@@ -19,10 +19,15 @@
 	 * and falls back to the design fixtures otherwise, saying which it used.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import DirectorySwitch from '$lib/shell/DirectorySwitch.svelte';
+	import LensSwitch from '$lib/shell/LensSwitch.svelte';
 	import { Alert, Field, Row, Btn, SourceNote, EmptyLive, SphereTags } from '$lib/kit';
 	import { listPeople, seedDirectory } from '$lib/pb.js';
 	import { sphereOf } from '$lib/spheres.js';
+
+	const LENSES = [
+		{ label: 'People', href: '/people', icon: 'people' },
+		{ label: 'Organizations', href: '/organizations', icon: 'sphere' }
+	];
 
 	let load = $state(listPeople());
 	let sphere = $state('all');
@@ -51,7 +56,7 @@
 <svelte:head><title>People · Chief</title></svelte:head>
 
 <Screen search>
-	<DirectorySwitch at="people" />
+	<LensSwitch label="Directory view" items={LENSES} at="/people" />
 	<Field label="Search people" placeholder="Name, role, sphere" bind:value={query} />
 
 	{#await load}

@@ -14,10 +14,15 @@
 	 * of any type may work across several.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import DirectorySwitch from '$lib/shell/DirectorySwitch.svelte';
+	import LensSwitch from '$lib/shell/LensSwitch.svelte';
 	import { Alert, Btn, Field, SourceNote, SphereTags, TypeBadge } from '$lib/kit';
 	import { ORGS } from '$lib/data.js';
 	import { orgType, perspective } from '$lib/orgtypes.js';
+
+	const LENSES = [
+		{ label: 'People', href: '/people', icon: 'people' },
+		{ label: 'Organizations', href: '/organizations', icon: 'sphere' }
+	];
 
 	let query = $state('');
 	let code = $state('all');
@@ -38,7 +43,7 @@
 <svelte:head><title>Organizations · Chief</title></svelte:head>
 
 <Screen search>
-	<DirectorySwitch at="organizations" />
+	<LensSwitch label="Directory view" items={LENSES} at="/organizations" />
 	<Field label="Search organizations" placeholder="Name, purpose, sphere" bind:value={query} />
 
 	<div class="filter" role="group" aria-label="Filter by organization type">

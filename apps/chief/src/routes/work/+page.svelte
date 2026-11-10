@@ -5,7 +5,13 @@
 	 * first-class tab because blocked work is what people lose track of.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
+	import LensSwitch from '$lib/shell/LensSwitch.svelte';
 	import { Tabs, Banner, Row, Btn } from '$lib/kit';
+
+	const LENSES = [
+		{ label: 'Tasks', href: '/work', icon: 'task' },
+		{ label: 'Endeavors', href: '/work/endeavors', icon: 'action' }
+	];
 
 	let active = $state(0);
 </script>
@@ -13,6 +19,7 @@
 <svelte:head><title>Work · Chief</title></svelte:head>
 
 <Screen>
+	<LensSwitch label="Action view" items={LENSES} at="/work" />
 	<Tabs items={['Now', 'Next', 'Waiting', 'Done']} {active} onpick={(i) => (active = i)} />
 	<Banner t="ai" title="2 items placed by AI" meta="Approved from your last jot." />
 	<Row
@@ -30,7 +37,6 @@
 		trailing="›"
 	/>
 	<Row t="cool" title="Review storage process" meta="Waiting on Daniel · 4 days" trailing="›" />
-	<Row t="cool" href="/work/endeavors" title="Endeavors" meta="3 active" trailing="›" />
 	<Row t="cool" href="/work/calendar" title="Day & week" meta="Calendar view" trailing="›" />
 	<Btn primary={false} href="/work/tasks/new" label="New task" />
 </Screen>
