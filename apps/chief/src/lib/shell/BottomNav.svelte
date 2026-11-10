@@ -120,9 +120,22 @@
 <style>
 	nav {
 		flex: none;
-		position: relative;
+		/* Sticky rather than fixed: it keeps its place in the flow, so
+		   nothing has to reserve space for it and the last row of a long
+		   page is never hidden underneath. It simply stops scrolling
+		   away. */
+		position: sticky;
+		bottom: 0;
+		z-index: 5;
 		height: calc(var(--nav) + env(safe-area-inset-bottom));
 		padding-bottom: env(safe-area-inset-bottom);
+		/* Translucent so a long page reads through it, with a blur so the
+		   labels stay legible over whatever is passing underneath.
+		   Backdrop-filter is unevenly supported, hence the opaque-enough
+		   base colour underneath it. */
+		background-color: color-mix(in srgb, var(--paper) 86%, transparent);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
 		/* The SVG stops at the bar's own height; this paints the home
 		   indicator strip beneath it in the same wash, so the surface does
 		   not end in a line part-way down the gesture area. */
@@ -148,7 +161,7 @@
 		height: var(--nav);
 		display: grid;
 		/* Sphere | Action | mark + quick | People | Asset */
-		grid-template-columns: repeat(2, 1fr) 84px repeat(2, 1fr);
+		grid-template-columns: repeat(2, 1fr) 108px repeat(2, 1fr);
 		align-items: start;
 	}
 	a {
@@ -190,14 +203,16 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 5px;
+		gap: 10px;
 	}
 	/* Two discs under the mark. Dark blue so they read as actions against
 	   the tabs' plain glyphs, and small enough that the mark stays the
 	   thing your eye lands on. */
 	.quick {
 		display: flex;
-		gap: 7px;
+		/* Wide enough that the two read as a pair flanking the mark
+		   rather than a stack under it. */
+		gap: 26px;
 	}
 	.quick a {
 		width: 28px;
@@ -259,7 +274,11 @@
 			padding: 26px 0 0;
 			position: sticky;
 			top: 0;
+			bottom: auto;
 			background-image: none;
+			background-color: transparent;
+			backdrop-filter: none;
+			-webkit-backdrop-filter: none;
 		}
 		/* The wave belongs to an edge of the screen. There is no edge here. */
 		.curve {

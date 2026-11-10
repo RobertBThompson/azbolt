@@ -31,7 +31,7 @@
 	/** @param {string} key */
 	function pick(key) {
 		shell.sphere = key;
-		goto('/');
+		goto('/sphere');
 	}
 </script>
 

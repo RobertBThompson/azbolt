@@ -11,7 +11,7 @@
 
 <svelte:head><title>Business plan · Chief</title></svelte:head>
 
-<Screen back="/records" nav={false}>
+<Screen back="/sphere" nav={false}>
 	<Banner
 		t="cool"
 		title="Azbolt · 9 of 11 sections covered"
