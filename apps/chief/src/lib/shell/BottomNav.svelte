@@ -17,8 +17,9 @@
 	 * because "where am I" and "do the thing" are different questions and
 	 * two current items in one bar answers neither.
 	 *
-	 * Today stands apart from the other three: its own group behind a
-	 * hairline, mono caps where the rest are sentence case.
+	 * Today stands apart from the other three by its mono caps, where the
+	 * rest are sentence case. It had a hairline beside it too, which read
+	 * as a stray mark rather than a divider once the icons arrived.
 	 */
 	import { page } from '$app/stores';
 	import Icon from '$lib/kit/Icon.svelte';
@@ -72,7 +73,6 @@
 				<span class="label" class:on>{tab.label}</span>
 				<span class="rail" class:on aria-hidden="true"></span>
 			</a>
-			{#if i === 0}<span class="rule" aria-hidden="true"></span>{/if}
 		{/each}
 
 		<a href="/?throw" class="jot" aria-label="Throw a jot">
@@ -121,17 +121,9 @@
 		position: relative;
 		height: var(--nav);
 		display: grid;
-		/* Today | rule | Action | mark | People | Asset */
-		grid-template-columns: 1fr auto 1fr 56px 1fr 1fr;
+		/* Today | Action | mark | People | Asset */
+		grid-template-columns: repeat(2, 1fr) 56px repeat(2, 1fr);
 		align-items: start;
-	}
-	.rule {
-		justify-self: center;
-		width: 1px;
-		height: 17px;
-		margin-top: 34px;
-		background: var(--line);
-		opacity: 0.8;
 	}
 	a {
 		display: flex;
@@ -219,9 +211,6 @@
 		}
 		/* The wave belongs to an edge of the screen. There is no edge here. */
 		.curve {
-			display: none;
-		}
-		.rule {
 			display: none;
 		}
 		.row {

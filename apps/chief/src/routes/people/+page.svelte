@@ -11,13 +11,23 @@
 	 * never offers an empty result, and it includes invented ones like
 	 * "Australian Rugby" the moment a person is put there.
 	 *
+	 * Every person is an Organization — type C in the Build vocabulary —
+	 * so this is not a different kind of record from the Organizations
+	 * lens beside it. It is the Directory filtered to the individuals.
+	 *
 	 * Reads from PocketBase when one is reachable and a session is live,
 	 * and falls back to the design fixtures otherwise, saying which it used.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
+	import LensSwitch from '$lib/shell/LensSwitch.svelte';
 	import { Alert, Field, Row, Btn, SourceNote, EmptyLive, SphereTags } from '$lib/kit';
 	import { listPeople, seedDirectory } from '$lib/pb.js';
 	import { sphereOf } from '$lib/spheres.js';
+
+	const LENSES = [
+		{ label: 'People', href: '/people', icon: 'people' },
+		{ label: 'Organizations', href: '/organizations', icon: 'sphere' }
+	];
 
 	let load = $state(listPeople());
 	let sphere = $state('all');
@@ -46,6 +56,7 @@
 <svelte:head><title>People · Chief</title></svelte:head>
 
 <Screen search>
+	<LensSwitch label="Directory view" items={LENSES} at="/people" />
 	<Field label="Search people" placeholder="Name, role, sphere" bind:value={query} />
 
 	{#await load}
@@ -95,13 +106,6 @@
 		/>
 	{/await}
 
-	<Row
-		t="cool"
-		href="/organizations"
-		title="Organizations"
-		meta="People, and groupings of people"
-		trailing="›"
-	/>
 	<Btn t="cool" href="/people/add" label="Add person" />
 </Screen>
 

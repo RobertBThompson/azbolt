@@ -22,7 +22,6 @@
 	import { UNSPHERED } from '$lib/data.js';
 	import { page } from '$app/stores';
 	import { replaceState } from '$app/navigation';
-	import { tick } from 'svelte';
 
 	/** 0 = Jot, 1 = Dash. */
 	let view = $state(0);
@@ -33,21 +32,22 @@
 	const queue = Object.entries(UNSPHERED);
 	const canThrow = $derived(draft.trim().length > 0);
 
-	/** @type {HTMLTextAreaElement|null} */
-	let box = $state(null);
 	/** Lifts the composer's border while typing, since it is now one field. */
 	let focused = $state(false);
 
 	/**
 	 * The mark in the nav arrives here as /?throw. Honour it by showing
-	 * Jot and putting the cursor in the box, then drop the parameter so
-	 * a back press does not re-fire it and a reload is just Today.
+	 * Jot, then drop the parameter so a back press does not re-fire it
+	 * and a reload is just Today.
+	 *
+	 * It deliberately does not focus the box. Focusing opens the keyboard
+	 * on arrival, covering half the screen before anyone has decided to
+	 * type — and the mark is also how you simply get home.
 	 */
 	$effect(() => {
 		if (!$page.url.searchParams.has('throw')) return;
 		view = 0;
 		input = 0;
-		tick().then(() => box?.focus());
 		replaceState('/', {});
 	});
 
@@ -111,7 +111,6 @@
 					{#if input === 0}
 						<textarea
 							rows="3"
-							bind:this={box}
 							bind:value={draft}
 							onfocus={() => (focused = true)}
 							onblur={() => (focused = false)}

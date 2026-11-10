@@ -5,8 +5,14 @@
 	 * progress bars tells you nothing you can act on.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
+	import LensSwitch from '$lib/shell/LensSwitch.svelte';
 	import { Hero, Banner, Tabs, Row, Seg, Alert, Btn, Note } from '$lib/kit';
 	import { page } from '$app/stores';
+
+	const LENSES = [
+		{ label: 'Tasks', href: '/work', icon: 'task' },
+		{ label: 'Endeavors', href: '/work/endeavors', icon: 'action' }
+	];
 
 	let active = $state(0);
 	let keep = $state(0);
@@ -15,7 +21,9 @@
 
 <svelte:head><title>Endeavors · Chief</title></svelte:head>
 
-<Screen back="/work" nav={false}>
+<Screen>
+	<LensSwitch label="Action view" items={LENSES} at="/work/endeavors" />
+
 	{#if view === 'empty'}
 		<!-- The empty state is the glossary: this is where the word
 		     "endeavor" is finally introduced, with right and wrong phrasing. -->

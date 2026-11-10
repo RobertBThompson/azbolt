@@ -104,7 +104,7 @@ export function listOrganizations() {
 				id,
 				name: o.name,
 				meta: o.blurb,
-				kind: 'company'
+				kind: o.code
 			}))
 	);
 }
@@ -151,10 +151,10 @@ export async function seedDirectory() {
 	for (const [key, o] of Object.entries(ORGS)) {
 		const row = await pb.collection('organizations').create({
 			name: o.name,
-			kind: 'company',
+			kind: o.code,
 			blurb: o.blurb,
 			swatch: 'solid',
-			hue: o.context ?? '',
+			hue: o.spheres[0] ?? '',
 			owner
 		});
 		orgIds[key] = row.id;

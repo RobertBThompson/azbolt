@@ -129,119 +129,206 @@ export const PEOPLE = {
 };
 
 /**
- * context is null for an organization that belongs to no sphere of the
- * Chief's own, and a row has no href when it is not yet a destination.
+ * Organizations, in the Lexicon's terms.
+ *
+ * Every one carries a type code from the C–CN vocabulary, a charter
+ * (its intension), the life Spheres it operates in, its members with
+ * their membership roles, and its two capacities stated separately:
+ * Asset Rights — what it may hold and claim — and Action Stewardship —
+ * what it is answerable for having done. An Organization may steward
+ * actions over Assets it holds no right in, which is why the two are
+ * never collapsed into one list.
+ *
+ * resolution is a state, not a species: a proposed Organization is a
+ * real record that can accumulate evidence and later resolve.
+ *
+ * Perspective (Me / You / Us / Them) is deliberately absent. It is
+ * contextual and derived from membership, never stored here.
  *
  * @type {Record<string, {
- *   name: string, context: string|null, blurb: string,
- *   stats: [string, string][],
- *   rows: { t: string, m: string, x: string, href?: string, tone: string }[]
+ *   name: string, code: string, charter: string, blurb: string,
+ *   spheres: string[], resolution: string,
+ *   members: { who: string, role: string, kind: string }[],
+ *   rights: string[], stewardship: string[],
+ *   controls?: string[], controlledBy?: string|null
  * }>}
  */
 export const ORGS = {
-	azbolt: {
-		name: 'Azbolt',
-		context: 'azbolt',
-		blurb: 'Software company · active sphere',
-		stats: [
-			['12', 'People'],
-			['8', 'Assets'],
-			['4', 'Endeavors']
-		],
-		rows: [
-			{
-				t: 'Ownership',
-				m: 'TN Holdings owns Azbolt',
-				x: '↗',
-				href: '/records/ownership',
-				tone: 'warm'
-			},
-			{
-				t: 'Business plan',
-				m: 'Strong on 6 of 11 sections',
-				x: '↗',
-				href: '/records/plans/overview',
-				tone: 'cool'
-			}
-		]
-	},
 	tn: {
 		name: 'TN Holdings',
-		context: 'tn',
-		blurb: 'Holding company · owns 4 entities',
-		stats: [
-			['4', 'Entities'],
-			['—', 'Assets'],
-			['1', 'Endeavors']
+		code: 'B',
+		charter: 'Hold and steward the family\u2019s assets across generations',
+		blurb: 'Parent holding company',
+		spheres: ['family', 'business'],
+		resolution: 'known',
+		members: [
+			{ who: 'me', role: 'owner', kind: 'person' },
+			{ who: 'june', role: 'owner', kind: 'person' }
 		],
-		rows: [
-			{
-				t: 'Ownership',
-				m: 'Root of the ownership tree',
-				x: '↗',
-				href: '/records/ownership',
-				tone: 'warm'
-			},
-			{
-				t: 'Business plan',
-				m: 'Coverage not started',
-				x: '↗',
-				href: '/records/plans',
-				tone: 'cool'
-			}
-		]
+		rights: ['Title', 'Transfer', 'Receive income', 'Pledge'],
+		stewardship: ['Direct', 'Approve', 'Account for'],
+		controls: ['azbolt', 'save'],
+		controlledBy: null
 	},
-	eagle: {
-		name: 'Eagle DAO',
-		context: null,
-		blurb: 'DAO · decentralised work network',
-		stats: [
-			['—', 'Members'],
-			['—', 'Endeavors'],
-			['1', 'Treasury']
+	azbolt: {
+		name: 'Azbolt',
+		code: 'B',
+		charter: 'Build and run the Build Suite as a for-profit software company',
+		blurb: 'Software company',
+		spheres: ['business', 'career'],
+		resolution: 'known',
+		members: [
+			{ who: 'me', role: 'owner', kind: 'person' },
+			{ who: 'carmen', role: 'operations', kind: 'person' },
+			{ who: 'dev', role: 'co-founder', kind: 'person' }
 		],
-		rows: [
-			{
-				t: 'Governance',
-				m: 'Member proposals · shared signing',
-				x: '↗',
-				href: '/records/structure',
-				tone: 'cool'
-			},
-			{
-				t: 'Ownership',
-				m: 'Member-governed · no parent',
-				x: '↗',
-				href: '/records/ownership',
-				tone: 'warm'
-			},
-			{ t: 'Rewards', m: 'Contribution rewards active', x: '›', tone: 'warm' }
-		]
+		rights: ['Title', 'License', 'Receive income', 'Modify'],
+		stewardship: ['Direct', 'Perform', 'Report'],
+		controls: [],
+		controlledBy: 'tn'
 	},
 	save: {
 		name: 'SAVE',
-		context: null,
-		blurb: 'Nonprofit · charity projects',
-		stats: [
-			['—', 'People'],
-			['—', 'Projects'],
-			['—', 'Assets']
+		code: 'DN',
+		charter: 'Carry the charitable work of the family holding',
+		blurb: 'Nonprofit arm of TN Holdings',
+		spheres: ['stewardship', 'community'],
+		resolution: 'known',
+		members: [{ who: 'me', role: 'trustee', kind: 'person' }],
+		rights: ['Receive income', 'Use', 'Benefit'],
+		stewardship: ['Safeguard', 'Consecrate', 'Report'],
+		controls: [],
+		controlledBy: 'tn'
+	},
+	eagle: {
+		name: 'Club Eagle DAO',
+		code: 'DO',
+		charter: 'Design and build without central control',
+		blurb: 'Decentralized development body',
+		spheres: ['business'],
+		resolution: 'known',
+		members: [
+			{ who: 'me', role: 'contributor', kind: 'person' },
+			{ who: 'dev', role: 'contributor', kind: 'person' }
 		],
-		rows: [
-			{ t: 'Oversight', m: 'Board-governed', x: '↗', href: '/records/structure', tone: 'cool' },
-			{ t: 'Funding', m: 'Donations and grants', x: '›', tone: 'warm' },
-			{
-				t: 'Business plan',
-				m: 'Coverage not started',
-				x: '↗',
-				href: '/records/plans',
-				tone: 'cool'
-			}
-		]
+		rights: ['Voting', 'Access', 'Benefit'],
+		stewardship: ['Propose', 'Perform', 'Delegate'],
+		controls: [],
+		controlledBy: null
+	},
+	circle: {
+		name: 'Circle of Friends',
+		code: 'CO',
+		charter: 'Hold things in common among friends without a controlling entity',
+		blurb: 'Common organization',
+		spheres: ['community', 'hobby'],
+		resolution: 'known',
+		members: [
+			{ who: 'me', role: 'member', kind: 'person' },
+			{ who: 'sofia', role: 'member', kind: 'person' },
+			{ who: 'koa', role: 'member', kind: 'person' }
+		],
+		rights: ['Use', 'Access'],
+		stewardship: ['Contribute', 'Safeguard'],
+		controls: [],
+		controlledBy: null
+	},
+	ward: {
+		name: 'Cottonwood Ward',
+		code: 'CN',
+		charter: 'The ecclesiastical body this household belongs to',
+		blurb: 'Congregation',
+		spheres: ['church'],
+		resolution: 'known',
+		members: [
+			{ who: 'me', role: 'member', kind: 'person' },
+			{ who: 'bishop', role: 'bishop', kind: 'person' },
+			{ who: 'june', role: 'member', kind: 'person' }
+		],
+		rights: ['Receive income'],
+		stewardship: ['Direct', 'Safeguard', 'Account for'],
+		controls: [],
+		controlledBy: null
+	},
+	council: {
+		name: 'Ward Council',
+		code: 'CC',
+		charter: 'Deliberate and decide for the ward on welfare and service',
+		blurb: 'Committee of Cottonwood Ward',
+		spheres: ['church', 'stewardship'],
+		resolution: 'known',
+		members: [
+			{ who: 'bishop', role: 'chair', kind: 'person' },
+			{ who: 'me', role: 'member', kind: 'person' }
+		],
+		rights: [],
+		stewardship: ['Decide', 'Approve', 'Report'],
+		controls: [],
+		controlledBy: 'ward'
+	},
+	storage: {
+		name: 'Storage Build-out',
+		code: 'P',
+		charter: 'Coordinate the storage build until it is finished and handed over',
+		blurb: 'Project group',
+		spheres: ['business'],
+		resolution: 'known',
+		members: [
+			{ who: 'me', role: 'sponsor', kind: 'person' },
+			{ who: 'carmen', role: 'responsible', kind: 'person' }
+		],
+		rights: ['Use'],
+		stewardship: ['Direct', 'Perform', 'Account for'],
+		controls: [],
+		controlledBy: 'azbolt'
+	},
+	bank: {
+		name: 'Deseret First',
+		code: 'B',
+		charter: 'The lender holding the house note',
+		blurb: 'Counterparty \u2014 not a body you belong to',
+		spheres: ['family'],
+		resolution: 'known',
+		members: [],
+		rights: ['Receive income', 'Pledge', 'Exclude'],
+		stewardship: ['Account for'],
+		controls: [],
+		controlledBy: null
+	},
+	fifita: {
+		name: 'Fifita Rugby Club',
+		code: 'CO',
+		charter: 'Run the club and its season',
+		blurb: 'Koa\u2019s club \u2014 known, not joined',
+		spheres: ['australian rugby'],
+		resolution: 'known',
+		members: [{ who: 'koa', role: 'captain', kind: 'person' }],
+		rights: ['Use'],
+		stewardship: ['Direct', 'Perform'],
+		controls: [],
+		controlledBy: null
+	},
+	ame: {
+		name: 'AME',
+		code: 'DO',
+		charter: 'An international reserve and exchange body; governance still open',
+		blurb: 'Proposed \u2014 governance undecided',
+		spheres: ['business'],
+		resolution: 'proposed',
+		members: [{ who: 'me', role: 'proposer', kind: 'person' }],
+		rights: [],
+		stewardship: ['Propose'],
+		controls: [],
+		controlledBy: null
 	}
 };
 
-/** @type {Record<string, { name: string, outcome: string, progress: number, milestones: string, next: string, owner: string, due: string, stats: [string,string][] }>} */
+/**
+ * @type {Record<string, {
+ *   name: string, outcome: string, progress: number, milestones: string,
+ *   next: string, owner: string, due: string, stats: [string, string][]
+ * }>}
+ */
 export const ENDEAVORS = {
 	website: {
 		name: 'Website launch',
