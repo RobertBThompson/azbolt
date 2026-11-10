@@ -116,7 +116,10 @@ def main():
                      "presentable": True, "max": 120},
                     {"name": "kind", "type": "select", "required": True,
                      "maxSelect": 1,
-                     "values": ["company", "holding", "nonprofit", "dao", "personal"]},
+                     # Organization Type, the canonical Build vocabulary.
+                     # C is the only type capable of control.
+                     "values": ["C", "B", "CO", "CC", "DO", "DB",
+                                "P", "DN", "CN"]},
                     {"name": "blurb", "type": "text", "max": 240},
                     {"name": "swatch", "type": "select", "required": True,
                      "maxSelect": 1, "values": ["solid", "hatched", "split"]},

@@ -19,6 +19,7 @@ export { default as Row } from './Row.svelte';
 export { default as SectionHead } from './SectionHead.svelte';
 export { default as Seg } from './Seg.svelte';
 export { default as SourceNote } from './SourceNote.svelte';
+export { default as TypeBadge } from './TypeBadge.svelte';
 export { default as SphereTags } from './SphereTags.svelte';
 export { default as Stats } from './Stats.svelte';
 export { default as Tabs } from './Tabs.svelte';

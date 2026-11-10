@@ -170,3 +170,37 @@ to actions, people and assets.
 The collection once called `workspaces` holds organizations, so it is
 named `organizations`. There is no spheres collection yet, deliberately:
 the concept is still being worked out, and a schema would freeze it.
+
+## Organizations
+
+From the Build Lexicon, November 2026 Organization-Centric revision.
+
+**Organization is the single actor class.** Every person is an
+Organization of type **C**; the Directory's People lens is that class
+filtered to the individuals, not a different kind of record. The
+Organizations lens shows the bodies those individuals are tied together
+by. One switch, two lenses, one underlying class.
+
+**Organization Type** is the canonical C–CN vocabulary in
+`orgtypes.js` — C, B, CO, CC, DO, DB, P, DN, CN. It is not a Sphere: a
+type says what kind of body is acting, a Sphere says which area of
+living it acts in, and one Organization of any type may work across
+several Spheres. The badge marks **C** differently because C is the only
+type capable of control, being the only type that is itself an
+intelligence; every other type governs how Cs are tied together.
+
+**The two capacities are never one list.** Asset Rights say what an
+Organization may hold and claim. Action Stewardship says what it is
+answerable for having done. An Organization can steward actions over
+Assets it holds no right in — a manager, a trustee, a committee — and
+hold rights in Assets it never touches. Collapsing them would lose the
+distinction that makes a manager not an owner, which is exactly the
+error the Lexicon flags in the historical `ownerType` field.
+
+**Perspective is derived, never stored.** Me, You, Us and Them are
+contextual roles. An Organization whose membership includes Me reads as
+Us; one that does not reads as Them. Nothing on the record says so.
+
+**Resolution is a state, not a species.** A proposed Organization —
+AME — is a real record that can accumulate evidence and resolve later
+without its history being rewritten.
