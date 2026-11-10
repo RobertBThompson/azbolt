@@ -18,11 +18,8 @@
 	 * of someone whose only intent was to get a sentence out of their head.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import LensSwitch from '$lib/shell/LensSwitch.svelte';
 	import { Banner, Expander, Icon, Row, StateSwitch, Stats } from '$lib/kit';
 	import { UNSPHERED } from '$lib/data.js';
-	import { page } from '$app/stores';
-	import { replaceState } from '$app/navigation';
 
 	/** 0 = Jot, 1 = Dash. */
 	let view = $state(0);
@@ -30,34 +27,11 @@
 	let input = $state(0);
 	let draft = $state('');
 
-	/* The rest of the Sphere branch. Jot and Dash are what this screen
-	   does; Notes and Documents are where it keeps things. */
-	const SPHERE_LENSES = [
-		{ label: 'Notes', href: '/notes', icon: 'notes' },
-		{ label: 'Documents', href: '/documents', icon: 'doc' }
-	];
-
 	const queue = Object.entries(UNSPHERED);
 	const canThrow = $derived(draft.trim().length > 0);
 
 	/** Lifts the composer's border while typing, since it is now one field. */
 	let focused = $state(false);
-
-	/**
-	 * The mark in the nav arrives here as /?throw. Honour it by showing
-	 * Jot, then drop the parameter so a back press does not re-fire it
-	 * and a reload is just Today.
-	 *
-	 * It deliberately does not focus the box. Focusing opens the keyboard
-	 * on arrival, covering half the screen before anyone has decided to
-	 * type — and the mark is also how you simply get home.
-	 */
-	$effect(() => {
-		if (!$page.url.searchParams.has('throw')) return;
-		view = 0;
-		input = 0;
-		replaceState('/', {});
-	});
 
 	const now = new Date();
 	const hour = now.getHours();
@@ -195,8 +169,6 @@
 					/>
 				</Expander>
 			</div>
-
-			<LensSwitch label="Sphere view" items={SPHERE_LENSES} at="/" />
 		</div>
 	{:else}
 		<p class="eyebrow date">{weekday} · {date}</p>

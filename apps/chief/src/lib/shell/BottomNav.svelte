@@ -12,10 +12,16 @@
 	 * Today and Asset ride the low shoulders, Action and People ride
 	 * higher as the wave climbs toward the crest.
 	 *
-	 * The mark is a capture action, not a tab. It takes you to Throw It
-	 * on Today with the field focused, and it never claims aria-current,
-	 * because "where am I" and "do the thing" are different questions and
-	 * two current items in one bar answers neither.
+	 * The mark is home, and home is Jot. It is the centre of the bar
+	 * because capture is the thing this app is for, and putting the
+	 * brand and the home of the app in the same place costs a slot
+	 * nothing.
+	 *
+	 * Notes and Documents sit under it as two filled discs. They are
+	 * reachable from anywhere without spending one of the four tab slots
+	 * on either, and they are the only places in the bar drawn as
+	 * buttons rather than tabs — they go somewhere specific rather than
+	 * switching which branch you are in.
 	 *
 	 * The labels share one treatment. Sphere used to be Today and carried
 	 * mono caps to set it apart, alongside a hairline; with icons on every
@@ -28,7 +34,7 @@
 	/* Curve y at each icon centre, for a 390-wide viewBox with a 56px
 	   centre column. Solved from M0 32 C 74 32, 112 4, 195 4. */
 	const left = [
-		{ label: 'Sphere', href: '/', icon: 'globe', y: 29 },
+		{ label: 'Sphere', href: '/sphere', icon: 'globe', y: 29 },
 		{ label: 'Action', href: '/work', icon: 'action', y: 11 }
 	];
 	const right = [
@@ -42,10 +48,13 @@
 	 */
 	function active(href) {
 		const path = $page.url.pathname;
-		if (href !== '/') return path === href || path.startsWith(href + '/');
-		// Notes and Documents live in the Sphere branch without living
+		if (href === '/') return path === '/';
+		// Notes and Documents belong to the Sphere branch without living
 		// under its path, so Sphere stays current while they are open.
-		return path === '/' || path === '/notes' || path === '/documents';
+		if (href === '/sphere') {
+			return path.startsWith('/sphere') || path === '/notes' || path === '/documents';
+		}
+		return path === href || path.startsWith(href + '/');
 	}
 </script>
 
@@ -74,10 +83,28 @@
 			</a>
 		{/each}
 
-		<a href="/?throw" class="jot" aria-label="Throw a jot">
-			<img src="/logo.png" alt="" width="40" height="40" />
-			<span class="jot-label">Throw a jot</span>
-		</a>
+		<div class="centre">
+			<a href="/" class="jot" aria-label="Home" aria-current={active('/') ? 'page' : undefined}>
+				<img src="/logo.png" alt="" width="40" height="40" />
+				<span class="jot-label">Home</span>
+			</a>
+			<div class="quick">
+				<a
+					href="/notes"
+					aria-label="Notes"
+					aria-current={$page.url.pathname === '/notes' ? 'page' : undefined}
+				>
+					<Icon name="notes" size={15} />
+				</a>
+				<a
+					href="/documents"
+					aria-label="Documents"
+					aria-current={$page.url.pathname === '/documents' ? 'page' : undefined}
+				>
+					<Icon name="doc" size={15} />
+				</a>
+			</div>
+		</div>
 
 		{#each right as tab (tab.href)}
 			{@const on = active(tab.href)}
@@ -120,8 +147,8 @@
 		position: relative;
 		height: var(--nav);
 		display: grid;
-		/* Today | Action | mark | People | Asset */
-		grid-template-columns: repeat(2, 1fr) 56px repeat(2, 1fr);
+		/* Sphere | Action | mark + quick | People | Asset */
+		grid-template-columns: repeat(2, 1fr) 84px repeat(2, 1fr);
 		align-items: start;
 	}
 	a {
@@ -157,6 +184,38 @@
 	}
 	.label.on {
 		color: var(--tone-brand);
+	}
+
+	.centre {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 5px;
+	}
+	/* Two discs under the mark. Dark blue so they read as actions against
+	   the tabs' plain glyphs, and small enough that the mark stays the
+	   thing your eye lands on. */
+	.quick {
+		display: flex;
+		gap: 7px;
+	}
+	.quick a {
+		width: 28px;
+		height: 28px;
+		min-height: 28px;
+		min-width: 28px;
+		padding: 0;
+		border-radius: 50%;
+		display: grid;
+		place-items: center;
+		background: #26527d;
+		color: #ffffff;
+		box-shadow: 0 1px 3px rgba(30, 26, 24, 0.22);
+	}
+	.quick a[aria-current='page'] {
+		box-shadow:
+			0 0 0 2px var(--paper),
+			0 0 0 3.5px #26527d;
 	}
 
 	/* The mark sits on the crest, overlapping the curve it rises from. */
