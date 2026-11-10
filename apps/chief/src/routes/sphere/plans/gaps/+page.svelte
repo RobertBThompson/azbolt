@@ -10,11 +10,11 @@
 
 <svelte:head><title>Gaps · Chief</title></svelte:head>
 
-<Screen back="/records/plans/coverage" nav={false}>
+<Screen back="/sphere/plans/coverage" nav={false}>
 	<Banner t="ai" title="3 things still missing" meta="One question at a time. Answer or skip." />
 	<Row
 		t="ai"
-		href="/records/plans/question"
+		href="/sphere/plans/question"
 		title="1 · Who else does this?"
 		meta="Name two competitors"
 		trailing="›"
@@ -28,11 +28,11 @@
 	/>
 	<Row
 		t="ai"
-		href="/records/plans/question"
+		href="/sphere/plans/question"
 		title="3 · What could go wrong?"
 		meta="One sentence"
 		trailing="›"
 	/>
-	<Btn t="ai" href="/records/plans/question" label="Answer the first one" />
-	<Btn primary={false} href="/records/plans/export" label="Skip to the plan" />
+	<Btn t="ai" href="/sphere/plans/question" label="Answer the first one" />
+	<Btn primary={false} href="/sphere/plans/export" label="Skip to the plan" />
 </Screen>

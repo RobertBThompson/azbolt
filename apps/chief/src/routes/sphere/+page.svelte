@@ -31,10 +31,10 @@
 			tone: 'cool'
 		},
 		{
-			href: '/records/plans/overview',
+			href: '/sphere/plans',
 			icon: 'doc',
 			label: 'Business plans',
-			meta: 'The motor behind a sphere — career, household or company',
+			meta: 'Ties to an organization, and pushes out endeavors, tasks and assets',
 			tone: 'warm'
 		},
 		{

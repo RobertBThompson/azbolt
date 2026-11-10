@@ -35,11 +35,4 @@
 		meta="No changes since June"
 		trailing="›"
 	/>
-	<Row
-		t="cool"
-		href="/records/plans/overview"
-		title="Business plans"
-		meta="Azbolt · 2 gaps left"
-		trailing="›"
-	/>
 </Screen>

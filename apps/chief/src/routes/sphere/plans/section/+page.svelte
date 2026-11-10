@@ -11,13 +11,13 @@
 
 <svelte:head><title>Section review · Chief</title></svelte:head>
 
-<Screen back="/records/plans/coverage" nav={false}>
+<Screen back="/sphere/plans/coverage" nav={false}>
 	<Banner t="ai" title="Market — drafted" meta="Your words on top, my draft below. Edit either." />
 	<Note>“small logistics firms, mostly 5 to 40 trucks” — you, at 0:23</Note>
 	<Field
 		label="Draft"
 		value="Azbolt serves small logistics operators running fleets of five to forty vehicles, where scheduling is still done by phone..."
 	/>
-	<Btn t="ai" href="/records/plans/gaps" label="Accept this section" />
+	<Btn t="ai" href="/sphere/plans/gaps" label="Accept this section" />
 	<Btn primary={false} label="Rewrite it myself" />
 </Screen>

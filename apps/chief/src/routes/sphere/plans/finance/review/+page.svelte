@@ -11,11 +11,11 @@
 
 <svelte:head><title>Finance 4 of 4 · Chief</title></svelte:head>
 
-<Screen back="/records/plans/finance/runway" nav={false}>
+<Screen back="/sphere/plans/finance/runway" nav={false}>
 	<Prog t="cool" title="Does this look right?" value={1} meta="Step 4 of 4 · review" />
 	<Row t="cool" title="Income" meta="Recurring and one-off assumptions" trailing="›" />
 	<Row t="cool" title="Costs" meta="Recurring and planned assumptions" trailing="›" />
 	<Row t="cool" title="Runway" meta="About 4.5 months · from current cash" trailing="›" />
 	<Alert title="One assumption needs a source" meta="Other income has no linked record." />
-	<Btn t="cool" href="/records/plans/overview" label="Save finance section" />
+	<Btn t="cool" href="/sphere/plans/overview" label="Save finance section" />
 </Screen>

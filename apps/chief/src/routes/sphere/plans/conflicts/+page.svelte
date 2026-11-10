@@ -11,23 +11,23 @@
 
 <svelte:head><title>Needs review · Chief</title></svelte:head>
 
-<Screen back="/records/plans/overview" nav={false}>
+<Screen back="/sphere/plans/overview" nav={false}>
 	<Alert title="2 sections need review" meta="A source changed after these drafts were accepted." />
 	<Row
 		t="cool"
-		href="/records/plans/section"
+		href="/sphere/plans/section"
 		title="Market"
 		meta="Your braindump and a linked note disagree"
 		trailing="Review"
 	/>
 	<Row
 		t="cool"
-		href="/records/plans/finance/review"
+		href="/sphere/plans/finance/review"
 		title="Finance"
 		meta="Money data is newer than this section"
 		trailing="Review"
 	/>
 	<Row t="cool" title="Team" meta="Strong · Directory is current" trailing="›" />
-	<Btn t="cool" href="/records/plans/section" label="Review the first flag" />
+	<Btn t="cool" href="/sphere/plans/section" label="Review the first flag" />
 	<Note>No accepted sentence is rewritten until you approve the change.</Note>
 </Screen>
