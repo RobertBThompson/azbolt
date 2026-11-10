@@ -31,15 +31,18 @@
 	import { page } from '$app/stores';
 	import Icon from '$lib/kit/Icon.svelte';
 
-	/* Curve y at each icon centre, for a 390-wide viewBox with a 56px
-	   centre column. Solved from M0 32 C 74 32, 112 4, 195 4. */
+	/* Curve y at each icon centre, solved from the same cubic the SVG
+	   draws — M0 32 C 74 32, 112 4, 195 4 — for a 390-wide viewBox with
+	   a 108px centre column. These move when that column does: widening
+	   it to make room for the discs slid Action and People up the slope,
+	   which is what pulled them off the line. */
 	const left = [
-		{ label: 'Sphere', href: '/sphere', icon: 'globe', y: 29 },
-		{ label: 'Action', href: '/work', icon: 'action', y: 11 }
+		{ label: 'Sphere', href: '/sphere', icon: 'globe', y: 30 },
+		{ label: 'Action', href: '/work', icon: 'action', y: 15 }
 	];
 	const right = [
-		{ label: 'People', href: '/people', icon: 'people', y: 11 },
-		{ label: 'Asset', href: '/records', icon: 'asset', y: 29 }
+		{ label: 'People', href: '/people', icon: 'people', y: 15 },
+		{ label: 'Asset', href: '/records', icon: 'asset', y: 30 }
 	];
 
 	/**

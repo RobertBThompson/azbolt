@@ -11,7 +11,7 @@
 
 <svelte:head><title>Finance 1 of 4 · Chief</title></svelte:head>
 
-<Screen back="/records/plans/coverage" nav={false}>
+<Screen back="/sphere/plans/coverage" nav={false}>
 	<Prog t="cool" title="What comes in" value={0.25} meta="Step 1 of 4 · income" />
 	<Banner
 		t="cool"
@@ -20,6 +20,6 @@
 	/>
 	<Field label="Main revenue" placeholder="What customers pay for · $—" />
 	<Field label="Other income" placeholder="Grants, services or one-offs · $—" />
-	<Btn t="cool" href="/records/plans/finance/costs" label="Next: what goes out" />
-	<Btn primary={false} href="/records/plans/coverage" label="Save and stop" />
+	<Btn t="cool" href="/sphere/plans/finance/costs" label="Next: what goes out" />
+	<Btn primary={false} href="/sphere/plans/coverage" label="Save and stop" />
 </Screen>

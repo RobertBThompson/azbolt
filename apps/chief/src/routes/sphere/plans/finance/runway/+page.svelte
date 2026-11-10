@@ -12,7 +12,7 @@
 
 <svelte:head><title>Finance 3 of 4 · Chief</title></svelte:head>
 
-<Screen back="/records/plans/finance/costs" nav={false}>
+<Screen back="/sphere/plans/finance/costs" nav={false}>
 	<Prog t="cool" title="How long it lasts" value={0.75} meta="Step 3 of 4 · cash and runway" />
 	<Banner
 		t="cool"
@@ -21,6 +21,6 @@
 	/>
 	<Field label="Cash available" placeholder="Current usable cash · $—" />
 	<Row t="cool" title="Estimated runway" meta="About 4.5 months" trailing="›" />
-	<Btn t="cool" href="/records/plans/finance/review" label="Next: review assumptions" />
-	<Btn primary={false} href="/records/plans/coverage" label="Save and stop" />
+	<Btn t="cool" href="/sphere/plans/finance/review" label="Next: review assumptions" />
+	<Btn primary={false} href="/sphere/plans/coverage" label="Save and stop" />
 </Screen>

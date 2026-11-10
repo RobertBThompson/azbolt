@@ -11,7 +11,7 @@
 
 <svelte:head><title>Plan question · Chief</title></svelte:head>
 
-<Screen back="/records/plans/gaps" nav={false}>
+<Screen back="/sphere/plans/gaps" nav={false}>
 	<Banner
 		t="ai"
 		title="Who else does this?"
@@ -23,6 +23,6 @@
 	/>
 	<Row t="ai" title="Use as evidence" meta="Link a note or record · optional" trailing="↗" />
 	<Row t="ai" title="Updates" meta="Market · competition" trailing="1 section" />
-	<Btn t="ai" href="/records/plans/coverage" label="Save answer" />
-	<Btn primary={false} href="/records/plans/gaps" label="Skip for now" />
+	<Btn t="ai" href="/sphere/plans/coverage" label="Save answer" />
+	<Btn primary={false} href="/sphere/plans/gaps" label="Skip for now" />
 </Screen>

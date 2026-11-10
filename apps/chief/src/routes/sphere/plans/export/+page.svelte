@@ -12,7 +12,7 @@
 
 <svelte:head><title>Export · Chief</title></svelte:head>
 
-<Screen back="/records/plans" nav={false}>
+<Screen back="/sphere/plans" nav={false}>
 	<Chips t="warm" items={['PDF', 'Share link']} />
 	<Row t="warm" title="Sections" meta="9 of 11 included" trailing="›" />
 	<Row t="warm" title="Appendices" meta="Team, assets, cash summary" trailing="›" />

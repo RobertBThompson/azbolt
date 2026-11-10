@@ -10,11 +10,11 @@
 
 <svelte:head><title>Braindump · Chief</title></svelte:head>
 
-<Screen back="/records/plans" nav={false}>
+<Screen back="/sphere/plans" nav={false}>
 	<Wave
 		text="We sell workflow software to small logistics firms. Carmen runs ops. The biggest blocker is onboarding time..."
 	/>
 	<Banner t="ai" title="84 seconds" meta="Keep going, or stop whenever you like." />
-	<Btn t="ai" href="/records/plans/coverage" label="Done" />
+	<Btn t="ai" href="/sphere/plans/coverage" label="Done" />
 	<Note>Nothing is written to the plan yet. This is a recording, not an answer.</Note>
 </Screen>

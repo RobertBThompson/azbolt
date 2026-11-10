@@ -28,3 +28,7 @@ pnpm-debug.log*
 
 # Generated at build time by packages/pwa/bin/gen-icons.js
 apps/*/static/icons/
+# Chief's are not generated. They are cut from its own mark and have to
+# be committed, or the server builds an app whose home-screen icon is
+# whatever placeholder happens to be lying around.
+!apps/chief/static/icons/

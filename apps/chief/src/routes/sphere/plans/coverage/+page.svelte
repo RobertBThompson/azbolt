@@ -12,7 +12,7 @@
 
 <svelte:head><title>Coverage · Chief</title></svelte:head>
 
-<Screen back="/records/plans" nav={false}>
+<Screen back="/sphere/plans" nav={false}>
 	<Banner
 		t="ai"
 		title="I could fill 6 of 11 sections"
@@ -20,14 +20,14 @@
 	/>
 	<Row
 		t="ai"
-		href="/records/plans/section"
+		href="/sphere/plans/section"
 		title="Purpose & offer"
 		meta="Strong · from your words"
 		trailing="●●●"
 	/>
 	<Row
 		t="ai"
-		href="/records/plans/section"
+		href="/sphere/plans/section"
 		title="Market"
 		meta="Thin · one sentence"
 		trailing="●○○"
@@ -35,10 +35,10 @@
 	<Row t="ai" title="Team" meta="Strong · from Directory" trailing="●●●" />
 	<Row
 		t="ai"
-		href="/records/plans/finance/income"
+		href="/sphere/plans/finance/income"
 		title="Finance"
 		meta="Nothing yet · needs numbers"
 		trailing="○○○"
 	/>
-	<Btn t="ai" href="/records/plans/section" label="Review the drafts" />
+	<Btn t="ai" href="/sphere/plans/section" label="Review the drafts" />
 </Screen>

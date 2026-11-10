@@ -11,7 +11,7 @@
 
 <svelte:head><title>Finance 2 of 4 · Chief</title></svelte:head>
 
-<Screen back="/records/plans/finance/income" nav={false}>
+<Screen back="/sphere/plans/finance/income" nav={false}>
 	<Prog t="cool" title="What goes out" value={0.5} meta="Step 2 of 4 · costs" />
 	<Banner
 		t="cool"
@@ -20,6 +20,6 @@
 	/>
 	<Field label="Largest cost" placeholder="Salaries · $—" />
 	<Field label="Second largest" placeholder="Software · $—" />
-	<Btn t="cool" href="/records/plans/finance/runway" label="Next: how long it lasts" />
-	<Btn primary={false} href="/records/plans/coverage" label="Save and stop" />
+	<Btn t="cool" href="/sphere/plans/finance/runway" label="Next: how long it lasts" />
+	<Btn primary={false} href="/sphere/plans/coverage" label="Save and stop" />
 </Screen>
