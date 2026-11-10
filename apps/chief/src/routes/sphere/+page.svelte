@@ -24,18 +24,18 @@
 	   property that may not exist. */
 	const ENTRIES = [
 		{
-			href: '/records/plans/overview',
-			icon: 'doc',
-			label: 'Business plans',
-			meta: 'The motor behind a sphere — career, household or company',
-			tone: 'warm'
-		},
-		{
 			href: '/sphere/switch',
 			icon: 'globe',
 			label: 'Spheres',
 			meta: 'The areas of living themselves, and which one you are in',
 			tone: 'cool'
+		},
+		{
+			href: '/records/plans/overview',
+			icon: 'doc',
+			label: 'Business plans',
+			meta: 'The motor behind a sphere — career, household or company',
+			tone: 'warm'
 		},
 		{
 			href: '/documents',
