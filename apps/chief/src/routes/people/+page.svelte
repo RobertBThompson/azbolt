@@ -21,7 +21,7 @@
 	import Screen from '$lib/shell/Screen.svelte';
 	import LensSwitch from '$lib/shell/LensSwitch.svelte';
 	import { Alert, Field, Row, Btn, SourceNote, EmptyLive, SphereTags } from '$lib/kit';
-	import { listPeople, seedDirectory } from '$lib/pb.js';
+	import { listPeople } from '$lib/pb.js';
 	import { sphereOf } from '$lib/spheres.js';
 
 	const LENSES = [
@@ -32,11 +32,6 @@
 	let load = $state(listPeople());
 	let sphere = $state('all');
 	let query = $state('');
-
-	async function seed() {
-		await seedDirectory();
-		load = listPeople();
-	}
 
 	/** @param {any[]} people */
 	const sphereList = (people) => [...new Set(people.flatMap((p) => p.spheres ?? []))].sort();
@@ -63,7 +58,7 @@
 		<Row t="cool" title="Loading people…" dot={false} />
 	{:then { data, source }}
 		{#if source === 'live' && data.length === 0}
-			<EmptyLive what="people" onseed={seed} />
+			<EmptyLive what="people" add="person" />
 		{:else}
 			{@const all = sphereList(data)}
 			{@const shown = visible(data)}

@@ -18,9 +18,11 @@ export default ({ mode }) => {
 	 * PocketBase in development, proxied under Chief's own origin exactly
 	 * as Caddy does in production, so the client needs no base URL and no
 	 * CORS allowlist in either place. Each working copy points at its own
-	 * instance with PB_URL in .env.local, beside its DEV_PORT.
+	 * instance with PB_URL in .env.local, beside its DEV_PORT. The default
+	 * is the port the deployed instance uses, so no one checkout's port
+	 * becomes everybody's.
 	 */
-	const pb = env.PB_URL || 'http://127.0.0.1:8092';
+	const pb = env.PB_URL || 'http://127.0.0.1:8091';
 	return {
 		plugins: [
 			sveltekit(),

@@ -3,38 +3,20 @@
 	 * What a signed-in account sees before it has any records.
 	 *
 	 * An empty list and a broken list look identical, so this says which
-	 * one it is and offers the one action that proves the round trip:
-	 * writing the design fixtures in as real, owned records.
+	 * one it is. It used to offer to write the design fixtures in as
+	 * real records, which put made-up people into a real account and
+	 * left nobody able to tell them from their own.
 	 */
-	/** @type {{ what: string, onseed: () => Promise<void>|void }} */
-	let { what, onseed } = $props();
-
-	let busy = $state(false);
-	let error = $state('');
-
-	async function run() {
-		busy = true;
-		error = '';
-		try {
-			await onseed();
-		} catch (/** @type {any} */ err) {
-			error = err?.message || 'Could not write the sample records.';
-		} finally {
-			busy = false;
-		}
-	}
+	/** @type {{ what: string, add?: string }} */
+	let { what, add = '' } = $props();
 </script>
 
 <div class="empty">
 	<p class="t">No {what} yet</p>
 	<p class="m">
-		You are signed in and this list is genuinely empty — nothing is failing. Add the sample
-		directory to see records come back from the backend.
+		You are signed in and this list is genuinely empty — nothing is failing.
+		{#if add}Add the first one and it will be here when you come back.{/if}
 	</p>
-	<button type="button" onclick={run} disabled={busy}>
-		{busy ? 'Writing…' : 'Add sample directory'}
-	</button>
-	{#if error}<p class="e">{error}</p>{/if}
 </div>
 
 <style>
@@ -58,28 +40,5 @@
 		font-size: 14.5px;
 		line-height: 1.45;
 		color: var(--ink-2);
-	}
-	button {
-		min-height: var(--tap-min);
-		padding: 0 22px;
-		border-radius: 999px;
-		border: 0;
-		background: var(--gloss), linear-gradient(118deg, #4b8dd3 0%, #2f6aa8 45%, #204d7b 100%);
-		box-shadow:
-			inset 0 1px 0 rgba(255, 255, 255, 0.6),
-			0 10px 20px -8px rgba(32, 77, 123, 0.9);
-		color: #ffffff;
-		font-family: var(--font-display);
-		font-size: 16px;
-		font-weight: 700;
-		cursor: pointer;
-	}
-	button:disabled {
-		opacity: 0.5;
-	}
-	.e {
-		margin: 9px 0 0;
-		font-size: 14px;
-		color: var(--tone-alert-ink);
 	}
 </style>

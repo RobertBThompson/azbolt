@@ -97,7 +97,7 @@ export function listOrganizations() {
 	return readOr(
 		async () => {
 			const rows = await pb.collection('organizations').getFullList({ sort: 'name' });
-			return rows.map((r) => ({ id: r.id, name: r.name, meta: r.blurb, kind: r.kind }));
+			return rows.map((r) => ({ id: r.id, name: r.name, meta: r.blurb, kind: r.code }));
 		},
 		() =>
 			Object.entries(ORGS).map(([id, o]) => ({
@@ -118,67 +118,11 @@ export function createPerson(fields) {
 }
 
 /**
- * @param {{ name: string, kind: string, blurb?: string,
- *           swatch?: string, hue?: string }} fields
+ * `code` is one of the nine organization types, not a free label:
+ * C, B, CO, CC, DO, DB, P, DN, CN.
+ * @param {{ name: string, code: string, blurb?: string, charter?: string }} fields
  */
 export function createOrganization(fields) {
-	return pb.collection('organizations').create({
-		swatch: 'solid',
-		...fields,
-		owner: ownerId()
-	});
+	return pb.collection('organizations').create({ ...fields, owner: ownerId() });
 }
 
-/**
- * Writes the design fixtures in as real, owned records.
- *
- * A fresh account reads an empty Directory, which is correct but looks
- * identical to a broken one. This makes the round trip visible: the same
- * names arrive back through the API, owned by the signed-in user, and
- * the screens stop saying they are showing placeholders.
- *
- * Not idempotent by itself — the unique index on (owner, name) is what
- * stops a second run duplicating organizations, and the caller only offers
- * it when the live lists come back empty.
- *
- * @returns {Promise<{ people: number, organizations: number }>}
- */
-export async function seedDirectory() {
-	const owner = ownerId();
-
-	/** @type {Record<string, string>} */
-	const orgIds = {};
-	for (const [key, o] of Object.entries(ORGS)) {
-		const row = await pb.collection('organizations').create({
-			name: o.name,
-			kind: o.code,
-			blurb: o.blurb,
-			swatch: 'solid',
-			hue: o.spheres[0] ?? '',
-			owner
-		});
-		orgIds[key] = row.id;
-	}
-
-	let people = 0;
-	for (const p of Object.values(PEOPLE)) {
-		// Fixtures carry one display name; split on the first space so the
-		// stored shape matches what the form writes rather than dumping
-		// everything into first_name.
-		const [first, ...rest] = String(p.name).split(' ');
-		await pb.collection('people').create({
-			first_name: first,
-			last_name: rest.join(' '),
-			role: p.role,
-			spheres: p.spheres,
-			relationship: p.strength,
-			email: p.email === '—' ? '' : p.email,
-			phone: p.phone,
-			notes: p.notes,
-			owner
-		});
-		people += 1;
-	}
-
-	return { people, organizations: Object.keys(orgIds).length };
-}

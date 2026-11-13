@@ -56,8 +56,9 @@ in force to the local network, for testing on a phone.
 
 Chief's dev server proxies `/api` and `/_/` to a local PocketBase, the same
 paths Caddy proxies in production, so the browser client needs no base URL in
-either place. The default is `http://127.0.0.1:8092`; point a checkout at its
-own instance in the same `.env.local`:
+either place. The default is `http://127.0.0.1:8091`, which is the port the deployed
+instance uses; every working copy names its own in the same `.env.local`,
+so no one checkout's port becomes everybody's:
 
 ```bash
 # apps/chief/.env.local
