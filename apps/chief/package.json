@@ -8,7 +8,8 @@
 		"build": "vite build",
 		"preview": "vite preview --port 4171",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"clean": "rm -rf .svelte-kit build"
+		"clean": "rm -rf .svelte-kit build",
+		"test": "node --test \"src/**/*.test.js\""
 	},
 	"devDependencies": {
 		"@azbolt/config": "workspace:*",

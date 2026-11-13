@@ -16,24 +16,25 @@
 	 * screen.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Stats, Row, Btn, SourceNote } from '$lib/kit';
+	import { Blank, Btn, Row, SourceNote, Stats } from '$lib/kit';
 	import {
+		ownershipLinks,
 		activeAssets,
 		assetValue,
-		owedTotal,
-		netWorth,
-		short,
-		signed,
-		categorySummary,
-		needingAttention,
 		cashFor,
 		cashTotals,
-		upcomingPayment,
+		categorySummary,
 		dayLabel,
+		events,
 		inSentence,
-		LINKS,
+		needingAttention,
+		netWorth,
+		owedTotal,
 		ownershipTree,
-		events
+		short,
+		signed,
+		upcomingPayment,
+		valueSummary
 	} from '$lib/assets.js';
 
 	const count = activeAssets().length;
@@ -50,8 +51,10 @@
 		`Net ${signed(net)} this month` +
 		(due ? ` · ${due.l.name.toLowerCase()} due ${inSentence(dayLabel(due.due))}` : '');
 	const ownershipLine =
-		`${LINKS.length} ownership links` +
+		`${ownershipLinks().length} ownership links` +
 		(loose ? ` · ${loose} ${loose === 1 ? 'asset has' : 'assets have'} no owner` : '');
+	const { unvalued } = valueSummary(activeAssets());
+
 	const activityLine = last
 		? `${last.type} · ${last.name} · ${inSentence(last.when)}`
 		: 'Nothing yet';
@@ -67,6 +70,21 @@
 			[short(netWorth()), 'Net worth']
 		]}
 	/>
+	<!--
+		Two things the figures do not say on their own: what is missing
+		from them, and whose they are.
+	-->
+	<Blank>
+		{#if unvalued || loose}
+			{[
+				unvalued ? `${unvalued} ${unvalued === 1 ? 'asset has' : 'assets have'} no value yet` : '',
+				loose ? `${loose} ${loose === 1 ? 'is' : 'are'} held by no organization` : ''
+			]
+				.filter(Boolean)
+				.join(', and ')}, so {unvalued + loose === 1 ? 'it is' : 'they are'} left out of net worth.
+		{/if}
+		Across every organization on file — your own is not a record yet, so no figure here is yours alone.
+	</Blank>
 	<Row
 		t="warm"
 		href="/records/assets"

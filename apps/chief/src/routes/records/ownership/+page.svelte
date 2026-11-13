@@ -16,14 +16,15 @@
 	 * the point of recording the role at all.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Tabs, Row, Alert, Btn, SectionHead, Stats, SourceNote, Blank } from '$lib/kit';
+	import { Alert, Blank, Btn, Row, SectionHead, SourceNote, Stats, Tabs } from '$lib/kit';
 	import { ORGS } from '$lib/data.js';
 	import { page } from '$app/stores';
 	import {
-		LINKS,
+		ownershipLinks,
 		money,
 		nodeName,
 		ownershipTree,
+		sharePercent,
 		short,
 		worthByOrganization
 	} from '$lib/assets.js';
@@ -34,7 +35,7 @@
 	let active = $state($page.url.searchParams.get('owned') ? 1 : 0);
 
 	const scoped = $derived(
-		LINKS.filter((l) => {
+		ownershipLinks().filter((l) => {
 			if (org) return l.owner.id === org || l.owned.id === org;
 			if (owned) return l.owned.id === owned;
 			return true;
@@ -60,18 +61,19 @@
 	const terms = (l) =>
 		[
 			l.role,
-			l.shares !== null ? `${l.shares}%` : null,
-			l.currentValue !== null ? money(l.currentValue) : null
+			sharePercent(l) !== null ? `${sharePercent(l)}%` : null,
+			l.role !== 'Owner' ? null : l.currentValue !== null ? money(l.currentValue) : 'needs a value'
 		]
 			.filter(Boolean)
 			.join(' · ');
 
 	const loose = ownershipTree().loose;
+	const worth = worthByOrganization();
 	/** @type {[string, string][]} */
-	const worthStats = worthByOrganization()
-		.filter((w) => w.org !== null)
+	const worthStats = worth
 		.slice(0, 3)
-		.map((w) => [short(w.net), ORGS[w.org ?? '']?.name ?? '']);
+		.map((w) => [short(w.net), w.org === null ? 'No organization' : (ORGS[w.org]?.name ?? '')]);
+	const worthRest = worth.length - worthStats.length;
 	const scope = $derived(
 		org ? (ORGS[org]?.name ?? org) : owned ? nodeName({ cls: 'asset', id: owned }) : ''
 	);
@@ -107,6 +109,17 @@
 	{:else}
 		<SectionHead label="Net worth by organization" t="warm" />
 		<Stats items={worthStats} />
+		<!--
+			An organization that owns another counts its share of that
+			one's worth, not its assets again, so these do not add up to
+			more than there is.
+		-->
+		{#if worthRest > 0}
+			<Blank
+				>{worthRest} more {worthRest === 1 ? 'organization' : 'organizations'} hold something. A figure
+				here counts only what that organization owns, by its share.</Blank
+			>
+		{/if}
 	{/if}
 
 	<Tabs items={['Owns', 'Owned by']} {active} onpick={(i) => (active = i)} />

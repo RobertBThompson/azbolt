@@ -12,7 +12,7 @@
 	import Screen from '$lib/shell/Screen.svelte';
 	import { PageHead, Stats, Row, Facts, SectionHead, Btn, Note } from '$lib/kit';
 	import { page } from '$app/stores';
-	import { LINKS, linkOf, money, nodeHref, nodeName } from '$lib/assets.js';
+	import { LINKS, linkOf, money, nodeHref, nodeName, sharePercent } from '$lib/assets.js';
 
 	/* The route guard in +layout.js has already turned an unknown id
 	   into a not-found screen, so the link is there by the time this
@@ -39,7 +39,7 @@
 	<Stats
 		items={[
 			[l.role, 'Role'],
-			[l.shares !== null ? `${l.shares}%` : '—', 'Share'],
+			[sharePercent(l) !== null ? `${sharePercent(l)}%` : '—', 'Share'],
 			['Active', 'Status']
 		]}
 	/>

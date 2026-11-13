@@ -7,13 +7,13 @@
 	import Screen from '$lib/shell/Screen.svelte';
 	import { PageHead, Select, Field, Btn, Note } from '$lib/kit';
 	import { page } from '$app/stores';
-	import { LINKS, OWNER_TYPES, linkOf, nodeName } from '$lib/assets.js';
+	import { LINKS, OWNER_TYPES, linkOf, nodeName, sharePercent } from '$lib/assets.js';
 
 	/* Guarded in +layout.js — see the note on the detail screen. */
 	const l = /** @type {NonNullable<ReturnType<typeof linkOf>>} */ (linkOf($page.params.id ?? ''));
 
 	let role = $state(/** @type {string} */ (l.role));
-	let shares = $state(l.shares !== null ? String(l.shares) : '');
+	let shares = $state(sharePercent(l) !== null ? String(sharePercent(l)) : '');
 	let start = $state(l.startValue !== null ? String(l.startValue) : '');
 	let current = $state(l.currentValue !== null ? String(l.currentValue) : '');
 	let since = $state(l.since);

@@ -12,12 +12,14 @@
 	 * moved for being flagged.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { PageHead, Field, Tabs, Row, Alert, Btn, Note, Blank } from '$lib/kit';
+	import { Alert, Blank, Btn, Field, Note, PageHead, Row, Tabs } from '$lib/kit';
 	import { page } from '$app/stores';
 	import {
 		activeAssets,
+		amountOrAsk,
 		attention,
 		categoryName,
+		effectiveValue,
 		isVerified,
 		money,
 		ownerLine,
@@ -48,7 +50,7 @@
 	const meta = (a) => {
 		const why = attention(a.id);
 		if (why.length) return why.join(' · ');
-		return `${ownerLine(a.id)} · ${money(a.value)}`;
+		return `${ownerLine(a.id)} · ${amountOrAsk(effectiveValue(a))}`;
 	};
 </script>
 
