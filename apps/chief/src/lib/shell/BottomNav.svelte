@@ -29,16 +29,18 @@
 
 <nav aria-label="Primary">
 	<svg class="curve" viewBox="0 0 390 94" preserveAspectRatio="none" aria-hidden="true">
+		<defs>
+			<!-- The wave is a fill, not an outline. A stroke across the top
+			     drew a hard line into the shoulders where the curve
+			     flattens, which is the seam the bar exists to avoid. -->
+			<linearGradient id="navwave" x1="0" y1="0" x2="0" y2="1">
+				<stop offset="0%" stop-color="rgba(255,255,255,0.86)" />
+				<stop offset="100%" stop-color="rgba(255,255,255,0.97)" />
+			</linearGradient>
+		</defs>
 		<path
 			d="M0 32 C 74 32, 112 4, 195 4 C 278 4, 316 32, 390 32 L390 94 L0 94 Z"
-			fill="var(--wash-2)"
-		/>
-		<path
-			d="M0 32 C 74 32, 112 4, 195 4 C 278 4, 316 32, 390 32"
-			fill="none"
-			stroke="var(--line)"
-			stroke-width="1"
-			vector-effect="non-scaling-stroke"
+			fill="url(#navwave)"
 		/>
 	</svg>
 
@@ -93,13 +95,13 @@
 		   labels stay legible over whatever is passing underneath.
 		   Backdrop-filter is unevenly supported, hence the opaque-enough
 		   base colour underneath it. */
-		background-color: color-mix(in srgb, var(--paper) 86%, transparent);
+		background-color: transparent;
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
 		/* The SVG stops at the bar's own height; this paints the home
 		   indicator strip beneath it in the same wash, so the surface does
 		   not end in a line part-way down the gesture area. */
-		background-image: linear-gradient(var(--wash-2), var(--wash-2));
+		background-image: linear-gradient(rgba(255, 255, 255, 0.97), rgba(255, 255, 255, 0.97));
 		background-size: 100% env(safe-area-inset-bottom);
 		background-position: bottom;
 		background-repeat: no-repeat;
@@ -189,9 +191,9 @@
 		border-radius: 50%;
 		display: grid;
 		place-items: center;
-		background: #26527d;
+		background: linear-gradient(135deg, #3f7cb8, #22517f);
 		color: #ffffff;
-		box-shadow: 0 1px 3px rgba(30, 26, 24, 0.22);
+		box-shadow: 0 6px 14px -4px rgba(34, 81, 127, 0.7);
 	}
 	.quick a[aria-current='page'] {
 		box-shadow:
@@ -214,9 +216,9 @@
 		justify-content: center;
 		gap: 0;
 		box-shadow:
-			0 0 0 6px var(--paper),
-			0 2px 3px rgba(30, 26, 24, 0.05),
-			0 8px 20px rgba(30, 26, 24, 0.09);
+			0 0 0 6px rgba(255, 255, 255, 0.92),
+			0 2px 4px rgba(40, 28, 80, 0.12),
+			0 12px 28px -8px rgba(40, 28, 80, 0.35);
 	}
 	.jot img {
 		display: block;

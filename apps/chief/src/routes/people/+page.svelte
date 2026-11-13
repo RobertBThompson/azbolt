@@ -156,10 +156,13 @@
 		flex-direction: column;
 		gap: 7px;
 		padding: 11px 13px;
-		border: 1px solid var(--line-3);
+		border: 1px solid var(--glass-line);
 		border-left: 3px solid var(--tone-cool);
 		border-radius: 3px 12px 12px 3px;
-		background: var(--card);
+		background: var(--glass);
+		backdrop-filter: blur(14px) saturate(1.15);
+		-webkit-backdrop-filter: blur(14px) saturate(1.15);
+		box-shadow: var(--glass-shadow);
 		text-decoration: none;
 	}
 	.who {

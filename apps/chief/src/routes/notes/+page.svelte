@@ -178,10 +178,13 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1px;
-		border: 1px solid var(--line-3);
+		border: 1px solid var(--glass-line);
 		border-radius: 12px;
 		overflow: hidden;
-		background: var(--line-4);
+		background: var(--glass);
+		backdrop-filter: blur(14px) saturate(1.15);
+		-webkit-backdrop-filter: blur(14px) saturate(1.15);
+		box-shadow: var(--glass-shadow);
 	}
 	li {
 		display: flex;
@@ -250,13 +253,13 @@
 		justify-content: center;
 		gap: 9px;
 		min-height: var(--tap-min);
-		border: 1px dashed var(--line-2);
+		border: 1px dashed rgba(255, 255, 255, 0.55);
 		border-radius: 11px;
-		background: transparent;
+		background: rgba(255, 255, 255, 0.14);
 		font-family: inherit;
 		font-size: 13.5px;
 		font-weight: 600;
-		color: var(--ink-3);
+		color: var(--on-field);
 		cursor: pointer;
 	}
 </style>

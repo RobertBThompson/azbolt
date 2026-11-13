@@ -21,7 +21,23 @@
 		flex-direction: column;
 		min-height: 100vh;
 		min-height: 100dvh;
-		background: var(--paper);
+		/* The field. Three layers: a warm sunrise behind the masthead, a
+		   cool one opposite it, and the violet-to-near-white fall that
+		   carries the page down to the nav. Fixed attachment so the
+		   gradient belongs to the screen rather than scrolling with the
+		   content and banding at the seam. */
+		background-color: #a79cdf;
+		background-image:
+			radial-gradient(120% 260px at 88% -6%, rgba(255, 186, 120, 0.5), transparent 62%),
+			radial-gradient(100% 220px at 4% 2%, rgba(120, 150, 230, 0.45), transparent 66%),
+			linear-gradient(
+				180deg,
+				var(--field-1) 0%,
+				var(--field-2) 18%,
+				var(--field-3) 52%,
+				#a79cdf 100%
+			);
+		background-attachment: fixed;
 	}
 	.body {
 		flex: 1;

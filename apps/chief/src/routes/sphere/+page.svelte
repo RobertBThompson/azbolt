@@ -81,6 +81,7 @@
 <style>
 	.head {
 		padding: 2px 2px 0;
+		color: var(--on-field-2);
 	}
 	.head h1 {
 		margin: 1px 0 0;
@@ -89,7 +90,8 @@
 		font-size: 29px;
 		line-height: 1.1;
 		letter-spacing: 0.04em;
-		color: var(--ink);
+		color: var(--on-field);
+		text-shadow: 0 1px 24px rgba(40, 28, 80, 0.4);
 	}
 	.entries {
 		list-style: none;
@@ -104,12 +106,14 @@
 		align-items: center;
 		gap: 12px;
 		padding: 12px 13px;
-		border: 1px solid var(--line-3);
+		border: 1px solid var(--glass-line);
 		border-left: 4px solid var(--t);
 		border-radius: 4px 13px 13px 4px;
-		background: var(--card);
+		background: var(--glass);
+		backdrop-filter: blur(14px) saturate(1.15);
+		-webkit-backdrop-filter: blur(14px) saturate(1.15);
+		box-shadow: var(--glass-shadow);
 		text-decoration: none;
-		box-shadow: 0 1px 2px rgba(30, 26, 24, 0.04);
 	}
 	.glyph {
 		width: 36px;

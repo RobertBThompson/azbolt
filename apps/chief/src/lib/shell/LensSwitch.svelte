@@ -44,10 +44,11 @@
 		gap: 4px;
 		padding: 4px;
 		border-radius: 999px;
-		background: var(--card);
-		box-shadow:
-			0 1px 2px rgba(30, 26, 24, 0.05),
-			0 6px 16px rgba(30, 26, 24, 0.08);
+		background: var(--glass-dim);
+		border: 1px solid var(--glass-line);
+		backdrop-filter: blur(14px) saturate(1.2);
+		-webkit-backdrop-filter: blur(14px) saturate(1.2);
+		box-shadow: var(--glass-shadow);
 	}
 	a {
 		flex: 1;
@@ -64,9 +65,11 @@
 		white-space: nowrap;
 	}
 	.on {
-		background: var(--tone-brand);
+		background:
+			linear-gradient(135deg, rgba(255, 255, 255, 0.22), transparent 50%),
+			linear-gradient(118deg, var(--tone-brand), #7d2f3f);
 		color: #ffffff;
-		box-shadow: 0 1px 3px rgba(30, 26, 24, 0.18);
+		box-shadow: 0 6px 16px -5px rgba(125, 47, 63, 0.7);
 	}
 	@media (min-width: 900px) {
 		.track {

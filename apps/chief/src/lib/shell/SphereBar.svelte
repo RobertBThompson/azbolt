@@ -41,6 +41,12 @@
 <style>
 	.band {
 		height: var(--band);
+		/* On the field the band was a hard stripe with a shadow under it,
+		   which read as a browser artifact rather than the sphere marker.
+		   It keeps its colour but fades into the field at its lower edge. */
+		opacity: 0.9;
+		-webkit-mask-image: linear-gradient(180deg, #000 0 45%, transparent 100%);
+		mask-image: linear-gradient(180deg, #000 0 45%, transparent 100%);
 		flex: none;
 	}
 	header {
@@ -56,7 +62,7 @@
 		   and a white strip at the top would reinstate exactly the seam
 		   the nav just lost. The context band above still does the
 		   dividing, so nothing here needs a border. */
-		background: var(--paper);
+		background: transparent;
 	}
 	.back {
 		width: 30px;
@@ -92,7 +98,7 @@
 		font-size: 19px;
 		font-weight: 500;
 		letter-spacing: 0.08em;
-		color: var(--ink);
+		color: var(--on-field);
 	}
 	.caret {
 		font-size: 10px;
@@ -107,19 +113,25 @@
 		border-radius: 50%;
 		display: grid;
 		place-items: center;
-		background: var(--card);
-		border: 1px solid var(--line-3);
-		color: var(--ink-2);
+		background: rgba(255, 255, 255, 0.16);
+		border: 1px solid rgba(255, 255, 255, 0.4);
+		color: var(--on-field);
 		text-decoration: none;
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
 	}
 	/* A hairline person at this size read as an unfinished wireframe. A
 	   solid silhouette on a tinted disc, ringed in the mark's own wine,
 	   reads as an account rather than a placeholder. */
+	/* On the field rather than on paper, so the disc is glass with a
+	   white rim instead of a tinted circle with a wine one. */
 	.avatar {
 		border: 0;
-		background: var(--tone-brand-tint);
-		box-shadow: inset 0 0 0 1.5px var(--tone-brand);
-		color: var(--tone-brand);
+		background: rgba(255, 255, 255, 0.18);
+		box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.75);
+		color: var(--on-field);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
 	}
 
 	@media (min-width: 48rem) {

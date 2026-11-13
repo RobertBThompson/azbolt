@@ -69,6 +69,34 @@
 	--line-3: #e8e3de;
 	--line-4: #eee9e5;
 
+	/* ── The field ──────────────────────────────────────────────────────
+	   The page is no longer a flat sheet. It is a graded field: deep
+	   violet at the top where the masthead and greeting sit in white,
+	   falling to near-white at the nav so cards keep lifting off it all
+	   the way down.
+
+	   The tone system is untouched underneath. Wine still leads, blue
+	   still arranges, clay still commits — the field only changes what
+	   they sit on. Anything drawn directly on the field uses --on-field;
+	   anything inside a card goes back to --ink. */
+	--field-1: #51429c;
+	--field-2: #6b5abb;
+	--field-3: #9387da;
+	--field-4: #c9c3ee;
+	--field-5: #ece9f8;
+	--on-field: #ffffff;
+	--on-field-2: rgba(255, 255, 255, 0.82);
+	--on-field-3: rgba(255, 255, 255, 0.64);
+
+	/* Glass. Cards are no longer opaque paper: they are a light pane over
+	   the field, which is what lets the gradient read through the edges
+	   and keeps the whole screen one surface instead of a stack. */
+	--glass: rgba(255, 255, 255, 0.93);
+	--glass-dim: rgba(255, 255, 255, 0.72);
+	--glass-line: rgba(255, 255, 255, 0.7);
+	--glass-shadow: 0 1px 2px rgba(40, 28, 80, 0.1), 0 14px 30px -10px rgba(40, 28, 80, 0.3);
+	--glass-shadow-lift: 0 2px 5px rgba(40, 28, 80, 0.14), 0 26px 50px -16px rgba(40, 28, 80, 0.45);
+
 	/* Washes. One opacity ladder for every translucent surface in the
 	   app, so a tint is never typed as a one-off rgba(). */
 	--wash-1: rgba(120, 103, 94, 0.05);
@@ -125,4 +153,43 @@ h4 {
 	letter-spacing: 0.11em;
 	color: var(--ink-4);
 	text-transform: uppercase;
+}
+
+/* ── On the field ────────────────────────────────────────────────────
+   Everything that sits directly on the gradient rather than inside a
+   card. These are global on purpose: the alternative is every screen
+   repeating the same four colour overrides, and one of them eventually
+   not getting the memo. Anything inside a card is untouched and keeps
+   --ink, because a card is still a light surface. */
+
+main > .eyebrow,
+main > p.lede,
+main > p.note,
+main > .none,
+main > header .eyebrow,
+main > header h1,
+main > header p {
+	color: var(--on-field-2);
+}
+main > header h1,
+main > .hello h1,
+main > .who h1,
+main > .head h1 {
+	color: var(--on-field);
+	text-shadow: 0 1px 24px rgba(40, 28, 80, 0.35);
+}
+
+/* Section headings label the field, not a card. */
+main > .head .label,
+main > div > .head .label {
+	color: var(--on-field-2);
+}
+
+/* Cards: a light pane over the field. */
+.card-glass {
+	background: var(--glass);
+	border: 1px solid var(--glass-line);
+	box-shadow: var(--glass-shadow);
+	backdrop-filter: blur(14px) saturate(1.15);
+	-webkit-backdrop-filter: blur(14px) saturate(1.15);
 }

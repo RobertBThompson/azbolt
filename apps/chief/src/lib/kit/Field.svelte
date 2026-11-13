@@ -64,13 +64,17 @@
 	.eyebrow {
 		display: block;
 		margin-bottom: 5px;
+		/* Most forms sit straight on the field, so the label defaults to
+		   white; a card that holds a Field sets --label-ink to an ink
+		   value and inheritance carries it down. */
+		color: var(--label-ink, var(--on-field-2));
 	}
 	input {
 		width: 100%;
 		min-height: var(--tap-min);
-		border: 1px solid var(--line-2);
+		border: 1px solid var(--glass-line);
 		border-radius: 10px;
-		background: var(--sunk);
+		background: var(--glass);
 		padding: 9px 13px;
 		font-family: inherit;
 		font-size: 13.5px;
@@ -78,9 +82,9 @@
 	}
 	textarea {
 		width: 100%;
-		border: 1px solid var(--line-2);
+		border: 1px solid var(--glass-line);
 		border-radius: 10px;
-		background: var(--sunk);
+		background: var(--glass);
 		padding: 10px 13px;
 		font-family: inherit;
 		font-size: 13.5px;

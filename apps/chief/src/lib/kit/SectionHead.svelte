@@ -28,7 +28,10 @@
 		width: 3px;
 		height: 13px;
 		border-radius: 2px;
-		background: var(--t-ink);
+		/* These headings sit on the field, not on paper. The tone colours
+		   were mixed for a light ground and go muddy on violet, so the
+		   bar is lifted toward white while keeping its hue. */
+		background: color-mix(in srgb, var(--t-ink) 45%, #ffffff);
 	}
 	h2 {
 		margin: 0;
@@ -37,11 +40,11 @@
 		font-weight: 600;
 		letter-spacing: 0.13em;
 		text-transform: uppercase;
-		color: var(--ink-2);
+		color: var(--on-field);
 	}
 	.count {
 		font-family: var(--font-mono);
 		font-size: 10.5px;
-		color: var(--ink-3);
+		color: var(--on-field-3);
 	}
 </style>

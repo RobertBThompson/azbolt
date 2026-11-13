@@ -64,10 +64,11 @@
 		gap: 4px;
 		padding: 4px;
 		border-radius: 999px;
-		background: var(--card);
-		box-shadow:
-			0 1px 2px rgba(30, 26, 24, 0.05),
-			0 6px 16px rgba(30, 26, 24, 0.08);
+		background: var(--glass-dim);
+		border: 1px solid var(--glass-line);
+		backdrop-filter: blur(14px) saturate(1.2);
+		-webkit-backdrop-filter: blur(14px) saturate(1.2);
+		box-shadow: var(--glass-shadow);
 	}
 	button {
 		flex: 1;

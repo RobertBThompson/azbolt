@@ -231,26 +231,29 @@
 		font-size: 25px;
 		line-height: 1.1;
 		letter-spacing: -0.01em;
-		color: var(--ink-3);
+		color: var(--on-field);
+		text-shadow: 0 1px 24px rgba(40, 28, 80, 0.4);
 	}
 	.lead {
 		margin: 3px 0 0;
 		font-size: 12.5px;
 		line-height: 1.4;
-		color: var(--ink-4);
+		color: var(--on-field-2);
 	}
+	/* Still the attention tone, lifted to carry on the field. */
 	.lead.urgent {
-		color: var(--tone-alert);
+		color: #ffd7a8;
 		font-weight: 600;
 	}
 	.date {
 		margin: 0 2px;
+		color: var(--on-field-2);
 	}
 
 	.composer {
 		border: 1px solid var(--line-2);
 		border-radius: 12px;
-		background: var(--sunk);
+		background: #ffffff;
 		padding: 4px;
 	}
 	.composer:focus-within {
@@ -325,17 +328,23 @@
 		padding: 0 15px;
 		border: 0;
 		border-radius: 9px;
-		background: #26527d;
+		background:
+			linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent 52%),
+			linear-gradient(118deg, #3f7cb8, #22517f);
 		color: #ffffff;
+		box-shadow: 0 8px 18px -6px rgba(34, 81, 127, 0.65);
 		font-family: inherit;
 		font-size: 14px;
 		font-weight: 600;
 		text-decoration: none;
 		cursor: pointer;
 	}
+	/* Disabled reads as waiting, not as a different colour of button.
+	   The gradient and its shadow go; the label stays legible. */
 	.go:disabled {
-		background: var(--line);
-		color: var(--ink-4);
+		background: rgba(40, 28, 80, 0.1);
+		color: rgba(40, 28, 80, 0.45);
+		box-shadow: none;
 		cursor: default;
 	}
 	.mode:focus-visible,

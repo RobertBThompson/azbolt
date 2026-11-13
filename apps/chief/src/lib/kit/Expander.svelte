@@ -66,14 +66,19 @@
 
 <style>
 	.panel {
-		background: var(--card);
-		border: 1px solid var(--line-3);
+		/* Glass, not paper: the field reads through the edges, which is
+		   what keeps the screen one surface instead of a stack of cards
+		   dropped on a background. */
+		background: var(--glass);
+		border: 1px solid var(--glass-line);
+		backdrop-filter: blur(14px) saturate(1.15);
+		-webkit-backdrop-filter: blur(14px) saturate(1.15);
 		/* The coloured edge is a real border rather than a pseudo-element,
 		   so it cannot fall out of sync with the corner radius. */
 		border-left: 4px solid var(--t-ink);
 		border-radius: 4px 14px 14px 4px;
 		overflow: hidden;
-		box-shadow: 0 1px 2px rgba(30, 26, 24, 0.04);
+		box-shadow: var(--glass-shadow);
 	}
 	.head {
 		display: flex;
@@ -159,6 +164,9 @@
 		flex-direction: column;
 		gap: 9px;
 		padding: 11px;
+		/* Inside the panel the ground is glass, so anything that defaults
+		   to white-on-field goes back to ink. */
+		--label-ink: var(--ink-3);
 	}
 
 	/* ── Leading ─────────────────────────────────────────────────────── */
@@ -198,6 +206,9 @@
 	.panel:not(.lead) summary {
 		min-height: 44px;
 		padding: 4px 13px;
+		/* A breath of the section's own tone across the pane, so a closed
+		   row is recognisable without reading it. */
+		background: linear-gradient(100deg, var(--t-tint) 0%, rgba(255, 255, 255, 0) 72%);
 	}
 	.panel:not(.lead) .glyph {
 		width: 26px;
