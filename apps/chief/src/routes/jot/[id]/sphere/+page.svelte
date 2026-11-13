@@ -142,7 +142,7 @@
 	}
 	.said {
 		font-family: var(--font-label);
-		font-size: 12.5px;
+		font-size: 13px;
 		letter-spacing: 0.05em;
 		color: var(--ink-3);
 		font-weight: 600;

@@ -15,6 +15,8 @@
 	const now = new Date();
 	const hour = now.getHours();
 	const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+	const greetLead = $derived(greeting.slice(0, greeting.lastIndexOf(' ') + 1));
+	const greetLast = $derived(greeting.slice(greeting.lastIndexOf(' ') + 1));
 	const weekday = now.toLocaleDateString(undefined, { weekday: 'long' });
 	const date = now.toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
 
@@ -50,7 +52,7 @@
 
 		<header class="hello">
 			<p class="eyebrow hello-date">{weekday} · {date}</p>
-			<h1>{greeting}</h1>
+			<h1>{greetLead}<span class="pop-word">{greetLast}</span></h1>
 			<p class="lead" class:urgent={lead.tone === 'alert'}>{lead.text}</p>
 		</header>
 	</div>

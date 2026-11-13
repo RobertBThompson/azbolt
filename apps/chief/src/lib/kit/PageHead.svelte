@@ -9,11 +9,15 @@
 	 */
 	/** @type {{ title: string, eyebrow?: string, meta?: string }} */
 	let { title, eyebrow = '', meta = '' } = $props();
+	/* The last word is lit in marigold; the words read the same. */
+	const cut = $derived(title.lastIndexOf(' '));
+	const lead = $derived(cut > 0 ? title.slice(0, cut + 1) : '');
+	const last = $derived(cut > 0 ? title.slice(cut + 1) : title);
 </script>
 
 <header class="head">
 	{#if eyebrow}<p class="eyebrow">{eyebrow}</p>{/if}
-	<h1>{title}</h1>
+	<h1>{lead}<span class="pop-word">{last}</span></h1>
 	{#if meta}<p class="meta">{meta}</p>{/if}
 </header>
 
@@ -28,7 +32,7 @@
 	h1 {
 		margin: 0;
 		font-family: var(--font-display);
-		font-size: 30px;
+		font-size: var(--fs-xl);
 		font-weight: 700;
 		line-height: 1.1;
 		letter-spacing: -0.015em;

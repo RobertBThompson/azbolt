@@ -25,9 +25,9 @@
 	--brand-taupe: #b5a8a1;
 	--brand-blue: #6699ce;
 
-	--app-accent: #9f3e49;
-	--app-accent-text: #82333c;
-	--app-accent-tint: rgba(159, 62, 73, 0.12);
+	--app-accent: #9a2b3b;
+	--app-accent-text: #9a2b3b;
+	--app-accent-tint: #f8e8ea;
 
 	/* ── Tones ──────────────────────────────────────────────────────────
 	   Roles are unchanged; only the hues moved onto the mark. Chief keeps
@@ -38,19 +38,19 @@
 	   default is now the ink itself, a step lighter — still no hue of its
 	   own, and far enough below --tone-ai in lightness that a plain
 	   button is never mistaken for an AI one. */
-	--tone-graphite: #403b6c;
-	--tone-graphite-tint: #efedf8;
-	--tone-cool: #366ea8; /* arranging — the mark's blue, darkened */
-	--tone-cool-tint: #eaf1f8;
-	--tone-clay: #8e6035; /* committing something of value */
-	--tone-clay-tint: #f7f1eb;
-	--tone-ai: #6b4f87; /* reserved, without exception, for AI moments */
-	--tone-ai-tint: #f1edf5;
-	--tone-brand: #9f3e49; /* the mark's wine — identity, not meaning */
-	--tone-brand-tint: #f7ebec;
-	--tone-alert: #82333c; /* attention required — deeper than the brand */
-	--tone-alert-tint: #f6e9ea;
-	--tone-alert-ink: #6d2a32;
+	--tone-graphite: #3d3653;
+	--tone-graphite-tint: #eeebf3;
+	--tone-cool: #2d62a3; /* arranging — the mark's blue, darkened */
+	--tone-cool-tint: #e8eff8;
+	--tone-clay: #8a4c14; /* committing something of value */
+	--tone-clay-tint: #f8eee2;
+	--tone-ai: #6a4a9e; /* reserved, without exception, for AI moments */
+	--tone-ai-tint: #f0ebf7;
+	--tone-brand: #9a2b3b; /* the mark's wine — identity, not meaning */
+	--tone-brand-tint: #f8e8ea;
+	--tone-alert: #b3361a; /* attention required — deeper than the brand */
+	--tone-alert-tint: #fbeae4;
+	--tone-alert-ink: #8c2a14;
 
 	/* Brand and alert share the mark's hue, which a system that spends
 	   hue on meaning cannot leave ambiguous. They are separated by depth
@@ -67,17 +67,17 @@
 	   as dirt. They are the same lightness ladder re-hued to indigo, so
 	   every contrast figure holds or improves (--ink-3 is 6.4:1 on white,
 	   was 5.7:1). */
-	--paper: #efedf9;
+	--paper: #efebf5;
 	--card: #ffffff;
-	--sunk: #f6f4fd;
-	--ink: #1b1740;
-	--ink-2: #353060;
-	--ink-3: #5f5a86;
-	--ink-4: #837ea8;
-	--line: #cdc8e6;
-	--line-2: #dad6ee;
-	--line-3: #e5e2f4;
-	--line-4: #edebf8;
+	--sunk: #f5f2f9;
+	--ink: #1a1624;
+	--ink-2: #362f48;
+	--ink-3: #544b65;
+	--ink-4: #635a74;
+	--line: #c9c0d8;
+	--line-2: #d6cfe2;
+	--line-3: #e2dceb;
+	--line-4: #ebe6f2;
 
 	/* ── The field ──────────────────────────────────────────────────────
 	   The page is a graded field: indigo night at the masthead, where the
@@ -89,18 +89,18 @@
 	   still arranges, clay still commits — the field only changes what
 	   they sit on. Anything drawn directly on the field uses --on-field;
 	   anything inside a pane goes back to --ink. */
-	--field-1: #2c2580;
-	--field-2: #4a3ca4;
-	--field-3: #6f60c9;
-	--field-4: #8e82d9;
-	--field-5: #ece9f8;
-	--sun-core: #fff1d6;
-	--sun-warm: #ffb27a;
-	--sun-rose: #f27aa6;
+	--field-1: #1b2238;
+	--field-2: #2c2f55;
+	--field-3: #4a3563;
+	--field-4: #6c3a5e;
+	--field-5: #efebf5;
+	--sun-core: #fff3d4;
+	--sun-warm: #f2a93b;
+	--sun-rose: #c45a6c;
 	--on-field: #ffffff;
 	--on-field-2: rgba(255, 255, 255, 0.86);
 	--on-field-3: rgba(255, 255, 255, 0.68);
-	--on-field-shade: 0 1px 14px rgba(24, 16, 80, 0.45);
+	--on-field-shade: 0 1px 14px rgba(16, 14, 40, 0.45);
 
 	/* ── Glass ──────────────────────────────────────────────────────────
 	   A pane is lit from above. Three things make that read: a rim of
@@ -113,19 +113,19 @@
 		180deg,
 		#ffffff 0%,
 		rgba(255, 255, 255, 0.96) 42%,
-		rgba(243, 240, 255, 0.95) 100%
+		rgba(246, 243, 250, 0.95) 100%
 	);
 	--glass-dim: rgba(255, 255, 255, 0.72);
 	--glass-line: rgba(255, 255, 255, 0.92);
 	--glass-shadow:
-		inset 0 1px 0 #ffffff, inset 0 -14px 22px -16px rgba(86, 66, 170, 0.24),
-		0 1px 2px rgba(30, 20, 90, 0.16), 0 12px 26px -10px rgba(30, 20, 90, 0.42);
+		inset 0 1px 0 #ffffff, inset 0 -14px 22px -16px rgba(74, 52, 104, 0.24),
+		0 1px 2px rgba(20, 18, 46, 0.16), 0 12px 26px -10px rgba(20, 18, 46, 0.42);
 	--glass-shadow-lift:
-		inset 0 1px 0 #ffffff, inset 0 -18px 28px -18px rgba(86, 66, 170, 0.26),
-		0 2px 5px rgba(30, 20, 90, 0.18), 0 26px 50px -16px rgba(30, 20, 90, 0.55);
+		inset 0 1px 0 #ffffff, inset 0 -18px 28px -18px rgba(74, 52, 104, 0.26),
+		0 2px 5px rgba(20, 18, 46, 0.18), 0 26px 50px -16px rgba(20, 18, 46, 0.55);
 	/* A control set into a pane rather than floating over it. */
-	--well: linear-gradient(180deg, #f3f0fc 0%, #faf9ff 100%);
-	--well-shadow: inset 0 2px 5px rgba(60, 44, 140, 0.13), inset 0 0 0 1px rgba(86, 66, 170, 0.1);
+	--well: linear-gradient(180deg, #f3f0fc 0%, #fbfafd 100%);
+	--well-shadow: inset 0 2px 5px rgba(64, 48, 96, 0.13), inset 0 0 0 1px rgba(74, 52, 104, 0.1);
 	/* The gloss on anything filled with colour: buttons, thumbs, orbs. */
 	--gloss: linear-gradient(
 		180deg,
@@ -136,19 +136,19 @@
 	);
 	/* Dark glass, for a control that sits on the field and must not look
 	   like a card: the switch tracks and the masthead buttons. */
-	--smoke: rgba(26, 18, 92, 0.3);
+	--smoke: rgba(22, 20, 52, 0.3);
 	--smoke-line: rgba(255, 255, 255, 0.5);
 	--smoke-shadow:
-		inset 0 1px 0 rgba(255, 255, 255, 0.28), inset 0 -8px 14px -10px rgba(10, 6, 60, 0.5),
-		0 8px 22px -10px rgba(20, 12, 80, 0.6);
+		inset 0 1px 0 rgba(255, 255, 255, 0.28), inset 0 -8px 14px -10px rgba(10, 8, 30, 0.5),
+		0 8px 22px -10px rgba(16, 12, 40, 0.6);
 
 	/* The lit thumb of a switch: the one bright object on a smoke track. */
-	--thumb: linear-gradient(180deg, #ffffff 0%, #f2eeff 52%, #dcd4fb 100%);
-	--thumb-ink: #2a2370;
+	--thumb: linear-gradient(180deg, #ffffff 0%, #f7f3fb 52%, #e6dcef 100%);
+	--thumb-ink: #1e2a42;
 	--thumb-shadow:
-		inset 0 1px 0 #ffffff, inset 0 -7px 10px -7px rgba(96, 76, 190, 0.5),
-		0 0 0 1px rgba(255, 255, 255, 0.9), 0 6px 18px -4px rgba(160, 130, 255, 0.8),
-		0 2px 4px rgba(20, 12, 80, 0.3);
+		inset 0 1px 0 #ffffff, inset 0 -7px 10px -7px rgba(120, 80, 110, 0.5),
+		0 0 0 1px rgba(255, 255, 255, 0.9), 0 6px 18px -4px rgba(242, 169, 59, 0.8),
+		0 2px 4px rgba(16, 12, 40, 0.3);
 
 	/* ── Curves ─────────────────────────────────────────────────────────
 	   One ladder. Small controls, rows and inputs, cards, the lead panel.
@@ -163,9 +163,9 @@
 
 	/* Washes. One opacity ladder for every translucent surface in the
 	   app, so a tint is never typed as a one-off rgba(). */
-	--wash-1: rgba(70, 55, 150, 0.06);
-	--wash-2: rgba(70, 55, 150, 0.1);
-	--wash-3: rgba(70, 55, 150, 0.16);
+	--wash-1: rgba(84, 70, 120, 0.06);
+	--wash-2: rgba(84, 70, 120, 0.1);
+	--wash-3: rgba(84, 70, 120, 0.16);
 	--wash-blue: rgba(102, 153, 206, 0.14);
 	--wash-wine: rgba(159, 62, 73, 0.12);
 
@@ -205,7 +205,39 @@
 	/* Everything is one step larger than the wireframe scale, which was
 	   drawn for a 310px artboard and carried over a size too small:
 	   body copy was 13px, where a phone wants 15 or 16. */
-	--size-body: 15px;
+	--size-body: 16px;
+
+	/* ── Pop, night and colour fills (restyle) ──────────────────────────
+	   Wine, marigold and the mark's blue form a near-triad, so marigold
+	   complements both arcs instead of fighting them. Marigold is only
+	   ever a FILL with dark ink on it, or a figure on night or the field —
+	   never text on a light surface. Night is the mark's blue taken to its
+	   deepest value. Every text pair here clears 4.5:1. */
+	--pop: #f2a93b; /* ink on pop 9.3:1; pop on night 7.2:1 */
+	--pop-ink: #17130f;
+	--pop-tint: #fdf1dc;
+	--night: #1e2a42; /* white on night 14.3:1 */
+	--night-2: #2b3a58;
+	--tone-ok: #276f44; /* verified, settled, done — 5.9:1 on white */
+	--tone-ok-tint: #e6f3eb;
+	--grad-wine: linear-gradient(135deg, #b0384c 0%, #8a2336 100%);
+	--grad-blue: linear-gradient(135deg, #3d76ba 0%, #26527d 100%);
+	--grad-night: linear-gradient(135deg, #34446a 0%, #1e2a42 100%);
+	--grad-pop: linear-gradient(135deg, #f8c867 0%, #f2a93b 55%, #ec9628 100%);
+	--grad-green: linear-gradient(135deg, #3a8a5c 0%, #22603b 100%);
+	--grad-clay: linear-gradient(135deg, #b56a26 0%, #8a4c14 100%);
+	--grad-taupe: linear-gradient(135deg, #9a8c84 0%, #6f625b 100%);
+	--glow-pop: 0 6px 18px rgba(242, 169, 59, 0.45);
+	--glow-wine: 0 8px 22px rgba(154, 43, 59, 0.32);
+
+	/* Type steps. 16px body; 13px is the floor — nothing is set below it. */
+	--fs-xs: 13px;
+	--fs-sm: 14px;
+	--fs-base: 16px;
+	--fs-md: 18px;
+	--fs-lg: 22px;
+	--fs-xl: 28px;
+	--fs-2xl: 34px;
 
 	--band: 9px;
 	--appbar: 50px;
@@ -214,6 +246,8 @@
 }
 
 body {
+	font-size: var(--size-body);
+	line-height: 1.5;
 	/* What shows before the first paint and under an overscroll — and
 	   behind anything drawn outside the shell, such as the framework's
 	   own error page, which is why the text default here is white. The
@@ -246,7 +280,7 @@ select {
 /* One eyebrow style, used for every small caps label in the app. */
 .eyebrow {
 	font-family: var(--font-label);
-	font-size: 12px;
+	font-size: 13px;
 	font-weight: 700;
 	letter-spacing: var(--track-label);
 	color: var(--ink-4);
@@ -301,4 +335,17 @@ main > div > .head .label {
 	box-shadow:
 		inset var(--edge) 0 0 var(--edge-ink, var(--tone-cool)),
 		inset 22px 0 26px -22px color-mix(in srgb, var(--edge-ink, var(--tone-cool)) 50%, transparent);
+}
+
+/* One focus treatment everywhere: a dark ring with a marigold halo, so
+   it shows on the dusk field, on glass, on wine buttons and on night. */
+:focus-visible {
+	outline: 2px solid var(--ink);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 5px var(--pop);
+}
+
+/* The last word of a page title, lit in marigold on the field. */
+.pop-word {
+	color: var(--pop);
 }

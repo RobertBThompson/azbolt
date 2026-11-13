@@ -6,10 +6,11 @@
 	const pct = $derived(Math.round(value * 100));
 </script>
 
-<div class="prog">
+<div class="prog" style="--t-ink:{c.ink}; --pct:{pct}">
+	<span class="ring" aria-hidden="true"><span class="w">{pct}%</span></span>
+	<div class="main">
 	<div class="head">
 		<span class="t">{title}</span>
-		<span class="w">{pct}%</span>
 	</div>
 	<div
 		class="track"
@@ -22,12 +23,16 @@
 		<div class="fill" style="width:{pct}%; background-color:{c.ink}"></div>
 	</div>
 	{#if meta}<div class="m">{meta}</div>{/if}
+	</div>
 </div>
 
 <style>
 	/* Was bare text and a bar on paper. On the field it needs a pane of
 	   its own, or the title and the figure are ink on violet. */
 	.prog {
+		display: flex;
+		align-items: center;
+		gap: 14px;
 		border: 1px solid var(--glass-line);
 		border-radius: var(--r-sm);
 		background: var(--glass);
@@ -69,5 +74,21 @@
 	.m {
 		font-size: 14px;
 		color: var(--ink-3);
+	}
+	.ring {
+		width: 58px;
+		height: 58px;
+		flex: none;
+		border-radius: 50%;
+		display: grid;
+		place-items: center;
+		background:
+			radial-gradient(closest-side, #ffffff 74%, transparent 75% 100%),
+			conic-gradient(var(--t-ink) calc(var(--pct) * 1%), var(--wash-2) 0);
+		box-shadow: 0 6px 14px color-mix(in srgb, var(--t-ink) 24%, transparent);
+	}
+	.main {
+		flex: 1;
+		min-width: 0;
 	}
 </style>

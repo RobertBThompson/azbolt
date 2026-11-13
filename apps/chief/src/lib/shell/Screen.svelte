@@ -23,25 +23,25 @@
 			<svg class="ridge" viewBox="0 0 390 160" preserveAspectRatio="xMaxYMin slice">
 				<defs>
 					<linearGradient id="ridge-far" x1="0" y1="0" x2="0" y2="1">
-						<stop offset="0" stop-color="#c58fd6" stop-opacity="0.78" />
-						<stop offset="0.6" stop-color="#9c84dc" stop-opacity="0.34" />
-						<stop offset="1" stop-color="#8e82d9" stop-opacity="0" />
+						<stop offset="0" stop-color="#8fb3e0" stop-opacity="0.78" />
+						<stop offset="0.6" stop-color="#6699ce" stop-opacity="0.34" />
+						<stop offset="1" stop-color="#6c3a5e" stop-opacity="0" />
 					</linearGradient>
 					<linearGradient id="ridge-mid" x1="0" y1="0" x2="0" y2="1">
-						<stop offset="0" stop-color="#7d58c0" stop-opacity="0.92" />
-						<stop offset="0.62" stop-color="#7562cc" stop-opacity="0.45" />
-						<stop offset="1" stop-color="#7562cc" stop-opacity="0" />
+						<stop offset="0" stop-color="#b04a62" stop-opacity="0.92" />
+						<stop offset="0.62" stop-color="#7a2c44" stop-opacity="0.45" />
+						<stop offset="1" stop-color="#7a2c44" stop-opacity="0" />
 					</linearGradient>
 					<linearGradient id="ridge-near" x1="0" y1="0" x2="0" y2="1">
-						<stop offset="0" stop-color="#4534a2" stop-opacity="0.95" />
-						<stop offset="0.7" stop-color="#5646b4" stop-opacity="0.4" />
-						<stop offset="1" stop-color="#6f60c9" stop-opacity="0" />
+						<stop offset="0" stop-color="#1a2036" stop-opacity="0.95" />
+						<stop offset="0.7" stop-color="#232a46" stop-opacity="0.4" />
+						<stop offset="1" stop-color="#4a3563" stop-opacity="0" />
 					</linearGradient>
 					<radialGradient id="ridge-lit" gradientUnits="userSpaceOnUse" cx="296" cy="74" r="170">
 						<stop offset="0" stop-color="#ffe2b8" stop-opacity="0.95" />
-						<stop offset="0.3" stop-color="#ffab8e" stop-opacity="0.6" />
-						<stop offset="0.65" stop-color="#f08fc0" stop-opacity="0.22" />
-						<stop offset="1" stop-color="#f08fc0" stop-opacity="0" />
+						<stop offset="0.3" stop-color="#f5b35a" stop-opacity="0.6" />
+						<stop offset="0.65" stop-color="#c45a6c" stop-opacity="0.22" />
+						<stop offset="1" stop-color="#c45a6c" stop-opacity="0" />
 					</radialGradient>
 					<linearGradient id="ridge-foot" x1="0" y1="0" x2="0" y2="1">
 						<stop offset="0.55" stop-color="#ffffff" />
@@ -121,7 +121,7 @@
 		overflow: hidden;
 		pointer-events: none;
 		background:
-			radial-gradient(90% 240px at 0% 0%, rgba(96, 132, 236, 0.4), transparent 70%),
+			radial-gradient(90% 240px at 0% 0%, rgba(102, 153, 206, 0.32), transparent 70%),
 			linear-gradient(
 				180deg,
 				var(--field-1) 0%,
@@ -140,9 +140,9 @@
 		border-radius: 50%;
 		background: radial-gradient(
 			circle,
-			rgba(255, 176, 200, 0.44) 0%,
-			rgba(226, 132, 214, 0.26) 32%,
-			rgba(176, 128, 244, 0.12) 54%,
+			rgba(255, 196, 120, 0.42) 0%,
+			rgba(196, 90, 108, 0.26) 32%,
+			rgba(159, 62, 73, 0.12) 54%,
 			transparent 70%
 		);
 	}
@@ -155,11 +155,11 @@
 		background: radial-gradient(
 			circle,
 			var(--sun-core) 0%,
-			#ffe0a8 3%,
-			rgba(255, 186, 128, 0.85) 7.5%,
-			rgba(248, 140, 150, 0.5) 19%,
-			rgba(214, 120, 214, 0.24) 38%,
-			rgba(160, 120, 240, 0.09) 55%,
+			#ffe2a8 3%,
+			rgba(248, 190, 100, 0.88) 7.5%,
+			rgba(242, 150, 90, 0.5) 19%,
+			rgba(196, 90, 108, 0.26) 38%,
+			rgba(159, 62, 73, 0.1) 55%,
 			transparent 70%
 		);
 	}

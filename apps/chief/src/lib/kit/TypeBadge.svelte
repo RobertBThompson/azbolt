@@ -39,7 +39,7 @@
 			0 3px 7px -3px var(--tone-graphite);
 		color: #ffffff;
 		font-family: var(--font-label);
-		font-size: 12.5px;
+		font-size: 13px;
 		font-weight: 800;
 		letter-spacing: 0.05em;
 	}

@@ -67,10 +67,10 @@
 			[short(netWorth()), 'Net worth']
 		]}
 	/>
-	<Row t="warm" href="/records/assets" title="Assets" meta={assetsLine} trailing="›" />
-	<Row t="warm" href="/records/money" title="Money" meta={moneyLine} trailing="›" />
-	<Row t="warm" href="/records/ownership" title="Ownership" meta={ownershipLine} trailing="›" />
-	<Row t="warm" href="/records/activity" title="Activity" meta={activityLine} trailing="›" />
+	<Row t="warm" href="/records/assets" title="Assets" icon="asset" hue="wine" meta={assetsLine} trailing="›" />
+	<Row t="warm" href="/records/money" title="Money" icon="cash" hue="green" meta={moneyLine} trailing="›" />
+	<Row t="warm" href="/records/ownership" title="Ownership" icon="people" hue="blue" meta={ownershipLine} trailing="›" />
+	<Row t="warm" href="/records/activity" title="Activity" icon="today" hue="night" meta={activityLine} trailing="›" />
 	<Btn t="warm" href="/records/assets/new" label="Add asset" />
 	<SourceNote source="fixture" />
 </Screen>

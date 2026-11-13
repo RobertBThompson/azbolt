@@ -134,15 +134,15 @@
 	.glyph {
 		width: 34px;
 		height: 34px;
-		border-radius: 50%;
+		border-radius: var(--r-xs);
 		display: grid;
 		place-items: center;
-		background: radial-gradient(circle at 34% 24%, #ffffff 0%, #ffffff 46%, #e9e4fb 100%);
+		background: var(--gloss), linear-gradient(135deg, color-mix(in srgb, var(--t-ink) 72%, #ffffff), var(--t-ink));
+		color: #ffffff;
 		box-shadow:
 			inset 0 1px 0 #ffffff,
 			inset 0 -5px 8px -5px rgba(86, 66, 170, 0.4),
 			0 3px 8px -2px color-mix(in srgb, var(--t-ink) 45%, transparent);
-		color: var(--t-ink);
 		flex: none;
 	}
 	.titles {

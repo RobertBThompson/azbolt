@@ -37,7 +37,7 @@
 		background: var(--well);
 		box-shadow: var(--well-shadow);
 		font-family: var(--font-label);
-		font-size: 12px;
+		font-size: 13px;
 		font-weight: 700;
 		letter-spacing: 0.08em;
 		color: var(--ink-2);
@@ -53,7 +53,7 @@
 		flex: none;
 	}
 	.sm li {
-		font-size: 11.5px;
+		font-size: 13px;
 		padding: 3px 8px 3px 6px;
 	}
 </style>

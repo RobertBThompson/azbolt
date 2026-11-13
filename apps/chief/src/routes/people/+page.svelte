@@ -135,7 +135,7 @@
 		border: 1px solid var(--glass-line);
 		background: var(--glass);
 		font-family: var(--font-label);
-		font-size: 12.5px;
+		font-size: 13px;
 		font-weight: 700;
 		letter-spacing: 0.08em;
 		color: var(--ink-3);

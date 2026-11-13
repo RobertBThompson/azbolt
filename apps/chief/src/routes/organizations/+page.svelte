@@ -102,7 +102,7 @@
 		border: 1px solid var(--glass-line);
 		background: var(--glass);
 		font-family: var(--font-label);
-		font-size: 12.5px;
+		font-size: 13px;
 		font-weight: 700;
 		letter-spacing: 0.08em;
 		color: var(--ink-3);
@@ -155,7 +155,7 @@
 	.persp {
 		margin-left: auto;
 		font-family: var(--font-label);
-		font-size: 12px;
+		font-size: 13px;
 		font-weight: 700;
 		letter-spacing: 0.1em;
 		color: var(--ink-3);
@@ -167,7 +167,7 @@
 	}
 	.foot {
 		font-family: var(--font-label);
-		font-size: 12.5px;
+		font-size: 13px;
 		letter-spacing: 0.06em;
 		color: var(--ink-3);
 		font-weight: 600;

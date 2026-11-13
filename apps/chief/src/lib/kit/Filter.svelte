@@ -82,7 +82,7 @@
 		outline-offset: 2px;
 	}
 	.n {
-		font-size: 12.5px;
+		font-size: 13px;
 		font-weight: 700;
 		font-variant-numeric: tabular-nums;
 		opacity: 0.7;

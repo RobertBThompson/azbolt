@@ -46,7 +46,7 @@
 	dt {
 		flex: none;
 		font-family: var(--font-label);
-		font-size: 12px;
+		font-size: 13px;
 		font-weight: 700;
 		letter-spacing: 0.1em;
 		text-transform: uppercase;

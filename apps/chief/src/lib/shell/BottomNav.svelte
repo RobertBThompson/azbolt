@@ -34,13 +34,13 @@
 	<svg class="aurora" viewBox="0 0 390 106" preserveAspectRatio="none" aria-hidden="true">
 		<defs>
 			<linearGradient id="aurora-cool" x1="0" y1="0" x2="1" y2="0.4">
-				<stop offset="0" stop-color="#c9d4ff" stop-opacity="0.55" />
-				<stop offset="0.6" stop-color="#d9ccff" stop-opacity="0.22" />
+				<stop offset="0" stop-color="#bcd2ee" stop-opacity="0.55" />
+				<stop offset="0.6" stop-color="#e9d6e0" stop-opacity="0.22" />
 				<stop offset="1" stop-color="#ffffff" stop-opacity="0" />
 			</linearGradient>
 			<linearGradient id="aurora-warm" x1="1" y1="0" x2="0" y2="0.4">
-				<stop offset="0" stop-color="#ffc9a6" stop-opacity="0.6" />
-				<stop offset="0.55" stop-color="#f7b4d6" stop-opacity="0.26" />
+				<stop offset="0" stop-color="#ffd9a0" stop-opacity="0.6" />
+				<stop offset="0.55" stop-color="#f0b8c4" stop-opacity="0.26" />
 				<stop offset="1" stop-color="#ffffff" stop-opacity="0" />
 			</linearGradient>
 			<linearGradient id="aurora-veil" x1="0" y1="0" x2="0" y2="1">
@@ -74,7 +74,7 @@
 			<linearGradient id="navwave" x1="0" y1="0" x2="0" y2="1">
 				<stop offset="0" stop-color="#ffffff" stop-opacity="0.8" />
 				<stop offset="0.5" stop-color="#ffffff" stop-opacity="0.93" />
-				<stop offset="1" stop-color="#f6f3ff" stop-opacity="0.98" />
+				<stop offset="1" stop-color="#f8f5fa" stop-opacity="0.98" />
 			</linearGradient>
 			<!-- Brightest on the crest, where the mark sits. -->
 			<radialGradient id="navsheen" cx="0.5" cy="0.04" r="0.5" fx="0.5" fy="0.04">
@@ -137,7 +137,7 @@
 		   indicator strip beneath it in the same wash, so the surface does
 		   not end in a line part-way down the gesture area. */
 		background-color: transparent;
-		background-image: linear-gradient(#f6f3ff, #f6f3ff);
+		background-image: linear-gradient(#f8f5fa, #f8f5fa);
 		background-size: 100% env(safe-area-inset-bottom);
 		background-position: bottom;
 		background-repeat: no-repeat;
@@ -179,7 +179,7 @@
 		width: 100%;
 		height: var(--nav);
 		pointer-events: none;
-		filter: drop-shadow(0 -7px 14px rgba(36, 24, 110, 0.26));
+		filter: drop-shadow(0 -7px 14px rgba(16, 14, 40, 0.3));
 	}
 	.row {
 		position: relative;
@@ -210,11 +210,17 @@
 	}
 	.glyph {
 		display: grid;
+		place-items: center;
+		width: 44px;
+		height: 30px;
+		display: grid;
 		color: var(--ink-3);
 	}
 	.glyph.on {
-		color: var(--tone-brand);
-		filter: drop-shadow(0 3px 5px color-mix(in srgb, var(--tone-brand) 45%, transparent));
+		color: var(--pop-ink);
+		background: var(--gloss), var(--grad-pop);
+		border-radius: 999px;
+		box-shadow: var(--glow-pop);
 	}
 	.rail {
 		width: 18px;
@@ -223,8 +229,8 @@
 		background: transparent;
 	}
 	.rail.on {
-		background: var(--tone-brand);
-		box-shadow: 0 2px 6px color-mix(in srgb, var(--tone-brand) 60%, transparent);
+		background: var(--pop);
+		box-shadow: var(--glow-pop);
 	}
 	.label {
 		font-family: var(--font-display);
@@ -236,7 +242,7 @@
 	}
 	.label.on {
 		font-weight: 700;
-		color: var(--tone-brand);
+		color: var(--ink);
 	}
 
 	/* Two beads under the mark. Blue so they read as actions against the
@@ -261,7 +267,7 @@
 		border-radius: 50%;
 		display: grid;
 		place-items: center;
-		background: radial-gradient(circle at 34% 22%, #9cc8f5 0%, #4585c4 38%, #1d4877 100%);
+		background: radial-gradient(circle at 34% 22%, #a9c8ec 0%, #3d76ba 38%, #1e2a42 100%);
 		color: #ffffff;
 		box-shadow:
 			inset 0 1px 0 rgba(255, 255, 255, 0.65),
@@ -289,16 +295,28 @@
 		width: 60px;
 		height: 60px;
 		border-radius: 50%;
-		background: radial-gradient(circle at 34% 20%, #ffffff 0%, #f8f6ff 52%, #dad2f6 100%);
+		border: 3px solid transparent;
+		background:
+			radial-gradient(circle at 34% 20%, #ffffff 0%, #fbf9fc 52%, #ece4ef 100%) padding-box,
+			conic-gradient(from 200deg, #9f3e49, #f2a93b, #6699ce, #b5a8a1, #9f3e49) border-box;
 		align-items: center;
 		justify-content: center;
 		gap: 0;
 		box-shadow:
 			inset 0 1px 0 #ffffff,
-			inset 0 -9px 13px -9px rgba(86, 66, 170, 0.55),
-			0 0 0 5px rgba(255, 255, 255, 0.6),
-			0 0 26px rgba(204, 188, 255, 0.85),
-			0 12px 26px -8px rgba(30, 20, 100, 0.6);
+			inset 0 -9px 13px -9px rgba(74, 52, 104, 0.45),
+			0 0 0 5px rgba(255, 255, 255, 0.7),
+			0 0 26px rgba(242, 169, 59, 0.45),
+			0 12px 26px -8px rgba(154, 43, 59, 0.45);
+	}
+	/* Current: a marigold halo round the ring. */
+	.jot[aria-current='page'] {
+		box-shadow:
+			inset 0 1px 0 #ffffff,
+			0 0 0 4px #ffffff,
+			0 0 0 7px rgba(242, 169, 59, 0.9),
+			0 0 30px 8px rgba(242, 169, 59, 0.45),
+			0 12px 26px -8px rgba(154, 43, 59, 0.45);
 	}
 	.jot img {
 		display: block;

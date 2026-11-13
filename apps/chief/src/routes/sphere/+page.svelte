@@ -116,11 +116,11 @@
 	.glyph {
 		width: 42px;
 		height: 42px;
-		border-radius: 50%;
+		border-radius: var(--r-xs);
 		display: grid;
 		place-items: center;
-		background: radial-gradient(circle at 34% 24%, #ffffff 0%, #ffffff 46%, #e6e0fa 100%);
-		color: var(--t);
+		background: var(--gloss), linear-gradient(135deg, color-mix(in srgb, var(--t) 72%, #ffffff), var(--t));
+		color: #ffffff;
 		flex: none;
 		box-shadow:
 			inset 0 1px 0 #ffffff,

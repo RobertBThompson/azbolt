@@ -156,7 +156,7 @@
 	.persp {
 		margin-left: auto;
 		font-family: var(--font-label);
-		font-size: 12px;
+		font-size: 13px;
 		font-weight: 700;
 		letter-spacing: 0.1em;
 		color: var(--on-field-2);
@@ -180,7 +180,7 @@
 	.res {
 		margin: 6px 0 0;
 		font-family: var(--font-label);
-		font-size: 12.5px;
+		font-size: 13px;
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
 		color: #ffd0c4;
@@ -224,7 +224,7 @@
 	.mr {
 		margin-left: auto;
 		font-family: var(--font-label);
-		font-size: 12px;
+		font-size: 13px;
 		letter-spacing: 0.08em;
 		text-transform: uppercase;
 		color: var(--ink-3);
@@ -257,7 +257,7 @@
 	}
 	dt {
 		font-family: var(--font-label);
-		font-size: 11.5px;
+		font-size: 13px;
 		letter-spacing: 0.12em;
 		text-transform: uppercase;
 		color: var(--ink-3);
