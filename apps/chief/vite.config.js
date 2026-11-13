@@ -14,6 +14,13 @@ import { manifest, runtimeCaching } from '@azbolt/pwa';
 export default ({ mode }) => {
 	const env = loadEnv(mode, process.cwd(), '');
 	const port = Number(env.DEV_PORT) || 7171;
+	/*
+	 * PocketBase in development, proxied under Chief's own origin exactly
+	 * as Caddy does in production, so the client needs no base URL and no
+	 * CORS allowlist in either place. Each working copy points at its own
+	 * instance with PB_URL in .env.local, beside its DEV_PORT.
+	 */
+	const pb = env.PB_URL || 'http://127.0.0.1:8092';
 	return {
 		plugins: [
 			sveltekit(),
@@ -47,6 +54,16 @@ export default ({ mode }) => {
 				devOptions: { enabled: false }
 			})
 		],
-		server: { port, strictPort: true, fs: { allow: ['../../packages'] } }
+		server: {
+			port,
+			strictPort: true,
+			proxy: {
+				'/api': { target: pb, changeOrigin: false },
+				/* A regular expression, because the plain prefix '/_' would
+				   also swallow /_app/immutable, which is the build's own. */
+				'^/_/': { target: pb, changeOrigin: false }
+			},
+			fs: { allow: ['../../packages'] }
+		}
 	};
 };
