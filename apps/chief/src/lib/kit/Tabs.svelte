@@ -15,26 +15,38 @@
 </div>
 
 <style>
+	/* The same smoke track and lit thumb as the page switches, smaller. */
 	.tabs {
 		display: flex;
-		background: var(--tone-graphite-tint);
-		border-radius: 11px;
+		background: var(--smoke);
+		border: 1px solid var(--smoke-line);
+		box-shadow: var(--smoke-shadow);
+		border-radius: 999px;
 		padding: 4px;
 		gap: 4px;
 	}
 	button {
 		flex: 1;
-		height: 33px;
+		min-width: 0;
+		height: 38px;
 		border: 0;
-		border-radius: 9px;
+		border-radius: 999px;
 		background: transparent;
-		color: var(--ink-4);
-		font-family: inherit;
-		font-size: 12px;
+		color: var(--on-field);
+		font-family: var(--font-display);
+		font-size: 14.5px;
 		font-weight: 600;
+		cursor: pointer;
+		white-space: nowrap;
 	}
 	button.on {
-		background: var(--card);
-		color: var(--ink);
+		background: var(--thumb);
+		color: var(--thumb-ink);
+		font-weight: 700;
+		box-shadow: var(--thumb-shadow);
+	}
+	button:focus-visible {
+		outline: 2px solid #ffffff;
+		outline-offset: 2px;
 	}
 </style>

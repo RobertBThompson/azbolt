@@ -61,7 +61,7 @@
 	{:else}
 		<div class="grid">
 			{#each shown as [id, o] (id)}
-				<a class="org" href="/organizations/{id}">
+				<a class="org edged" href="/organizations/{id}">
 					<span class="top">
 						<TypeBadge code={o.code} showName={false} />
 						<span class="nm">{o.name}</span>
@@ -85,52 +85,58 @@
 <style>
 	.filter {
 		display: flex;
-		gap: 6px;
+		gap: 8px;
 		overflow-x: auto;
-		padding-bottom: 2px;
 		scrollbar-width: none;
+		padding: 2px var(--shell-gutter) 8px;
+		margin: -2px calc(var(--shell-gutter) * -1) -6px;
 	}
 	.filter::-webkit-scrollbar {
 		display: none;
 	}
 	.filter button {
 		flex: none;
-		min-height: 32px;
-		padding: 0 11px;
+		min-height: 36px;
+		padding: 0 14px;
 		border-radius: 999px;
-		border: 1px solid var(--line-2);
-		background: var(--card);
-		font-family: var(--font-mono);
-		font-size: 9.5px;
+		border: 1px solid var(--glass-line);
+		background: var(--glass);
+		font-family: var(--font-label);
+		font-size: 12.5px;
 		font-weight: 700;
 		letter-spacing: 0.08em;
 		color: var(--ink-3);
 		cursor: pointer;
 		white-space: nowrap;
+		box-shadow:
+			inset 0 1px 0 #ffffff,
+			0 4px 10px -5px rgba(30, 20, 90, 0.45);
 	}
 	.filter button.on {
-		border-color: var(--tone-cool);
-		background: var(--tone-cool-tint);
+		border-color: color-mix(in srgb, var(--tone-cool) 55%, #ffffff);
+		background: linear-gradient(180deg, #ffffff 0%, var(--tone-cool-tint) 100%);
 		color: var(--tone-cool);
+		box-shadow:
+			inset 0 1px 0 #ffffff,
+			0 0 0 3px color-mix(in srgb, var(--tone-cool) 16%, transparent),
+			0 5px 12px -5px color-mix(in srgb, var(--tone-cool) 60%, transparent);
 	}
 	.grid {
 		display: flex;
 		flex-direction: column;
-		gap: 9px;
+		gap: 12px;
 	}
 	.org {
 		display: flex;
 		flex-direction: column;
 		gap: 7px;
-		padding: 11px 13px;
+		padding: 14px 16px 14px 20px;
 		border: 1px solid var(--glass-line);
-		border-left: 3px solid var(--tone-cool);
-		border-radius: 3px 12px 12px 3px;
+		border-radius: var(--r-md);
 		background: var(--glass);
-		backdrop-filter: blur(14px) saturate(1.15);
-		-webkit-backdrop-filter: blur(14px) saturate(1.15);
 		box-shadow: var(--glass-shadow);
 		text-decoration: none;
+		--edge-ink: var(--tone-cool);
 	}
 	.top {
 		display: flex;
@@ -138,37 +144,40 @@
 		gap: 8px;
 	}
 	.nm {
-		font-size: 14.5px;
-		font-weight: 600;
+		font-size: 18px;
+		font-weight: 700;
 		color: var(--ink);
+		font-family: var(--font-display);
+		letter-spacing: -0.005em;
 	}
 	/* Perspective is contextual, so it is shown but never stored: an
 	   Organization whose membership includes Me reads as Us. */
 	.persp {
 		margin-left: auto;
-		font-family: var(--font-mono);
-		font-size: 9px;
+		font-family: var(--font-label);
+		font-size: 12px;
 		font-weight: 700;
 		letter-spacing: 0.1em;
-		color: var(--ink-4);
+		color: var(--ink-3);
 	}
 	.charter {
-		font-size: 12px;
+		font-size: 14px;
 		line-height: 1.4;
 		color: var(--ink-3);
 	}
 	.foot {
-		font-family: var(--font-mono);
-		font-size: 9.5px;
+		font-family: var(--font-label);
+		font-size: 12.5px;
 		letter-spacing: 0.06em;
-		color: var(--ink-4);
+		color: var(--ink-3);
+		font-weight: 600;
 	}
 	.none {
 		margin: 0;
 		padding: 14px 2px;
 		text-align: center;
-		font-size: 12.5px;
-		color: var(--ink-3);
+		font-size: 14.5px;
+		color: var(--on-field-2);
 	}
 	@media (min-width: 900px) {
 		.filter {

@@ -23,22 +23,34 @@
 <style>
 	.seg {
 		display: flex;
-		gap: 7px;
+		gap: 9px;
 	}
 	button {
 		flex: 1;
-		height: 62px;
-		border-radius: 11px;
-		border: 1px solid var(--line-3);
-		background: var(--card);
+		height: 66px;
+		border-radius: var(--r-sm);
+		border: 1px solid var(--glass-line);
+		background: var(--glass);
+		box-shadow: var(--glass-shadow);
 		color: var(--ink-2);
-		font-family: inherit;
-		font-size: 14px;
+		font-family: var(--font-display);
+		font-size: 16.5px;
 		font-weight: 600;
+		cursor: pointer;
 	}
 	button.on {
-		border-color: var(--t-ink);
-		background: var(--t-tint);
+		border-color: color-mix(in srgb, var(--t-ink) 55%, #ffffff);
+		background: linear-gradient(180deg, #ffffff 0%, var(--t-tint) 100%);
 		color: var(--ink);
+		font-weight: 700;
+		box-shadow:
+			inset 0 1px 0 #ffffff,
+			inset 0 0 0 1.5px color-mix(in srgb, var(--t-ink) 55%, transparent),
+			0 0 0 3px color-mix(in srgb, var(--t-ink) 16%, transparent),
+			0 12px 22px -12px color-mix(in srgb, var(--t-ink) 70%, transparent);
+	}
+	button:focus-visible {
+		outline: 2px solid #ffffff;
+		outline-offset: 2px;
 	}
 </style>

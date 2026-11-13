@@ -16,23 +16,30 @@
 	.chips {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 6px;
+		gap: 7px;
 	}
 	.chip {
-		height: 30px;
-		border-radius: 15px;
-		padding: 0 13px;
+		height: 34px;
+		border-radius: 999px;
+		padding: 0 15px;
 		display: flex;
 		align-items: center;
-		font-size: 12px;
+		font-size: 14.5px;
 		font-weight: 600;
-		background: var(--card);
-		border: 1px solid var(--line-2);
+		background: var(--glass);
+		border: 1px solid var(--glass-line);
+		box-shadow:
+			inset 0 1px 0 #ffffff,
+			0 4px 10px -5px rgba(30, 20, 90, 0.45);
 		color: var(--ink-3);
 	}
 	.chip.on {
-		background: var(--t-tint);
-		border-color: var(--t-ink);
+		background: linear-gradient(180deg, #ffffff 0%, var(--t-tint) 100%);
+		border-color: color-mix(in srgb, var(--t-ink) 55%, #ffffff);
 		color: var(--t-ink);
+		box-shadow:
+			inset 0 1px 0 #ffffff,
+			0 0 0 3px color-mix(in srgb, var(--t-ink) 16%, transparent),
+			0 5px 12px -5px color-mix(in srgb, var(--t-ink) 60%, transparent);
 	}
 </style>

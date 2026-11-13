@@ -36,27 +36,51 @@
 {/if}
 
 <style>
+	/* Every button is a pill. Secondary is unlit glass; primary is its
+	   tone with a gloss over it and its own colour in the shadow, so it
+	   looks pressed up out of the page rather than printed on it. */
 	.btn {
 		height: var(--tap-min);
-		border-radius: 11px;
+		border-radius: 999px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-family: inherit;
-		font-size: 14.5px;
+		font-family: var(--font-display);
+		font-size: 16.5px;
 		font-weight: 600;
+		letter-spacing: 0.01em;
 		width: 100%;
-		background: var(--card);
-		border: 1px solid var(--line-2);
+		background: var(--glass);
+		border: 1px solid var(--glass-line);
+		box-shadow: var(--glass-shadow);
 		color: var(--ink);
 		text-decoration: none;
+		cursor: pointer;
 	}
 	.btn.primary {
-		background: var(--t-ink);
-		border-color: var(--t-ink);
+		background:
+			var(--gloss),
+			linear-gradient(
+				118deg,
+				color-mix(in srgb, var(--t-ink) 78%, #ffffff) 0%,
+				var(--t-ink) 46%,
+				color-mix(in srgb, var(--t-ink) 76%, #170c5c) 100%
+			);
+		border-color: color-mix(in srgb, var(--t-ink) 70%, #ffffff);
 		color: #ffffff;
+		font-weight: 700;
+		text-shadow: 0 1px 2px rgba(10, 6, 50, 0.35);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.55),
+			0 12px 22px -10px color-mix(in srgb, var(--t-ink) 90%, #000000),
+			0 2px 4px rgba(20, 12, 80, 0.25);
+	}
+	.btn:focus-visible {
+		outline: 2px solid #ffffff;
+		outline-offset: 3px;
 	}
 	.btn:disabled {
-		opacity: 0.5;
+		opacity: 0.55;
+		cursor: default;
 	}
 </style>

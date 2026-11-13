@@ -23,29 +23,35 @@
 	.badge {
 		display: inline-flex;
 		align-items: center;
-		gap: 6px;
+		gap: 7px;
 		flex: none;
 	}
 	.code {
-		min-width: 24px;
-		height: 20px;
-		padding: 0 6px;
-		border-radius: 5px;
+		min-width: 28px;
+		height: 23px;
+		padding: 0 7px;
+		border-radius: 8px;
 		display: grid;
 		place-items: center;
-		background: var(--tone-graphite);
+		background: var(--gloss), var(--tone-graphite);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.4),
+			0 3px 7px -3px var(--tone-graphite);
 		color: #ffffff;
-		font-family: var(--font-mono);
-		font-size: 10.5px;
+		font-family: var(--font-label);
+		font-size: 12.5px;
 		font-weight: 800;
-		letter-spacing: 0.04em;
+		letter-spacing: 0.05em;
 	}
 	/* The one controlling type reads differently, on purpose. */
 	.badge.controls .code {
-		background: var(--tone-brand);
+		background: var(--gloss), var(--tone-brand);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.4),
+			0 3px 7px -3px var(--tone-brand);
 	}
 	.name {
-		font-size: 11.5px;
-		color: var(--ink-3);
+		font-size: 14px;
+		color: var(--badge-ink, var(--ink-3));
 	}
 </style>

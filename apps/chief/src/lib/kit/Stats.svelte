@@ -19,26 +19,28 @@
 <style>
 	.stats {
 		display: flex;
-		gap: 6px;
+		gap: 8px;
 	}
 	.stat {
 		flex: 1;
-		border: 1px solid var(--line-3);
-		border-radius: 10px;
-		background: var(--sunk);
-		padding: 9px 6px;
+		border: 1px solid var(--glass-line);
+		border-radius: var(--r-sm);
+		background: var(--glass);
+		box-shadow: var(--glass-shadow);
+		padding: 11px 6px 10px;
 		text-align: center;
 	}
 	.a {
 		display: block;
-		font-size: 16px;
+		font-family: var(--font-display);
+		font-size: 22px;
 		font-weight: 700;
 		line-height: 1.1;
 		font-variant-numeric: tabular-nums lining-nums;
 	}
 	.b {
 		display: block;
-		font-size: 11px;
+		font-size: 13px;
 		color: var(--ink-3);
 		margin-top: 3px;
 		line-height: 1.2;

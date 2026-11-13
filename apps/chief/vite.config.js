@@ -15,7 +15,10 @@ export default {
 				slug: 'chief',
 				name: 'Chief',
 				description: 'AZBOLT Chief',
-				themeColor: '#efebe7'
+				themeColor: '#2c2580',
+				// The splash is this colour until the first paint. Paper before
+				// an indigo app is a white flash on every launch.
+				backgroundColor: '#2c2580'
 			}),
 			workbox: {
 				globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],

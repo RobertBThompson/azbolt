@@ -4,6 +4,7 @@
  * @property {string} name   Display name.
  * @property {string} description
  * @property {string} [themeColor]
+ * @property {string} [backgroundColor]  Splash ground while the app loads.
  */
 
 /** Literal types, not widened strings — the PWA plugin's types require them. */
@@ -14,11 +15,18 @@ const MASKABLE = /** @type {const} */ ('maskable');
 /**
  * Shared PWA manifest factory. Each app calls this in its vite.config
  * so manifests stay structurally identical and only differ where they
- * must: name, slug, theme color.
+ * must: name, slug, theme color, and the splash ground for an app whose
+ * first screen is not paper.
  *
  * @param {ManifestInput} input
  */
-export function manifest({ slug, name, description, themeColor = '#17181a' }) {
+export function manifest({
+	slug,
+	name,
+	description,
+	themeColor = '#17181a',
+	backgroundColor = '#f6f5f0'
+}) {
 	return {
 		id: `/?app=${slug}`,
 		name,
@@ -28,7 +36,7 @@ export function manifest({ slug, name, description, themeColor = '#17181a' }) {
 		scope: '/',
 		display: DISPLAY,
 		orientation: ORIENTATION,
-		background_color: '#f6f5f0',
+		background_color: backgroundColor,
 		theme_color: themeColor,
 		icons: [
 			{ src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },

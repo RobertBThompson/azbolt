@@ -39,41 +39,47 @@
 
 <style>
 	.empty {
-		border: 1px dashed var(--line-2);
-		border-radius: 12px;
-		padding: 16px 14px;
+		border: 1.5px dashed rgba(255, 255, 255, 0.9);
+		border-radius: var(--r-md);
+		padding: 20px 16px;
 		text-align: center;
-		background: var(--card);
+		background: var(--glass-dim);
+		box-shadow: 0 12px 26px -12px rgba(30, 20, 90, 0.4);
 	}
 	.t {
 		margin: 0 0 5px;
-		font-weight: 600;
-		font-size: 14px;
+		font-family: var(--font-display);
+		font-weight: 700;
+		font-size: 17px;
 		color: var(--ink);
 	}
 	.m {
-		margin: 0 0 11px;
-		font-size: 12px;
+		margin: 0 0 13px;
+		font-size: 14.5px;
 		line-height: 1.45;
-		color: var(--ink-3);
+		color: var(--ink-2);
 	}
 	button {
 		min-height: var(--tap-min);
-		padding: 0 16px;
-		border-radius: 11px;
-		border: 1px solid var(--tone-cool);
-		background: var(--tone-cool);
+		padding: 0 22px;
+		border-radius: 999px;
+		border: 0;
+		background: var(--gloss), linear-gradient(118deg, #4b8dd3 0%, #2f6aa8 45%, #204d7b 100%);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.6),
+			0 10px 20px -8px rgba(32, 77, 123, 0.9);
 		color: #ffffff;
-		font-family: inherit;
-		font-size: 13.5px;
-		font-weight: 600;
+		font-family: var(--font-display);
+		font-size: 16px;
+		font-weight: 700;
+		cursor: pointer;
 	}
 	button:disabled {
 		opacity: 0.5;
 	}
 	.e {
 		margin: 9px 0 0;
-		font-size: 12px;
+		font-size: 14px;
 		color: var(--tone-alert-ink);
 	}
 </style>

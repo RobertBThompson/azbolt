@@ -48,55 +48,65 @@
 
 <style>
 	.display {
-		border: 1px solid color-mix(in srgb, var(--t-ink) 35%, transparent);
-		border-radius: 11px;
-		background: var(--t-tint);
-		padding: 14px 15px;
+		border: 1px solid color-mix(in srgb, var(--t-ink) 30%, #ffffff);
+		border-radius: var(--r-md);
+		background: linear-gradient(180deg, #ffffff 0%, var(--t-tint) 85%);
+		box-shadow: var(--glass-shadow);
+		padding: 16px 18px;
 	}
+	/* Figures line up without a mono face: the same family, tabular. */
 	.v {
-		font-family: var(--font-mono);
-		font-size: 34px;
-		font-weight: 700;
+		font-family: var(--font-display);
+		font-size: 40px;
+		font-weight: 800;
+		font-variant-numeric: tabular-nums lining-nums;
 		letter-spacing: -0.02em;
 		line-height: 1;
 	}
 	.m {
-		font-size: 12px;
+		font-size: 14.5px;
 		color: var(--ink-2);
-		margin-top: 6px;
+		margin-top: 7px;
 		line-height: 1.35;
 	}
 	.sys {
 		display: block;
-		margin-top: 9px;
+		margin-top: 11px;
 	}
 	.sys .eyebrow {
 		display: block;
-		margin-bottom: 5px;
+		margin-bottom: 6px;
+		color: var(--label-ink, var(--on-field-2));
 	}
 	.sys input {
 		width: 100%;
 		min-height: var(--tap-min);
-		border: 1px solid var(--line-2);
-		border-radius: 10px;
-		background: var(--sunk);
-		padding: 9px 13px;
-		font-family: var(--font-mono);
-		font-size: 14px;
+		border: 1px solid var(--glass-line);
+		border-radius: var(--r-sm);
+		background: var(--glass);
+		box-shadow: var(--glass-shadow);
+		padding: 9px 15px;
+		font-family: var(--font-display);
+		font-size: 17px;
+		font-variant-numeric: tabular-nums;
+		color: var(--ink);
 	}
 	.pad {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 6px;
-		margin-top: 9px;
+		gap: 8px;
+		margin-top: 11px;
 	}
 	.pad button {
-		height: 52px;
-		border: 1px solid var(--line-3);
-		border-radius: 10px;
-		background: var(--sunk);
-		font-family: inherit;
-		font-size: 18px;
+		height: 56px;
+		border: 1px solid var(--glass-line);
+		border-radius: var(--r-sm);
+		background: var(--glass);
+		box-shadow: var(--glass-shadow);
+		font-family: var(--font-display);
+		font-size: 22px;
 		font-weight: 600;
+		color: var(--ink);
+		cursor: pointer;
 	}
 </style>

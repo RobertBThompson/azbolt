@@ -69,6 +69,9 @@ importers:
       '@azbolt/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@fontsource-variable/outfit':
+        specifier: ^5.3.0
+        version: 5.3.0
     devDependencies:
       '@azbolt/config':
         specifier: workspace:*
@@ -898,6 +901,9 @@ packages:
     engines: {node: '>=12'}
     cpu: [x64]
     os: [win32]
+
+  '@fontsource-variable/outfit@5.3.0':
+    resolution: {integrity: sha512-fPb5XnYK0k7SbR++HEmm4+ZqDszmLKQ+sPRUr8oQ/KNC0vy6r6hazJFe8iYozv4cqlHbvJ/JECkJWrfDodUMVQ==}
 
   '@isaacs/cliui@9.0.0':
     resolution: {integrity: sha512-AokJm4tuBHillT+FpMtxQ60n8ObyXBatq7jD2/JA9dxbDDokKQm8KMht5ibGzLVU9IJDIKK4TPKgMHEYMn3lMg==}
@@ -3061,6 +3067,8 @@ snapshots:
 
   '@esbuild/win32-x64@0.21.5':
     optional: true
+
+  '@fontsource-variable/outfit@5.3.0': {}
 
   '@isaacs/cliui@9.0.0': {}
 

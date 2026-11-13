@@ -1,4 +1,7 @@
 @import '@azbolt/config/tokens.css';
+/* Self-hosted, so the face is in the precache and the app is the same
+   offline as on. It used to come from a font CDN on every cold start. */
+@import '@fontsource-variable/outfit/wght.css';
 
 /* Chief overrides more than --app-accent, which the README warns about.
    The reason: Chief has a full design spec of its own (docs/chief), and it
@@ -30,8 +33,13 @@
 	   Roles are unchanged; only the hues moved onto the mark. Chief keeps
 	   these here rather than in packages/config because they are Chief's
 	   branding, and the other four apps should not inherit it. */
-	--tone-graphite: #78675e; /* default — the mark's taupe, darkened */
-	--tone-graphite-tint: #f3f0ef;
+	/* The default was the mark's taupe, darkened. On paper that was a
+	   quiet neutral; on the violet field it is a brown button. The
+	   default is now the ink itself, a step lighter — still no hue of its
+	   own, and far enough below --tone-ai in lightness that a plain
+	   button is never mistaken for an AI one. */
+	--tone-graphite: #403b6c;
+	--tone-graphite-tint: #efedf8;
 	--tone-cool: #366ea8; /* arranging — the mark's blue, darkened */
 	--tone-cool-tint: #eaf1f8;
 	--tone-clay: #8e6035; /* committing something of value */
@@ -54,54 +62,110 @@
 	   still belonging to the same family. */
 
 	/* ── Surfaces ───────────────────────────────────────────────────────
-	   Re-hued onto the mark's taupe (21°) at the lightness levels the
-	   wireframes already used, so contrast is unchanged and the greys
-	   stop fighting the logo. */
-	--paper: #efebe7;
+	   The neutrals were hued onto the mark's taupe, which was right on
+	   paper and goes muddy on violet: warm grey text on a cool pane reads
+	   as dirt. They are the same lightness ladder re-hued to indigo, so
+	   every contrast figure holds or improves (--ink-3 is 6.4:1 on white,
+	   was 5.7:1). */
+	--paper: #efedf9;
 	--card: #ffffff;
-	--sunk: #faf8f6;
-	--ink: #1e1a18;
-	--ink-2: #3b352f;
-	--ink-3: #6d655e;
-	--ink-4: #8d847c;
-	--line: #d1c9c3;
-	--line-2: #ded8d3;
-	--line-3: #e8e3de;
-	--line-4: #eee9e5;
+	--sunk: #f6f4fd;
+	--ink: #1b1740;
+	--ink-2: #353060;
+	--ink-3: #5f5a86;
+	--ink-4: #837ea8;
+	--line: #cdc8e6;
+	--line-2: #dad6ee;
+	--line-3: #e5e2f4;
+	--line-4: #edebf8;
 
 	/* ── The field ──────────────────────────────────────────────────────
-	   The page is no longer a flat sheet. It is a graded field: deep
-	   violet at the top where the masthead and greeting sit in white,
-	   falling to near-white at the nav so cards keep lifting off it all
-	   the way down.
+	   The page is a graded field: indigo night at the masthead, where the
+	   greeting sits in white, lifting to periwinkle at the nav. It stops
+	   at a mid violet rather than running out to near-white, because bold
+	   white labels still have to clear 3:1 at the bottom of the screen.
 
 	   The tone system is untouched underneath. Wine still leads, blue
 	   still arranges, clay still commits — the field only changes what
 	   they sit on. Anything drawn directly on the field uses --on-field;
-	   anything inside a card goes back to --ink. */
-	--field-1: #51429c;
-	--field-2: #6b5abb;
-	--field-3: #9387da;
-	--field-4: #c9c3ee;
+	   anything inside a pane goes back to --ink. */
+	--field-1: #2c2580;
+	--field-2: #4a3ca4;
+	--field-3: #6f60c9;
+	--field-4: #8e82d9;
 	--field-5: #ece9f8;
+	--sun-core: #fff1d6;
+	--sun-warm: #ffb27a;
+	--sun-rose: #f27aa6;
 	--on-field: #ffffff;
-	--on-field-2: rgba(255, 255, 255, 0.82);
-	--on-field-3: rgba(255, 255, 255, 0.64);
+	--on-field-2: rgba(255, 255, 255, 0.86);
+	--on-field-3: rgba(255, 255, 255, 0.68);
+	--on-field-shade: 0 1px 14px rgba(24, 16, 80, 0.45);
 
-	/* Glass. Cards are no longer opaque paper: they are a light pane over
-	   the field, which is what lets the gradient read through the edges
-	   and keeps the whole screen one surface instead of a stack. */
-	--glass: rgba(255, 255, 255, 0.93);
+	/* ── Glass ──────────────────────────────────────────────────────────
+	   A pane is lit from above. Three things make that read: a rim of
+	   pure white along the top edge, a faint violet shade gathering in
+	   the belly, and a shadow in two parts — a tight one where the pane
+	   meets the field and a wide soft one that says how far above it the
+	   pane is floating. Every surface in the app takes these from here,
+	   so no card is lit from a different direction than its neighbour. */
+	--glass: linear-gradient(
+		180deg,
+		#ffffff 0%,
+		rgba(255, 255, 255, 0.96) 42%,
+		rgba(243, 240, 255, 0.95) 100%
+	);
 	--glass-dim: rgba(255, 255, 255, 0.72);
-	--glass-line: rgba(255, 255, 255, 0.7);
-	--glass-shadow: 0 1px 2px rgba(40, 28, 80, 0.1), 0 14px 30px -10px rgba(40, 28, 80, 0.3);
-	--glass-shadow-lift: 0 2px 5px rgba(40, 28, 80, 0.14), 0 26px 50px -16px rgba(40, 28, 80, 0.45);
+	--glass-line: rgba(255, 255, 255, 0.92);
+	--glass-shadow:
+		inset 0 1px 0 #ffffff, inset 0 -14px 22px -16px rgba(86, 66, 170, 0.24),
+		0 1px 2px rgba(30, 20, 90, 0.16), 0 12px 26px -10px rgba(30, 20, 90, 0.42);
+	--glass-shadow-lift:
+		inset 0 1px 0 #ffffff, inset 0 -18px 28px -18px rgba(86, 66, 170, 0.26),
+		0 2px 5px rgba(30, 20, 90, 0.18), 0 26px 50px -16px rgba(30, 20, 90, 0.55);
+	/* A control set into a pane rather than floating over it. */
+	--well: linear-gradient(180deg, #f3f0fc 0%, #faf9ff 100%);
+	--well-shadow: inset 0 2px 5px rgba(60, 44, 140, 0.13), inset 0 0 0 1px rgba(86, 66, 170, 0.1);
+	/* The gloss on anything filled with colour: buttons, thumbs, orbs. */
+	--gloss: linear-gradient(
+		180deg,
+		rgba(255, 255, 255, 0.42) 0%,
+		rgba(255, 255, 255, 0.1) 46%,
+		rgba(255, 255, 255, 0) 52%,
+		rgba(0, 0, 0, 0.08) 100%
+	);
+	/* Dark glass, for a control that sits on the field and must not look
+	   like a card: the switch tracks and the masthead buttons. */
+	--smoke: rgba(26, 18, 92, 0.3);
+	--smoke-line: rgba(255, 255, 255, 0.5);
+	--smoke-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.28), inset 0 -8px 14px -10px rgba(10, 6, 60, 0.5),
+		0 8px 22px -10px rgba(20, 12, 80, 0.6);
+
+	/* The lit thumb of a switch: the one bright object on a smoke track. */
+	--thumb: linear-gradient(180deg, #ffffff 0%, #f2eeff 52%, #dcd4fb 100%);
+	--thumb-ink: #2a2370;
+	--thumb-shadow:
+		inset 0 1px 0 #ffffff, inset 0 -7px 10px -7px rgba(96, 76, 190, 0.5),
+		0 0 0 1px rgba(255, 255, 255, 0.9), 0 6px 18px -4px rgba(160, 130, 255, 0.8),
+		0 2px 4px rgba(20, 12, 80, 0.3);
+
+	/* ── Curves ─────────────────────────────────────────────────────────
+	   One ladder. Small controls, rows and inputs, cards, the lead panel.
+	   Nothing in the app picks a radius of its own. */
+	--r-xs: 10px;
+	--r-sm: 15px;
+	--r-md: 22px;
+	--r-lg: 28px;
+	/* The coloured edge of a card is cut by the corner instead of being a
+	   straight bar beside it. */
+	--edge: 5px;
 
 	/* Washes. One opacity ladder for every translucent surface in the
 	   app, so a tint is never typed as a one-off rgba(). */
-	--wash-1: rgba(120, 103, 94, 0.05);
-	--wash-2: rgba(120, 103, 94, 0.09);
-	--wash-3: rgba(120, 103, 94, 0.15);
+	--wash-1: rgba(70, 55, 150, 0.06);
+	--wash-2: rgba(70, 55, 150, 0.1);
+	--wash-3: rgba(70, 55, 150, 0.16);
 	--wash-blue: rgba(102, 153, 206, 0.14);
 	--wash-wine: rgba(159, 62, 73, 0.12);
 
@@ -119,38 +183,72 @@
 	--sph-business: #5a6472;
 	--sph-hobby: repeating-linear-gradient(45deg, #7a7140 0 3px, #a89d6e 3px 6px);
 
-	/* Type */
-	--font-sans: 'Instrument Sans', system-ui, -apple-system, sans-serif;
-	--font-serif: Newsreader, Georgia, serif;
-	--font-mono: 'JetBrains Mono', ui-monospace, monospace;
+	/* ── Type ───────────────────────────────────────────────────────────
+	   One family. Outfit is round and geometric, which is the same
+	   drawing as the panes and the orbs, and it holds from a 12px tag to
+	   a 30px greeting on weight alone. The serif masthead and the mono
+	   labels are gone: three families was two more voices than one app
+	   needs, and the mono was doing a job letter-spacing does better.
 
-	/* Scale. Wireframes are drawn 310px wide for a 390pt phone
-	   (0.795 px per pt), so every size below is the wireframe value
-	   scaled up by ~1.258. That keeps rows, buttons and the nav above
-	   the 44pt minimum. */
+	   The roles are still named separately so a later change of mind is a
+	   one-line edit rather than a search. */
+	--font-sans: 'Outfit Variable', Outfit, system-ui, -apple-system, 'Segoe UI', sans-serif;
+	--font-display: var(--font-sans);
+	--font-label: var(--font-sans);
+	/* Code is the one place a fixed pitch is doing real work, and the
+	   system has a good one, so nothing is downloaded for it. */
+	--font-code: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', Menlo, Consolas, monospace;
+	/* Caps labels are tracked wide instead of set in mono. */
+	--track-label: 0.16em;
+	--track-stage: 0.28em;
+
+	/* Everything is one step larger than the wireframe scale, which was
+	   drawn for a 310px artboard and carried over a size too small:
+	   body copy was 13px, where a phone wants 15 or 16. */
+	--size-body: 15px;
+
 	--band: 9px;
-	--appbar: 44px;
-	--nav: 94px; /* the icons ride the curve, so the bar is deeper than the wave */
-	--tap-min: 45px;
+	--appbar: 50px;
+	--nav: 96px; /* the icons ride the curve, so the bar is deeper than the wave */
+	--tap-min: 48px;
 }
 
 body {
+	/* What shows before the first paint and under an overscroll — and
+	   behind anything drawn outside the shell, such as the framework's
+	   own error page, which is why the text default here is white. The
+	   shell sets it back to ink for everything inside a screen. */
+	background: var(--field-3);
+	color: var(--on-field);
 	font-family: var(--font-sans);
+	/* Outfit sets a touch tight at text sizes. */
+	letter-spacing: 0.006em;
+	font-variant-numeric: lining-nums;
+	text-rendering: optimizeLegibility;
 }
 
 h1,
 h2,
 h3,
 h4 {
-	font-family: var(--font-sans);
-	font-weight: 600;
+	font-family: var(--font-display);
+	font-weight: 700;
+	letter-spacing: -0.012em;
 }
 
-/* One mono eyebrow style, used for every small caps label in the app. */
+button,
+input,
+textarea,
+select {
+	letter-spacing: inherit;
+}
+
+/* One eyebrow style, used for every small caps label in the app. */
 .eyebrow {
-	font-family: var(--font-mono);
-	font-size: 10.5px;
-	letter-spacing: 0.11em;
+	font-family: var(--font-label);
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: var(--track-label);
 	color: var(--ink-4);
 	text-transform: uppercase;
 }
@@ -176,7 +274,7 @@ main > .hello h1,
 main > .who h1,
 main > .head h1 {
 	color: var(--on-field);
-	text-shadow: 0 1px 24px rgba(40, 28, 80, 0.35);
+	text-shadow: var(--on-field-shade);
 }
 
 /* Section headings label the field, not a card. */
@@ -185,11 +283,22 @@ main > div > .head .label {
 	color: var(--on-field-2);
 }
 
-/* Cards: a light pane over the field. */
-.card-glass {
-	background: var(--glass);
-	border: 1px solid var(--glass-line);
-	box-shadow: var(--glass-shadow);
-	backdrop-filter: blur(14px) saturate(1.15);
-	-webkit-backdrop-filter: blur(14px) saturate(1.15);
+/* ── The curved edge ─────────────────────────────────────────────────
+   A card's tone used to be a straight border-left, which squared off
+   the one side of the card the eye starts on. This draws it as an inset
+   shadow on an overlay instead, so the colour is cut by the same radius
+   as the card and thins out around the corners, with a little of the
+   tone bleeding into the pane beside it. Set --edge-ink on the card. */
+.edged {
+	position: relative;
+}
+.edged::after {
+	content: '';
+	position: absolute;
+	inset: -1px;
+	border-radius: inherit;
+	pointer-events: none;
+	box-shadow:
+		inset var(--edge) 0 0 var(--edge-ink, var(--tone-cool)),
+		inset 22px 0 26px -22px color-mix(in srgb, var(--edge-ink, var(--tone-cool)) 50%, transparent);
 }

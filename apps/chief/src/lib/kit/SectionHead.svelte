@@ -21,30 +21,34 @@
 	.head {
 		display: flex;
 		align-items: center;
-		gap: 8px;
-		padding: 10px 2px 1px;
+		gap: 9px;
+		padding: 12px 2px 2px;
 	}
 	.bar {
-		width: 3px;
-		height: 13px;
-		border-radius: 2px;
+		width: 4px;
+		height: 15px;
+		border-radius: 3px;
 		/* These headings sit on the field, not on paper. The tone colours
 		   were mixed for a light ground and go muddy on violet, so the
 		   bar is lifted toward white while keeping its hue. */
-		background: color-mix(in srgb, var(--t-ink) 45%, #ffffff);
+		background: color-mix(in srgb, var(--t-ink) 40%, #ffffff);
+		box-shadow: 0 0 10px color-mix(in srgb, var(--t-ink) 40%, #ffffff);
 	}
 	h2 {
 		margin: 0;
-		font-family: var(--font-mono);
-		font-size: 10.5px;
-		font-weight: 600;
-		letter-spacing: 0.13em;
+		font-family: var(--font-label);
+		font-size: 13.5px;
+		font-weight: 700;
+		letter-spacing: var(--track-label);
 		text-transform: uppercase;
 		color: var(--on-field);
+		text-shadow: var(--on-field-shade);
 	}
 	.count {
-		font-family: var(--font-mono);
-		font-size: 10.5px;
-		color: var(--on-field-3);
+		font-family: var(--font-label);
+		font-size: 13.5px;
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+		color: var(--on-field-2);
 	}
 </style>

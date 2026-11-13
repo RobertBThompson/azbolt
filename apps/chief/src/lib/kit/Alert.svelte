@@ -14,21 +14,30 @@
 
 <style>
 	.alert {
-		background: var(--tone-alert-tint);
-		border: 1px solid var(--tone-alert);
-		border-radius: 11px;
-		padding: 11px 13px;
+		background: linear-gradient(180deg, #ffffff 0%, var(--tone-alert-tint) 80%);
+		border: 1px solid color-mix(in srgb, var(--tone-alert) 55%, #ffffff);
+		border-radius: var(--r-sm);
+		padding: 13px 15px;
 		display: flex;
-		gap: 10px;
+		gap: 11px;
+		box-shadow:
+			inset 0 1px 0 #ffffff,
+			0 0 0 3px color-mix(in srgb, var(--tone-alert) 14%, transparent),
+			0 12px 26px -10px rgba(30, 20, 90, 0.42);
 	}
 	.bang {
-		width: 18px;
-		height: 18px;
+		width: 22px;
+		height: 22px;
 		border-radius: 50%;
-		background: var(--tone-alert);
+		background: radial-gradient(
+			circle at 34% 24%,
+			color-mix(in srgb, var(--tone-alert) 50%, #ffffff) 0%,
+			var(--tone-alert) 58%
+		);
+		box-shadow: 0 4px 9px -3px var(--tone-alert);
 		color: #fff;
-		font-size: 12px;
-		font-weight: 700;
+		font-size: 14.5px;
+		font-weight: 800;
 		display: grid;
 		place-items: center;
 		flex: none;
@@ -40,14 +49,14 @@
 	}
 	.t {
 		display: block;
-		font-size: 14.5px;
-		font-weight: 600;
+		font-size: 16.5px;
+		font-weight: 700;
 		line-height: 1.3;
 		color: var(--tone-alert-ink);
 	}
 	.m {
 		display: block;
-		font-size: 12.5px;
+		font-size: 14.5px;
 		line-height: 1.4;
 		color: var(--ink-2);
 		margin-top: 4px;

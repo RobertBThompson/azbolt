@@ -72,10 +72,14 @@
 
 <style>
 	.lede {
-		margin: 0 2px;
-		font-size: 12.5px;
+		margin: 0;
+		font-size: 14.5px;
 		line-height: 1.5;
-		color: var(--ink-3);
+		color: var(--ink-2);
+		background: var(--glass-dim);
+		border-radius: var(--r-xs);
+		padding: 9px 13px;
+		box-shadow: inset 3px 0 0 rgba(255, 255, 255, 0.95);
 	}
 	.pushes {
 		list-style: none;
@@ -84,27 +88,31 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1px;
-		border: 1px solid var(--line-3);
-		border-radius: 12px;
+		border: 1px solid var(--glass-line);
+		border-radius: var(--r-md);
 		overflow: hidden;
-		background: var(--line-4);
+		background: var(--line-3);
+		box-shadow: var(--glass-shadow);
 	}
 	li {
 		display: flex;
 		align-items: center;
-		gap: 11px;
-		padding: 9px 13px;
+		gap: 13px;
+		padding: 11px 16px;
 		background: var(--card);
 	}
 	.g {
-		width: 30px;
-		height: 30px;
+		width: 36px;
+		height: 36px;
 		border-radius: 50%;
 		display: grid;
 		place-items: center;
-		background: var(--tone-clay-tint);
+		background: radial-gradient(circle at 34% 24%, #ffffff 0%, var(--tone-clay-tint) 70%);
 		color: var(--tone-clay);
 		flex: none;
+		box-shadow:
+			inset 0 1px 0 #ffffff,
+			0 4px 9px -3px color-mix(in srgb, var(--tone-clay) 55%, transparent);
 	}
 	.b {
 		display: flex;
@@ -112,12 +120,12 @@
 		gap: 1px;
 	}
 	.t {
-		font-size: 13.5px;
+		font-size: 16.5px;
 		font-weight: 600;
 		color: var(--ink);
 	}
 	.m {
-		font-size: 11.5px;
+		font-size: 14px;
 		color: var(--ink-3);
 	}
 </style>
