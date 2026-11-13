@@ -4,7 +4,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "vite dev --port 5171",
+		"dev": "vite dev --port 7171 --strictPort",
 		"build": "vite build",
 		"preview": "vite preview --port 4171",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",

@@ -9,6 +9,7 @@
   },
   "scripts": {
     "dev": "turbo run dev",
+    "dev:host": "turbo run dev -- --host",
     "build": "turbo run build",
     "preview": "turbo run preview",
     "check": "turbo run check",

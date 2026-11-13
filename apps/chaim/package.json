@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite dev --port 5172",
+    "dev": "vite dev --port 7172 --strictPort",
     "build": "node ../../packages/pwa/bin/gen-icons.js static/icons '#17181a' '#3f6b52' && vite build",
     "preview": "vite preview --port 4172",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
