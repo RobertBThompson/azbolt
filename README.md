@@ -38,6 +38,20 @@ pnpm --filter @azbolt/chief build
 
 Node 20+ and pnpm 10+.
 
+### Running a second checkout at the same time
+
+The ports above are defaults set in each app's `vite.config.js`. To run another
+clone of this repo alongside the first, give its apps their own ports in
+`.env.local` files, which git ignores:
+
+```bash
+echo DEV_PORT=8171 > apps/chief/.env.local
+```
+
+`strictPort` is on, so a port already in use is an error rather than a silent
+move to another one. `pnpm dev:host` from the root exposes whichever ports are
+in force to the local network, for testing on a phone.
+
 ## Design decisions worth knowing before you change things
 
 **Shared components ship as source.** `@azbolt/ui` points its `svelte`
