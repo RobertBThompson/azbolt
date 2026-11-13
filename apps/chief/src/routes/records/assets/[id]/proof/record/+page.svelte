@@ -8,6 +8,9 @@
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Banner, Row, Btn } from '$lib/kit';
 	import { page } from '$app/stores';
+	import { ASSETS } from '$lib/assets.js';
+
+	const a = $derived(ASSETS[$page.params.id ?? ''] ?? ASSETS['nfta-014']);
 </script>
 
 <svelte:head><title>Evidence record · Chief</title></svelte:head>
@@ -16,7 +19,13 @@
 	<Banner t="warm" title="Storage confirmation" meta="Verified · current" />
 	<Row t="warm" title="Source" meta="Secure facility · issued 12 August" trailing="›" />
 	<Row t="warm" title="Checks" meta="Issuer, date and asset matched" trailing="›" />
-	<Row t="warm" title="Supports" meta="Storage claim · NFTA artwork #014" trailing="↗" />
+	<Row
+		t="warm"
+		href="/records/assets/{$page.params.id}"
+		title="Supports"
+		meta="Storage claim · {a.name}"
+		trailing="↗"
+	/>
 	<Row t="warm" title="Audit history" meta="Added, checked, linked" trailing="›" />
 	<Btn primary={false} label="Replace this evidence" />
 </Screen>

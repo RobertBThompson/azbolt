@@ -1,27 +1,43 @@
 <script>
 	/**
-	 * B5 — E6 Valuation.
-	 * A valuation is a dated claim with a source, not a number overwritten
-	 * in place. Prior reviews stay auditable.
+	 * Assets — valuation.
+	 * Every asset carries a value, because net worth is worked out from
+	 * them. This is where that number comes from and how old it is.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Banner, Stats, Row, Btn } from '$lib/kit';
+	import { PageHead, Stats, Row, Btn, Alert } from '$lib/kit';
 	import { page } from '$app/stores';
+	import { ASSETS, events, short } from '$lib/assets.js';
+
+	const id = $derived($page.params.id ?? '');
+	const a = $derived(ASSETS[id] ?? ASSETS['nfta-014']);
+	const reviews = $derived(
+		events(ASSETS[id] ? id : 'nfta-014').filter((e) => e.type === 'Re-valued')
+	);
+	const stale = $derived(a.valuedDaysAgo !== null && a.valuedDaysAgo > 365);
 </script>
 
 <svelte:head><title>Valuation · Chief</title></svelte:head>
 
-<Screen back="/records/assets/{$page.params.id}" nav={false}>
-	<Banner t="warm" title="NFTA artwork #014" meta="Current valuation · amount private" />
+<Screen back="/records/assets/{id}" nav={false}>
+	<PageHead eyebrow={a.name} title="Valuation" />
+	{#if a.value === null}
+		<Alert title="No value recorded" meta="It is left out of net worth until it has one." />
+	{:else if stale}
+		<Alert
+			title="This valuation is over a year old"
+			meta="Net worth is still counting it as it was."
+		/>
+	{/if}
 	<Stats
 		items={[
-			['$—', 'Value'],
-			['3 Aug', 'Reviewed'],
-			['1', 'Source']
+			[short(a.value), 'Value'],
+			[reviews[0]?.when ?? '—', 'Reviewed'],
+			[String(reviews.length), reviews.length === 1 ? 'Review' : 'Reviews']
 		]}
 	/>
-	<Row t="warm" title="Method" meta="Independent appraisal" trailing="›" />
-	<Row t="warm" title="Source" meta="Valuation review · verified" trailing="↗" />
-	<Row t="warm" title="History" meta="2 prior valuations" trailing="›" />
+	{#each reviews as r (r.detail + r.when)}
+		<Row t="warm" title={r.detail} meta="Re-valued" trailing={r.when} />
+	{/each}
 	<Btn t="warm" label="Update valuation" />
 </Screen>

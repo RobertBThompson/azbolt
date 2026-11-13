@@ -1,15 +1,36 @@
 <script>
 	/**
-	 * B5 Assets & Evidence — E1 Assets.
-	 * Net worth is the headline because it is the only number that answers a
-	 * question. v2's Categories screen became this chip row; creating an
-	 * asset went from nine required decisions to two.
+	 * Assets — categories.
+	 *
+	 * Categories are the level you go into first. The list is the
+	 * Chief's own: it can be added to and renamed, it is not a fixed set.
+	 * Ones that hold something lead, each with its count and what it
+	 * adds up to; the empty ones are kept out of the way until asked for,
+	 * because twenty names with nothing in them bury the eight that
+	 * matter.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Hero, Stats, Field, Chips, Row, Alert, Btn, Note } from '$lib/kit';
+	import { Hero, Row, Btn, SectionHead, SourceNote } from '$lib/kit';
 	import { page } from '$app/stores';
+	import {
+		activeAssets,
+		assetValue,
+		categorySummary,
+		needingAttention,
+		money
+	} from '$lib/assets.js';
 
 	const view = $derived($page.url.searchParams.get('state') ?? 'default');
+	const { used, empty } = categorySummary();
+	const count = activeAssets().length;
+	const attn = needingAttention().length;
+	let showEmpty = $state(false);
+
+	/** @param {{ count: number, value: number, attention: number }} c */
+	const line = (c) =>
+		`${c.count} ${c.count === 1 ? 'asset' : 'assets'}` +
+		(c.value ? ` · ${money(c.value)}` : '') +
+		(c.attention ? ` · ${c.attention} need attention` : '');
 </script>
 
 <svelte:head><title>Assets · Chief</title></svelte:head>
@@ -25,56 +46,49 @@
 		/>
 		<Btn t="warm" href="/records/assets/new" label="Add the first one" />
 		<Btn primary={false} label="Import from a spreadsheet" />
-	{:else if view === 'attention'}
-		<!-- Attention is a count with reasons, never a red badge with no
-		     explanation. The flagged rows are not moved or hidden. -->
-		<Alert
-			title="2 assets need attention"
-			meta="A movement authorisation expired and a valuation is 14 months old."
-		/>
-		<Row
-			t="warm"
-			href="/records/assets/nfta-014"
-			title="NFTA artwork #022"
-			meta="Movement pending since 2 August"
-			trailing="⚠"
-		/>
-		<Row
-			t="warm"
-			href="/records/assets/studio-collection"
-			title="Studio collection"
-			meta="Valuation 14 months old"
-			trailing="⚠"
-		/>
-		<Btn t="warm" label="Review both" />
-		<Note
-			>Nothing is marked unverified automatically — Chief says what is stale and lets you decide.</Note
-		>
 	{:else}
-		<Stats
-			items={[
-				['$—', 'Assets'],
-				['$—', 'Owed'],
-				['$—', 'Net']
-			]}
-		/>
-		<Field label="Search" placeholder="Name, owner, tag, claim" />
-		<Chips t="warm" items={['All', 'Art', 'Property', 'Equipment', 'IP']} />
 		<Row
 			t="warm"
-			href="/records/assets/nfta-014"
-			title="NFTA artwork #014"
-			meta="Verified · secure storage"
+			href="/records/assets/in/all"
+			title="All assets"
+			meta="{count} assets · {money(assetValue())}"
 			trailing="›"
 		/>
-		<Row
-			t="warm"
-			href="/records/assets/studio-collection"
-			title="Studio collection"
-			meta="4 linked works"
-			trailing="›"
-		/>
-		<Row t="warm" title="Delivery van" meta="Equipment · Build" trailing="›" />
+		{#if attn}
+			<Row
+				t="alert"
+				href="/records/assets/in/all?show=attention"
+				title="{attn} need attention"
+				meta="Each one says why"
+				trailing="⚠"
+			/>
+		{/if}
+
+		<SectionHead label="Categories" t="warm" count={used.length} />
+		{#each used as c (c.id)}
+			<Row t="warm" href="/records/assets/in/{c.id}" title={c.name} meta={line(c)} trailing="›" />
+		{/each}
+
+		{#if showEmpty}
+			<SectionHead label="Empty" count={empty.length} />
+			{#each empty as c (c.id)}
+				<Row
+					href="/records/assets/in/{c.id}"
+					title={c.name}
+					meta="Nothing in it yet"
+					trailing="›"
+				/>
+			{/each}
+		{:else}
+			<Btn
+				primary={false}
+				label="Show {empty.length} empty categories"
+				onclick={() => (showEmpty = true)}
+			/>
+		{/if}
+
 		<Btn t="warm" href="/records/assets/new" label="Add asset" />
+		<Btn primary={false} href="/records/assets/categories/new" label="New category" />
+		<SourceNote source="fixture" />
 	{/if}
 </Screen>

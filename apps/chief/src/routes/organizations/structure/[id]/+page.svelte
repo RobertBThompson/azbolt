@@ -11,7 +11,7 @@
 
 <svelte:head><title>Reporting relationship · Chief</title></svelte:head>
 
-<Screen back="/records/structure" nav={false}>
+<Screen back="/organizations/structure" nav={false}>
 	<Banner t="cool" title="Carmen reports to Pamela" meta="As Operations lead · active" />
 	<Row t="cool" href="/people/carmen" title="Who" meta="Carmen Mendez" trailing="↗" />
 	<Row t="cool" href="/people/pamela" title="Reports to" meta="Pamela Anderson" trailing="↗" />

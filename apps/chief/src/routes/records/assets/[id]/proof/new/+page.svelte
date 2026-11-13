@@ -7,6 +7,9 @@
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Banner, Chips, Field, Row, Btn } from '$lib/kit';
 	import { page } from '$app/stores';
+	import { ASSETS } from '$lib/assets.js';
+
+	const a = $derived(ASSETS[$page.params.id ?? ''] ?? ASSETS['nfta-014']);
 </script>
 
 <svelte:head><title>Add proof · Chief</title></svelte:head>
@@ -16,7 +19,7 @@
 	<Chips t="warm" items={['Document', 'Photo', 'Link']} />
 	<Field label="Title" placeholder="For example: storage confirmation" />
 	<Field label="Source" placeholder="Issuer, person or URL" />
-	<Row t="warm" title="Supports" meta="NFTA artwork #014 · storage" trailing="›" />
+	<Row t="warm" title="Supports" meta={a.name} trailing="›" />
 	<Btn
 		t="warm"
 		href="/records/assets/{$page.params.id}/proof/record"

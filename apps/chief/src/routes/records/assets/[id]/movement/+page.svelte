@@ -8,6 +8,17 @@
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Alert, Row, Btn } from '$lib/kit';
 	import { page } from '$app/stores';
+	import { ASSETS, controllingOrgs } from '$lib/assets.js';
+	import { ORGS } from '$lib/data.js';
+
+	const id = $derived($page.params.id ?? '');
+	const a = $derived(ASSETS[id] ?? ASSETS['nfta-014']);
+	// The organization the chain ends at, however many assets it passes through.
+	const holder = $derived(
+		controllingOrgs(ASSETS[id] ? id : 'nfta-014')
+			.map((o) => ORGS[o]?.name ?? o)
+			.join(' and ')
+	);
 </script>
 
 <svelte:head><title>Movement · Chief</title></svelte:head>
@@ -15,7 +26,9 @@
 <Screen back="/records/assets/{$page.params.id}" nav={false}>
 	<Alert
 		title="Custody changes; ownership does not"
-		meta="AME Reserve remains the owner throughout this movement."
+		meta={holder
+			? `${holder} remains the owner of ${a.name} throughout this movement.`
+			: `Nobody is recorded as the owner of ${a.name}. Settle that before it moves.`}
 	/>
 	<Row t="warm" title="From" meta="Secure facility" trailing="›" />
 	<Row t="warm" title="To" meta="Exhibition storage" trailing="›" />

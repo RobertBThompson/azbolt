@@ -13,28 +13,28 @@
 
 <svelte:head><title>Team structure · Chief</title></svelte:head>
 
-<Screen back="/records" nav={false}>
+<Screen back="/organizations" nav={false}>
 	<Tabs items={['List', 'Tree']} {active} onpick={(i) => (active = i)} />
 	<Row
 		t="cool"
-		href="/records/structure/pamela"
+		href="/organizations/structure/pamela"
 		title="Pamela Anderson"
 		meta="CEO · reports to the board"
 		trailing="›"
 	/>
 	<Row
 		t="cool"
-		href="/records/structure/carmen"
+		href="/organizations/structure/carmen"
 		title="Carmen Mendez"
 		meta="Operations · reports to Pamela"
 		trailing="›"
 	/>
 	<Row
 		t="cool"
-		href="/records/structure/sam"
+		href="/organizations/structure/sam"
 		title="Sam Smith"
 		meta="Sales · reports to Carmen"
 		trailing="›"
 	/>
-	<Btn t="cool" href="/records/structure/add" label="Add a reporting link" />
+	<Btn t="cool" href="/organizations/structure/add" label="Add a reporting link" />
 </Screen>

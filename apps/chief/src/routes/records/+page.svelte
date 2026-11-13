@@ -1,38 +1,76 @@
 <script>
 	/**
-	 * B2 Today — T3 Records.
-	 * The replacement for "More". Four areas, each with what changed since
-	 * you last looked, so the page is worth opening even when you are not
-	 * going anywhere specific. Assets sits first because it lost its
-	 * bottom-nav slot — the one tap it costs is paid back here.
+	 * The Asset tab.
+	 *
+	 * Three numbers, then four doors. Net worth is on the strip because it
+	 * is a number Chief always knows — assets minus liabilities, worked
+	 * out from the records, never something to go and ask for.
+	 *
+	 * The doors are the four things a Chief does with what they hold:
+	 * look at it, follow the money it earns and costs, see who holds it,
+	 * and see what has happened to it. Each says what is behind it before
+	 * it is opened, so the page is worth a glance even with nowhere to go.
+	 *
+	 * There is no All · Personal · Work filter. That split is what
+	 * spheres replaced, and the sphere is already named at the top of the
+	 * screen.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Banner, Row } from '$lib/kit';
+	import { Stats, Row, Btn, SourceNote } from '$lib/kit';
+	import {
+		activeAssets,
+		assetValue,
+		owedTotal,
+		netWorth,
+		short,
+		signed,
+		categorySummary,
+		needingAttention,
+		cashFor,
+		cashTotals,
+		upcomingPayment,
+		dayLabel,
+		inSentence,
+		LINKS,
+		ownershipTree,
+		events
+	} from '$lib/assets.js';
+
+	const count = activeAssets().length;
+	const categories = categorySummary().used.length;
+	const attn = needingAttention().length;
+	const net = cashTotals(cashFor('month')).net;
+	const due = upcomingPayment();
+	const loose = ownershipTree().loose.length;
+	const last = events()[0];
+
+	const assetsLine =
+		`${count} assets in ${categories} categories` + (attn ? ` · ${attn} need attention` : '');
+	const moneyLine =
+		`Net ${signed(net)} this month` +
+		(due ? ` · ${due.l.name.toLowerCase()} due ${inSentence(dayLabel(due.due))}` : '');
+	const ownershipLine =
+		`${LINKS.length} ownership links` +
+		(loose ? ` · ${loose} ${loose === 1 ? 'asset has' : 'assets have'} no owner` : '');
+	const activityLine = last
+		? `${last.type} · ${last.name} · ${inSentence(last.when)}`
+		: 'Nothing yet';
 </script>
 
-<svelte:head><title>Records · Chief</title></svelte:head>
+<svelte:head><title>Asset · Chief</title></svelte:head>
 
 <Screen>
-	<Banner t="cool" title="Everything not used daily" meta="Four areas, and what changed in each." />
-	<Row
-		t="warm"
-		href="/records/assets"
-		title="Assets & evidence"
-		meta="41 assets · 2 need attention"
-		trailing="›"
+	<Stats
+		items={[
+			[short(assetValue()), 'Asset value'],
+			[short(owedTotal()), 'Liabilities'],
+			[short(netWorth()), 'Net worth']
+		]}
 	/>
-	<Row
-		t="warm"
-		href="/records/money"
-		title="Money"
-		meta="Runway 4.5 months · 1 payment Friday"
-		trailing="›"
-	/>
-	<Row
-		t="warm"
-		href="/records/structure"
-		title="Structure & ownership"
-		meta="No changes since June"
-		trailing="›"
-	/>
+	<Row t="warm" href="/records/assets" title="Assets" meta={assetsLine} trailing="›" />
+	<Row t="warm" href="/records/money" title="Money" meta={moneyLine} trailing="›" />
+	<Row t="warm" href="/records/ownership" title="Ownership" meta={ownershipLine} trailing="›" />
+	<Row t="warm" href="/records/activity" title="Activity" meta={activityLine} trailing="›" />
+	<Btn t="warm" href="/records/assets/new" label="Add asset" />
+	<SourceNote source="fixture" />
 </Screen>

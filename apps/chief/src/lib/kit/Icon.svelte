@@ -41,6 +41,10 @@
 		keyboard: 'M3 6.5h18v11H3v-11ZM7 10h.01M11 10h.01M15 10h.01M17 13.5h.01M7 13.5h6.5',
 		spark: 'M12 3l1.8 4.9L18.5 9.7l-4.7 1.8L12 16.4l-1.8-4.9L5.5 9.7l4.7-1.8L12 3Z',
 		dash: 'M3.5 4.5h7v7h-7v-7ZM13.5 4.5h7v7h-7v-7ZM3.5 14.5h7v6h-7v-6ZM13.5 14.5h7v6h-7v-6Z',
+		// Cash flow — a note, with the coin it stands for.
+		cash: 'M2.5 6.5h19v11h-19v-11ZM12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM6 9.5v.01M18 14.5v.01',
+		// Liabilities — a statement with its lines, torn off at the foot.
+		owed: 'M6 2.5h12v19l-3-2-3 2-3-2-3 2v-19ZM9 8h6M9 12h6',
 		// Filled. A hairline person at 17px reads as a wireframe placeholder;
 		// a solid silhouette reads as somebody.
 		'user-solid':

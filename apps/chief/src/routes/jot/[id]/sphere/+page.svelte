@@ -20,7 +20,8 @@
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Btn, Note, Row, SectionHead } from '$lib/kit';
 	import { PLACEABLE } from '$lib/spheres.js';
-	import { UNSPHERED, PEOPLE, ORGS, ASSETS } from '$lib/data.js';
+	import { UNSPHERED, PEOPLE, ORGS } from '$lib/data.js';
+	import { activeAssets } from '$lib/assets.js';
 
 	const id = $derived($page.params.id ?? '');
 	const jot = $derived(UNSPHERED[id] ?? { text: 'Untitled jot', meta: 'No sphere', thrown: '' });
@@ -96,13 +97,13 @@
 
 	<SectionHead label="Any assets" t="cool" />
 	<div class="grid">
-		{#each Object.entries(ASSETS) as [key, a] (key)}
+		{#each activeAssets() as a (a.id)}
 			<button
 				type="button"
 				class="pick"
-				class:on={assets.includes(key)}
-				aria-pressed={assets.includes(key)}
-				onclick={() => (assets = toggle(assets, key))}
+				class:on={assets.includes(a.id)}
+				aria-pressed={assets.includes(a.id)}
+				onclick={() => (assets = toggle(assets, a.id))}
 			>
 				<span class="nm">{a.name}</span>
 			</button>
