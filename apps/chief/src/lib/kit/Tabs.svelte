@@ -26,8 +26,12 @@
 		gap: 4px;
 	}
 	button {
-		flex: 1;
+		/* Each tab grows from its own width, so a long label takes the
+		   room it needs from a short one instead of spilling out of an
+		   equal third. */
+		flex: 1 1 auto;
 		min-width: 0;
+		padding: 0 8px;
 		height: 38px;
 		border: 0;
 		border-radius: 999px;

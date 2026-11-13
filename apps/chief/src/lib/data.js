@@ -378,26 +378,6 @@ export const TASKS = {
 	}
 };
 
-/** @type {Record<string, { name: string, blurb: string, tags: string[], owner: string, claim: string, valuation: string }>} */
-export const ASSETS = {
-	'nfta-014': {
-		name: 'NFTA artwork #014',
-		blurb: 'Tangible artwork with a tokenised claim.',
-		tags: ['Verified', 'Insured', 'Stored'],
-		owner: 'AME Reserve',
-		claim: 'Token linked and verified',
-		valuation: 'Reviewed 3 August'
-	},
-	'studio-collection': {
-		name: 'Studio collection',
-		blurb: 'Four linked works held together.',
-		tags: ['Stored'],
-		owner: 'AME Reserve',
-		claim: 'Partially verified',
-		valuation: 'Valuation 14 months old'
-	}
-};
-
 /**
  * Jots that have been thrown and not yet sphered.
  *

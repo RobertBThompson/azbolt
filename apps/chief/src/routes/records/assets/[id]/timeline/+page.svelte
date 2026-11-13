@@ -1,20 +1,27 @@
 <script>
 	/**
-	 * B5 Assets & Evidence — E5 Timeline.
-	 * Ownership and movement changes stay auditable. This is also where an
-	 * approved Quick Jot about an asset lands.
+	 * Assets — timeline.
+	 * Everything that has happened to this one asset, newest first. The
+	 * same events, across every asset, are the Activity feed.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Row, Btn } from '$lib/kit';
+	import { PageHead, Row, Btn, Blank } from '$lib/kit';
 	import { page } from '$app/stores';
+	import { ASSETS, events } from '$lib/assets.js';
+
+	const id = $derived($page.params.id ?? '');
+	const a = $derived(ASSETS[id] ?? ASSETS['nfta-014']);
+	const history = $derived(events(ASSETS[id] ? id : 'nfta-014'));
 </script>
 
 <svelte:head><title>Timeline · Chief</title></svelte:head>
 
-<Screen back="/records/assets/{$page.params.id}" nav={false}>
-	<Row t="warm" title="Created" meta="Artist identity captured" trailing="2026" />
-	<Row t="warm" title="Token linked" meta="Ownership claim verified" trailing="2026" />
-	<Row t="warm" title="Valuation updated" meta="Review document added" trailing="3 Aug" />
-	<Row t="warm" title="Storage checked" meta="Facility confirmation" trailing="12 Aug" />
-	<Btn t="ai" primary={false} href="/jot" label="Jot an update" />
+<Screen back="/records/assets/{id}" nav={false}>
+	<PageHead eyebrow={a.name} title="Timeline" />
+	{#each history as h (h.type + h.detail)}
+		<Row t="warm" title={h.type} meta={h.detail} trailing={h.when} />
+	{:else}
+		<Blank>Nothing recorded yet.</Blank>
+	{/each}
+	<Btn t="ai" primary={false} href="/jot" label="Jot a timeline update" />
 </Screen>

@@ -20,7 +20,7 @@ reads from them and none of them read back.
 | F0  | Shell & Context       | context switching, app bar, bottom nav, search, notifications |
 | F1  | Directory             | the only place a person or an organization exists             |
 | F2  | Capture (Quick Jot)   | jot input, the proposal model, placement rules and history    |
-| B1  | Onboarding            | auth, sphere creation, first-run permissions               |
+| B1  | Onboarding            | auth, sphere creation, first-run permissions                  |
 | B2  | Today                 | the daily feed, attention ranking, the Records landing page   |
 | B3  | Work & Calendar       | endeavors, tasks, calendar, external sync                     |
 | B4  | Structure & Ownership | reporting links, ownership records                            |
@@ -102,9 +102,12 @@ Every destination on the map, as its own route. Shell in
 
 **State variants are states, not routes.** The map shows four screens in
 three states each (Quick Jot, Endeavors, Assets, Cash flow). Those are
-selected with `?state=` — `/records/assets?state=attention`,
-`?state=empty`, `/jot?state=offline` — because in a running app they come
-from data. Do not turn them into routes.
+selected with `?state=` — `/records/assets?state=empty`,
+`/records/money?state=duplicate`, `/jot?state=offline` — because in a
+running app they come from data. Do not turn them into routes. Where the
+data now exists the state is simply read from it: assets needing
+attention are a filter on the asset list (`?show=attention`), worked out
+from the records rather than staged.
 
 The kit is app-local because the tone language is proven on Chief only —
 if a second app adopts it, move the folder to `packages/ui` rather than
@@ -138,7 +141,7 @@ than a dashboard about them:
    sphere and is never blocked on choosing one. Throwing must cost nothing.
 2. **Sphere it** — select a sphere, then any people or organizations, then
    any assets. Everything is optional. A jot is in **All life** until told
-   otherwise: that is every sphere at once *and* the absence of one, which
+   otherwise: that is every sphere at once _and_ the absence of one, which
    is why there is no separate "unsphered" state in the app. The default
    is a real answer, not a blank waiting to be filled.
 3. **Task it** — offered as a choice at the end of Sphere It, never as a
@@ -149,8 +152,8 @@ An **endeavor** is a group of tasks. It is never required.
 
 ## Sphere and organization
 
-**Sphere** replaced **Workspace** throughout. A sphere is an *area of a
-life* — Family, Business, Church, Career, Hobby, Children, Spouse. It is
+**Sphere** replaced **Workspace** throughout. A sphere is an _area of a
+life_ — Family, Business, Church, Career, Hobby, Children, Spouse. It is
 the lens a Chief is looking through, and it is the app's subject rather
 than one of its fields: spheres overlap, compete for the same hours, and
 run up against each other, and choosing between them is the Chief's
@@ -204,3 +207,64 @@ Us; one that does not reads as Them. Nothing on the record says so.
 **Resolution is a state, not a species.** A proposed Organization —
 AME — is a real record that can accumulate evidence and resolve later
 without its history being rewritten.
+
+## The Asset tab
+
+What sits behind **Asset** in the menu bar: branches B4 (ownership), B5
+and B6 as one place, laid out from the asset lexicon, the Layer 2 screen
+maps and the Layer 4 ERD.
+
+**Three numbers, four doors.** The hub leads with Asset value,
+Liabilities and Net worth, because net worth is a number Chief always
+knows — assets minus liabilities, worked out from the records. There is
+no All · Personal · Work filter: spheres replaced that split.
+
+| Door      | Route                | What is behind it                                                          |
+| --------- | -------------------- | -------------------------------------------------------------------------- |
+| Assets    | `/records/assets`    | categories → list (`in/[category]`) → asset → attributes, claims, timeline |
+| Money     | `/records/money`     | two lenses: cash flow here, liabilities at `money/liabilities`             |
+| Ownership | `/records/ownership` | Owns · Owned by, one link (`[id]`), add a link (`add`), the tree (`tree`)  |
+| Activity  | `/records/activity`  | one feed of asset events; an asset's timeline is the same list narrowed    |
+
+**One book.** Every figure comes from `src/lib/assets.js`: the fixtures
+and the arithmetic over them, shaped like the ERD (`asset_categories`,
+`assets`, `ownerships`, `liabilities`; cash and events follow the
+lexicon's field lists, having no confirmed table yet). No screen keeps a
+number of its own, so the hub, the lists and the detail pages cannot
+disagree. Swapping fixtures for live rows is a change of source in that
+one file.
+
+**Rules that live in the book, not in the screens.**
+
+- Everything is an asset if it is not a person. A person is never an
+  asset; the contract that binds one is.
+- Every asset carries a value. One without is saved and flagged, not
+  refused.
+- An asset can be owned by an asset, but every chain has to end at an
+  organization. One that does not is named at the top of Ownership and
+  under the tree.
+- For an asset link, current value is the asset's value times the share.
+  It is derived, never stored on the link, so the two cannot disagree.
+- Organization-to-organization links are read from `ORGS.controlledBy`,
+  the same fact the Directory shows, so the two views cannot drift.
+- Owner and Manager stay two words. A manager answers for a thing
+  without holding any of it.
+- A liability is debt against a specific asset, owed to a specific
+  organization. One tied to neither is flagged.
+- Net cash is Cash In minus Actual Expense. It is not profit. The other
+  five cash types are expected, not moved: listed, never counted.
+- Verified, Insured and Stored are read off the claims on file, never
+  set by hand.
+
+**Wording.** Owner, Owned by, Liability and Claims are kept exactly. The
+friendlier front-of-house words in the language map are not used.
+
+**Not behind Asset.** Reporting structure is about people, so it lives
+under Organizations (`/organizations/structure`), reached from an
+organization's profile. Organizations themselves stay in the Directory;
+ownership links out to them rather than keeping a second list.
+
+**Still a prototype.** The records are design placeholders and say so on
+screen. Forms lay out the right fields and step through; they do not
+save yet. Dates in the fixtures are stored as ages, so the book reads as
+current whenever it is opened.

@@ -1,6 +1,6 @@
 <script>
 	/**
-	 * B6 Money — M6 Add · from paperwork.
+	 * Money — add a liability, from the paperwork.
 	 * Step two is the look-up step, and it is skippable. The liability
 	 * already exists after step one, so abandoning here loses nothing.
 	 * "I don't know yet" is an explicit answer on the rate rather than a
@@ -8,7 +8,14 @@
 	 * reason a debt never gets recorded.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Prog, Field, Row, Btn } from '$lib/kit';
+	import { Prog, Field, Select, Btn } from '$lib/kit';
+
+	let started = $state('');
+	let amount = $state('');
+	let rate = $state('');
+	let payment = $state('');
+	let frequency = $state('Monthly');
+	let months = $state('');
 </script>
 
 <svelte:head><title>Paperwork · Chief</title></svelte:head>
@@ -20,15 +27,12 @@
 		value={1}
 		meta="Step 2 of 2 · you may need to look these up"
 	/>
-	<Field label="Interest rate" placeholder="I don't know yet" />
-	<Field label="Payment & term" placeholder="Amount · frequency · end date" />
-	<Row
-		t="warm"
-		href="/records/assets"
-		title="Secured against an asset?"
-		meta="Link an asset record"
-		trailing="↗"
-	/>
+	<Field label="Starting date" placeholder="When it began" bind:value={started} />
+	<Field label="Start amount" placeholder="What was borrowed" bind:value={amount} />
+	<Field label="Interest rate" placeholder="I don't know yet" bind:value={rate} />
+	<Field label="Payment amount" placeholder="Each payment" bind:value={payment} />
+	<Select label="Frequency" options={['Monthly', 'Quarterly']} bind:value={frequency} />
+	<Field label="Term in months" placeholder="How long in all" bind:value={months} />
 	<Btn t="warm" href="/records/money/liabilities" label="Save liability" />
 	<Btn primary={false} href="/records/money/liabilities" label="Save without this" />
 </Screen>

@@ -10,7 +10,7 @@
 
 <svelte:head><title>Add a link · Chief</title></svelte:head>
 
-<Screen back="/records/structure" nav={false}>
+<Screen back="/organizations/structure" nav={false}>
 	<Banner t="cool" title="Build one sentence" meta="Carmen reports to Pamela as Operations lead." />
 	<Field label="Who" placeholder="Carmen Mendez" />
 	<Field label="Reports to" placeholder="Pamela Anderson" />

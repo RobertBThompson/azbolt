@@ -19,9 +19,10 @@
 	 * together, not an intelligence of its own.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Btn, Note, SectionHead, SphereTags, TypeBadge } from '$lib/kit';
+	import { Btn, Note, Row, SectionHead, SphereTags, TypeBadge } from '$lib/kit';
 	import { ORGS, PEOPLE } from '$lib/data.js';
 	import { orgType, perspective } from '$lib/orgtypes.js';
+	import { ownedBy, ownersOf } from '$lib/assets.js';
 	import { page } from '$app/stores';
 
 	const id = $derived($page.params.id ?? '');
@@ -33,6 +34,12 @@
 	const nameOf = (who) => (who === 'me' ? 'You' : (PEOPLE[who]?.name ?? ORGS[who]?.name ?? who));
 
 	const parent = $derived(org.controlledBy ? ORGS[org.controlledBy] : null);
+
+	// The same links the Asset tab reads, counted from this organization's
+	// side: what it holds, and what holds it.
+	const key = $derived(ORGS[id] ? id : 'tn');
+	const owns = $derived(ownedBy({ cls: 'organization', id: key }).length);
+	const heldBy = $derived(ownersOf({ cls: 'organization', id: key }).length);
 </script>
 
 <svelte:head><title>{org.name} · Chief</title></svelte:head>
@@ -117,6 +124,21 @@
 			? 'An individual is the only type that can control, being the only one that is itself an intelligence.'
 			: `A ${type.name} does not control on its own. It governs how individuals are tied together and how assets move among them.`}
 	</Note>
+
+	<Row
+		t="warm"
+		href="/records/ownership?org={key}"
+		title="Ownership"
+		meta="Owns {owns} · owned by {heldBy}"
+		trailing="↗"
+	/>
+	<Row
+		t="cool"
+		href="/organizations/structure"
+		title="Structure"
+		meta="Leadership and reporting"
+		trailing="›"
+	/>
 
 	<Btn primary={false} href="/organizations" label="Back to organizations" />
 </Screen>
