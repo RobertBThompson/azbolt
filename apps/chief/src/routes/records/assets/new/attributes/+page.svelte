@@ -12,8 +12,8 @@
 <svelte:head><title>Attributes · Add asset · Chief</title></svelte:head>
 
 <Screen back="/records/assets/new" nav={false}>
-	<Prog t="warm" title="Attributes" value={1} meta="Step 2 of 2 · the draft is already saved" />
+	<Prog t="warm" title="Attributes" value={1} meta="Step 2 of 2 · nothing is saved yet" />
 	<AttributeFields />
-	<Btn t="warm" href="/records/assets" label="Save attributes" />
-	<Btn primary={false} href="/records/assets" label="Leave these for later" />
+	<Btn t="warm" label="Save attributes" soon />
+	<Btn primary={false} href="/records/assets" label="Back to assets" />
 </Screen>

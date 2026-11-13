@@ -13,7 +13,7 @@
 <Screen back="/" nav={false}>
 	<Field label="Search" placeholder="People, work, assets, notes" />
 	<Chips items={['All', 'People', 'Work', 'Assets']} />
-	<Row title="Carmen Mendez" meta="Person · Azbolt" trailing="↗" href="/people/carmen" />
+	<Row title="Carmen Ruiz" meta="Person · Azbolt" trailing="↗" href="/people/carmen" />
 	<Row
 		title="NFTA artwork #014"
 		meta="Asset · verified"

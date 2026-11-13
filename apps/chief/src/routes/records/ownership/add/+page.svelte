@@ -58,7 +58,7 @@
 		<Select label="Owned" options={either} bind:value={owned} placeholder="Organization or asset" />
 		<Select label="Role" options={OWNER_TYPES} bind:value={role} />
 		{#if role === 'Owner'}
-			<Field label="Shares" placeholder="Percent held" bind:value={shares} />
+			<Field label="Shares" type="money" placeholder="Percent held" bind:value={shares} />
 		{/if}
 		<Btn t="warm" type="submit" label="Create ownership link" disabled={!ready} />
 	</form>

@@ -15,13 +15,20 @@ import { PEOPLE, ORGS } from './data.js';
  *   'anon'    a backend is up but nobody is signed in, so the
  *             owner-scoped rules return nothing and fixtures stand in
  *   'fixture' no backend at all — the prototype's normal state
+ *   'error'   signed in, and the read failed
  *
  * 'anon' is kept distinct from 'fixture' because they need different
  * words on screen: one is an invitation to sign in, the other is not.
+ *
+ * 'error' returns nothing rather than fixtures. A signed-in account
+ * shown design placeholders after a failed read cannot tell them from
+ * its own records, and a note at the foot of the screen is not enough
+ * when the rows above it look like data. The screen says the read
+ * failed and offers to try again.
  */
 export const pb = createPocketBase('', 'azbolt.chief.pb');
 
-/** @typedef {'live'|'anon'|'fixture'} Source */
+/** @typedef {'live'|'anon'|'fixture'|'error'} Source */
 
 /** @type {boolean|null} */
 let reachable = null;
@@ -36,18 +43,31 @@ export async function backendUp() {
  * @template T
  * @param {() => Promise<T>} live
  * @param {() => T} fixture
- * @returns {Promise<{ data: T, source: Source }>}
+ * @param {T} empty  what a failed read shows: nothing of this kind
+ * @returns {Promise<{ data: T, source: Source, error?: string }>}
  */
-async function readOr(live, fixture) {
+async function readOr(live, fixture, empty) {
 	if (!(await backendUp())) return { data: fixture(), source: 'fixture' };
 	if (!pb.authStore.isValid) return { data: fixture(), source: 'anon' };
 	try {
 		return { data: await live(), source: 'live' };
-	} catch {
-		// A reachable backend that rejects the read is still a failed read.
-		// Showing fixtures beats showing nothing, as long as we say so.
-		return { data: fixture(), source: 'fixture' };
+	} catch (/** @type {any} */ err) {
+		return {
+			data: empty,
+			source: 'error',
+			error: err?.message || 'The server did not answer.'
+		};
 	}
+}
+
+/**
+ * Retire a record without destroying it. Old records still name it, so
+ * a hard delete would leave them pointing at nothing.
+ * @param {string} collection
+ * @param {string} id
+ */
+export function archive(collection, id) {
+	return pb.collection(collection).update(id, { archived: new Date().toISOString() });
 }
 
 /** The id every write hangs its `owner` relation on. */
@@ -64,7 +84,9 @@ const fullName = (p) => [p.first_name, p.last_name].filter(Boolean).join(' ');
 export function listPeople() {
 	return readOr(
 		async () => {
-			const rows = await pb.collection('people').getFullList({ sort: 'first_name' });
+			const rows = await pb
+				.collection('people')
+				.getFullList({ sort: 'first_name', filter: 'archived = null' });
 			return rows.map((r) => ({
 				id: r.id,
 				name: fullName(r),
@@ -81,7 +103,8 @@ export function listPeople() {
 				name: p.name,
 				meta: `${p.role} · ${p.next}`,
 				spheres: p.spheres
-			}))
+			})),
+		[]
 	);
 }
 
@@ -96,8 +119,10 @@ export function listPeople() {
 export function listOrganizations() {
 	return readOr(
 		async () => {
-			const rows = await pb.collection('organizations').getFullList({ sort: 'name' });
-			return rows.map((r) => ({ id: r.id, name: r.name, meta: r.blurb, kind: r.kind }));
+			const rows = await pb
+				.collection('organizations')
+				.getFullList({ sort: 'name', filter: 'archived = null' });
+			return rows.map((r) => ({ id: r.id, name: r.name, meta: r.blurb, kind: r.code }));
 		},
 		() =>
 			Object.entries(ORGS).map(([id, o]) => ({
@@ -105,7 +130,8 @@ export function listOrganizations() {
 				name: o.name,
 				meta: o.blurb,
 				kind: o.code
-			}))
+			})),
+		[]
 	);
 }
 
@@ -118,67 +144,60 @@ export function createPerson(fields) {
 }
 
 /**
- * @param {{ name: string, kind: string, blurb?: string,
- *           swatch?: string, hue?: string }} fields
+ * `code` is one of the nine organization types, not a free label:
+ * C, B, CO, CC, DO, DB, P, DN, CN.
+ * @param {{ name: string, code: string, blurb?: string, charter?: string }} fields
  */
 export function createOrganization(fields) {
-	return pb.collection('organizations').create({
-		swatch: 'solid',
-		...fields,
-		owner: ownerId()
-	});
+	return pb.collection('organizations').create({ ...fields, owner: ownerId() });
+}
+
+/* ── Jots ───────────────────────────────────────────────────────────── */
+
+/**
+ * @typedef {{ id: string, text: string, created: string,
+ *             sphere: string, sphered: string }} JotRow
+ */
+
+/**
+ * Jots still waiting to be placed, newest first.
+ *
+ * Only the unplaced ones: a jot that has been given a sphere has left
+ * the queue, which is the whole of what Sphere it does.
+ */
+export function listJots() {
+	return readOr(
+		async () => {
+			const rows = await pb.collection('jots').getFullList({
+				sort: '-created',
+				filter: 'archived = null && sphered = null'
+			});
+			return rows.map((r) => ({
+				id: r.id,
+				text: r.text,
+				created: r.created,
+				sphere: r.sphere ?? '',
+				sphered: r.sphered ?? ''
+			}));
+		},
+		() => [],
+		[]
+	);
 }
 
 /**
- * Writes the design fixtures in as real, owned records.
+ * Keep a thrown jot.
  *
- * A fresh account reads an empty Directory, which is correct but looks
- * identical to a broken one. This makes the round trip visible: the same
- * names arrive back through the API, owned by the signed-in user, and
- * the screens stop saying they are showing placeholders.
- *
- * Not idempotent by itself — the unique index on (owner, name) is what
- * stops a second run duplicating organizations, and the caller only offers
- * it when the live lists come back empty.
- *
- * @returns {Promise<{ people: number, organizations: number }>}
+ * @param {string} text
+ * @returns {Promise<JotRow>}
  */
-export async function seedDirectory() {
-	const owner = ownerId();
-
-	/** @type {Record<string, string>} */
-	const orgIds = {};
-	for (const [key, o] of Object.entries(ORGS)) {
-		const row = await pb.collection('organizations').create({
-			name: o.name,
-			kind: o.code,
-			blurb: o.blurb,
-			swatch: 'solid',
-			hue: o.spheres[0] ?? '',
-			owner
-		});
-		orgIds[key] = row.id;
-	}
-
-	let people = 0;
-	for (const p of Object.values(PEOPLE)) {
-		// Fixtures carry one display name; split on the first space so the
-		// stored shape matches what the form writes rather than dumping
-		// everything into first_name.
-		const [first, ...rest] = String(p.name).split(' ');
-		await pb.collection('people').create({
-			first_name: first,
-			last_name: rest.join(' '),
-			role: p.role,
-			spheres: p.spheres,
-			relationship: p.strength,
-			email: p.email === '—' ? '' : p.email,
-			phone: p.phone,
-			notes: p.notes,
-			owner
-		});
-		people += 1;
-	}
-
-	return { people, organizations: Object.keys(orgIds).length };
+export async function writeJot(text) {
+	const row = await pb.collection('jots').create({ text: text.trim(), owner: ownerId() });
+	return {
+		id: row.id,
+		text: row.text,
+		created: row.created,
+		sphere: row.sphere ?? '',
+		sphered: row.sphered ?? ''
+	};
 }

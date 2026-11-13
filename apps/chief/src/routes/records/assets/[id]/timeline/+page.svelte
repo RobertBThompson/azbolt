@@ -10,7 +10,7 @@
 	import { ASSETS, events } from '$lib/assets.js';
 
 	const id = $derived($page.params.id ?? '');
-	const a = $derived(ASSETS[id] ?? ASSETS['nfta-014']);
+	const a = $derived(ASSETS[id]);
 	const history = $derived(events(ASSETS[id] ? id : 'nfta-014'));
 </script>
 
@@ -23,5 +23,5 @@
 	{:else}
 		<Blank>Nothing recorded yet.</Blank>
 	{/each}
-	<Btn t="ai" primary={false} href="/jot" label="Jot a timeline update" />
+	<Btn t="ai" primary={false} href="/" label="Jot a timeline update" />
 </Screen>

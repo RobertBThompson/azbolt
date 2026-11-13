@@ -14,7 +14,7 @@
 	import Screen from '$lib/shell/Screen.svelte';
 	import { PageHead, Alert, Btn, TypeBadge } from '$lib/kit';
 	import { ORGS, PEOPLE } from '$lib/data.js';
-	import { money, nodeHref, nodeName, ownershipTree } from '$lib/assets.js';
+	import { money, nodeHref, nodeName, ownershipTree, sharePercent } from '$lib/assets.js';
 
 	const { rows, loose } = ownershipTree();
 
@@ -51,8 +51,8 @@
 					</span>
 					{#if r.link}
 						<span class="tm">
-							{r.link.role}{r.link.shares !== null ? ` · ${r.link.shares}%` : ''}{r.link
-								.currentValue !== null
+							{r.link.role}{sharePercent(r.link) !== null ? ` · ${sharePercent(r.link)}%` : ''}{r
+								.link.currentValue !== null
 								? ` · ${money(r.link.currentValue)}`
 								: ''}
 						</span>

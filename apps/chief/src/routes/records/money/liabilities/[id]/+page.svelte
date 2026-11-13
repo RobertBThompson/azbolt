@@ -19,9 +19,7 @@
 		short
 	} from '$lib/assets.js';
 
-	const id = $derived(
-		LIABILITIES[$page.params.id ?? ''] ? ($page.params.id ?? '') : 'business-loan'
-	);
+	const id = $derived($page.params.id ?? '');
 	const l = $derived(LIABILITIES[id]);
 	const gaps = $derived(liabilityGaps(l));
 

@@ -6,7 +6,7 @@
 	 * suggest into them — suggest, never auto-book.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Tabs, Chips, Row, Note } from '$lib/kit';
+	import { Chips, Note, Row, SourceNote, Tabs } from '$lib/kit';
 
 	let active = $state(0);
 </script>
@@ -38,4 +38,5 @@
 		trailing="›"
 	/>
 	<Note>Google Calendar is two-way. External events are shown but not editable here.</Note>
+	<SourceNote source="fixture" />
 </Screen>

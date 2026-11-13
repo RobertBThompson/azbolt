@@ -21,5 +21,5 @@
 	<Field label="Name" placeholder="Short working title" />
 	<Field label="What will be true when this succeeds" placeholder="One sentence" />
 	<Chips t="cool" items={['Now', 'Next', 'Someday']} />
-	<Btn t="cool" label="Create endeavor" />
+	<Btn t="cool" label="Create endeavor" soon />
 </Screen>

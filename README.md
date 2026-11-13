@@ -38,6 +38,44 @@ pnpm --filter @azbolt/chief build
 
 Node 20+ and pnpm 10+.
 
+### Running a second checkout at the same time
+
+The ports above are defaults set in each app's `vite.config.js`. To run another
+clone of this repo alongside the first, give its apps their own ports in
+`.env.local` files, which git ignores:
+
+```bash
+echo DEV_PORT=8171 > apps/chief/.env.local
+```
+
+`strictPort` is on, so a port already in use is an error rather than a silent
+move to another one. `pnpm dev:host` from the root exposes whichever ports are
+in force to the local network, for testing on a phone.
+
+### PocketBase in development
+
+Chief's dev server proxies `/api` and `/_/` to a local PocketBase, the same
+paths Caddy proxies in production, so the browser client needs no base URL in
+either place. The default is `http://127.0.0.1:8091`, which is the port the deployed
+instance uses; every working copy names its own in the same `.env.local`,
+so no one checkout's port becomes everybody's:
+
+```bash
+# apps/chief/.env.local
+DEV_PORT=8171
+PB_URL=http://127.0.0.1:8092
+```
+
+Run that instance with its own data folder, so two checkouts never share a
+database or fight over a schema:
+
+```bash
+pocketbase serve --http=127.0.0.1:8092 --dir=C:\dev\pocketbase\chief8171
+```
+
+With nothing listening, Chief falls back to its design fixtures and says so on
+screen.
+
 ## Design decisions worth knowing before you change things
 
 **Shared components ship as source.** `@azbolt/ui` points its `svelte`

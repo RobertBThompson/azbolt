@@ -13,7 +13,7 @@
 	import { LIABILITIES, LOAN_TYPES, activeAssets } from '$lib/assets.js';
 
 	const id = $page.params.id ?? '';
-	const l = LIABILITIES[id] ?? LIABILITIES['business-loan'];
+	const l = LIABILITIES[id];
 
 	const orgs = Object.entries(ORGS).map(([key, o]) => ({ value: key, label: o.name }));
 	const assets = activeAssets().map((a) => ({ value: a.id, label: a.name }));
@@ -38,12 +38,12 @@
 		<Select label="Loan type" options={LOAN_TYPES} bind:value={type} />
 		<Select label="Lender" options={orgs} bind:value={lender} placeholder="Organization" />
 		<Select label="Secured against" options={assets} bind:value={asset} placeholder="Asset" />
-		<Field label="Current balance" placeholder="Amount left" bind:value={balance} />
+		<Field label="Current balance" type="money" placeholder="Amount left" bind:value={balance} />
 	{:else}
-		<Field label="Interest rate" placeholder="I don't know yet" bind:value={rate} />
-		<Field label="Payment amount" placeholder="Each payment" bind:value={payment} />
+		<Field label="Interest rate" type="money" placeholder="I don't know yet" bind:value={rate} />
+		<Field label="Payment amount" type="money" placeholder="Each payment" bind:value={payment} />
 		<Select label="Frequency" options={['Monthly', 'Quarterly']} bind:value={frequency} />
-		<Field label="Term in months" placeholder="How long in all" bind:value={months} />
+		<Field label="Term in months" type="money" placeholder="How long in all" bind:value={months} />
 	{/if}
 	<Btn t="warm" href="/records/money/liabilities/{id}" label="Save changes" />
 </Screen>

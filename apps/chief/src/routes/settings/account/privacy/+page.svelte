@@ -20,5 +20,5 @@
 	<Row title="How AI uses data" meta="Processing and retained controls" trailing="›" />
 	<Row title="Sharing and providers" meta="Who receives which data" trailing="›" />
 	<Row title="Your choices" meta="Access, export and deletion" trailing="›" />
-	<Btn primary={false} label="Download a copy" />
+	<Btn primary={false} label="Download a copy" soon />
 </Screen>

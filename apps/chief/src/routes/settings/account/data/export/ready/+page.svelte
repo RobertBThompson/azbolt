@@ -16,6 +16,6 @@
 	<Row title="Included" meta="Selected branch records and evidence" trailing="›" />
 	<Row title="Excluded" meta="Private notes and unselected data" trailing="›" />
 	<Row title="Format" meta="JSON, CSV and original documents" trailing="›" />
-	<Btn label="Download archive" />
+	<Btn label="Download archive" soon />
 	<Btn primary={false} href="/settings/account/data/export" label="Prepare another export" />
 </Screen>

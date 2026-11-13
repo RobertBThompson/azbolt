@@ -95,8 +95,8 @@
 		/>
 		<Row t="warm" title="6:12 PM · $1,240" meta="Office · Azbolt" trailing="Keep" />
 		<Row t="warm" title="6:13 PM · $1,240" meta="Office · Azbolt" trailing="Merge" />
-		<Btn t="warm" label="Merge into one" />
-		<Btn primary={false} label="Keep both — they are different" />
+		<Btn t="warm" label="Merge into one" soon />
+		<Btn primary={false} label="Keep both — they are different" soon />
 	{:else}
 		<Filter label="Period" items={PERIODS} bind:active={period} />
 		<Stats

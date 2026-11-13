@@ -7,7 +7,8 @@
 	 *   href?: string|null,
 	 *   onclick?: (() => void)|null,
 	 *   type?: 'button'|'submit',
-	 *   disabled?: boolean
+	 *   disabled?: boolean,
+	 *   soon?: boolean
 	 * }}
 	 */
 	let {
@@ -17,30 +18,54 @@
 		href = null,
 		onclick = null,
 		type = 'button',
-		disabled = false
+		disabled = false,
+		soon = false
 	} = $props();
 	import { tone } from './tone.js';
 	const c = $derived(tone(t));
+	/* `soon` is for a control whose feature is not built yet. Leaving the
+	   button live and silent teaches people that pressing things in Chief
+	   does nothing; saying so keeps the screen honest until it is wired. */
+	const off = $derived(disabled || soon);
 </script>
 
 {#if href}
 	<a class="btn" class:primary {href} style="--t-ink:{c.ink}">{label}</a>
 {:else if type === 'submit'}
-	<button type="submit" class="btn" class:primary {onclick} {disabled} style="--t-ink:{c.ink}"
-		>{label}</button
+	<button type="submit" class="btn" class:primary {onclick} disabled={off} style="--t-ink:{c.ink}"
+		>{label}{#if soon}<span class="soon">Not yet</span>{/if}</button
 	>
 {:else}
-	<button type="button" class="btn" class:primary {onclick} {disabled} style="--t-ink:{c.ink}"
-		>{label}</button
+	<button type="button" class="btn" class:primary {onclick} disabled={off} style="--t-ink:{c.ink}"
+		>{label}{#if soon}<span class="soon">Not yet</span>{/if}</button
 	>
 {/if}
 
 <style>
+	/* The marker rides inside the pill so it cannot be read as a second
+	   control, and it says the same thing to a screen reader. */
+	.soon {
+		flex: none;
+		margin-left: 8px;
+		padding: 2px 8px;
+		border-radius: 999px;
+		background: color-mix(in srgb, currentColor 14%, transparent);
+		font-size: 12px;
+		font-weight: 600;
+		letter-spacing: 0.02em;
+		text-transform: none;
+	}
+
 	/* Every button is a pill. Secondary is unlit glass; primary is its
 	   tone with a gloss over it and its own colour in the shadow, so it
 	   looks pressed up out of the page rather than printed on it. */
 	.btn {
-		height: var(--tap-min);
+		/* min-height, not height: a long label beside the Not yet marker
+		   needs two lines on a narrow phone rather than spilling out of
+		   the pill. */
+		min-height: var(--tap-min);
+		padding: 6px 16px;
+		text-align: center;
 		border-radius: 999px;
 		display: flex;
 		align-items: center;

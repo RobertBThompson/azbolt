@@ -7,12 +7,13 @@
 	import Screen from '$lib/shell/Screen.svelte';
 	import { PageHead, Select, Field, Btn, Note } from '$lib/kit';
 	import { page } from '$app/stores';
-	import { LINKS, OWNER_TYPES, linkOf, nodeName } from '$lib/assets.js';
+	import { LINKS, OWNER_TYPES, linkOf, nodeName, sharePercent } from '$lib/assets.js';
 
-	const l = linkOf($page.params.id ?? '') ?? LINKS[0];
+	/* Guarded in +layout.js — see the note on the detail screen. */
+	const l = /** @type {NonNullable<ReturnType<typeof linkOf>>} */ (linkOf($page.params.id ?? ''));
 
 	let role = $state(/** @type {string} */ (l.role));
-	let shares = $state(l.shares !== null ? String(l.shares) : '');
+	let shares = $state(sharePercent(l) !== null ? String(sharePercent(l)) : '');
 	let start = $state(l.startValue !== null ? String(l.startValue) : '');
 	let current = $state(l.currentValue !== null ? String(l.currentValue) : '');
 	let since = $state(l.since);
@@ -23,12 +24,12 @@
 <Screen back="/records/ownership/{l.id}" nav={false}>
 	<PageHead eyebrow="Edit ownership" title="{nodeName(l.owner)} → {nodeName(l.owned)}" />
 	<Select label="Role" options={OWNER_TYPES} bind:value={role} />
-	<Field label="Shares" placeholder="Percent held" bind:value={shares} />
-	<Field label="Start value" placeholder="Worth when this began" bind:value={start} />
+	<Field label="Shares" type="money" placeholder="Percent held" bind:value={shares} />
+	<Field label="Start value" type="money" placeholder="Worth when this began" bind:value={start} />
 	{#if l.owned.cls === 'organization'}
-		<Field label="Current value" placeholder="Worth now" bind:value={current} />
+		<Field label="Current value" type="money" placeholder="Worth now" bind:value={current} />
 	{/if}
-	<Field label="Since" placeholder="When this began" bind:value={since} />
+	<Field label="Since" type="date" bind:value={since} />
 	<Btn t="warm" href="/records/ownership/{l.id}" label="Save changes" />
 	{#if l.owned.cls === 'asset'}
 		<Note>

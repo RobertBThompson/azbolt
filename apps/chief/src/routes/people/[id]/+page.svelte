@@ -24,7 +24,7 @@
 	import { sphereOf, PLACEABLE } from '$lib/spheres.js';
 	import { page } from '$app/stores';
 
-	const person = $derived(PEOPLE[$page.params.id ?? ''] ?? PEOPLE.carmen);
+	const person = $derived(PEOPLE[$page.params.id ?? '']);
 
 	/** @type {string[]} */
 	let spheres = $state([]);
@@ -144,7 +144,7 @@
 
 	<p class="note">Actions that strengthen this one:</p>
 	<div class="acts">
-		<a class="act-btn" href="/jot"><Icon name="throw" size={16} /> Jot about {person.first}</a>
+		<a class="act-btn" href="/"><Icon name="throw" size={16} /> Jot about {person.first}</a>
 		<a class="act-btn" href="/work/tasks/new"><Icon name="task" size={16} /> Set a next step</a>
 		<a class="act-btn" href="/work"><Icon name="action" size={16} /> Shared: {person.endeavors}</a>
 	</div>

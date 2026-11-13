@@ -17,5 +17,5 @@
 	<Row t="warm" title="Sections" meta="9 of 11 included" trailing="›" />
 	<Row t="warm" title="Appendices" meta="Team, assets, cash summary" trailing="›" />
 	<Row t="warm" title="Private notes" meta="Excluded" trailing="Off" />
-	<Btn t="warm" label="Generate PDF" />
+	<Btn t="warm" label="Generate PDF" soon />
 </Screen>

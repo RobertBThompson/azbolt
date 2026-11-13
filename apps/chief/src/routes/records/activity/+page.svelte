@@ -42,6 +42,6 @@
 	{:else}
 		<Blank>Nothing of that kind has happened yet.</Blank>
 	{/each}
-	<Btn t="ai" primary={false} href="/jot" label="Jot an asset update" />
+	<Btn t="ai" primary={false} href="/" label="Jot an asset update" />
 	<SourceNote source="fixture" />
 </Screen>

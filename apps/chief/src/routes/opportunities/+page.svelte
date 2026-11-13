@@ -5,7 +5,7 @@
 	 * approval posture as Quick Jot: Chief noticed, Chief did not act.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Banner, Row, Note } from '$lib/kit';
+	import { Banner, Note, Row, SourceNote } from '$lib/kit';
 </script>
 
 <svelte:head><title>Opportunities · Chief</title></svelte:head>
@@ -38,4 +38,5 @@
 		trailing="›"
 	/>
 	<Note>Dismissing one tells Chief why, and that reason is visible in placement rules.</Note>
+	<SourceNote source="fixture" />
 </Screen>

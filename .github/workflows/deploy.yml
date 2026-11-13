@@ -45,8 +45,25 @@ jobs:
               - 'apps/tithe/**'
               - 'packages/**'
 
-  deploy:
+  # Nothing reaches the server until the checks that would have caught
+  # it have run. This job is cheap and the deploy below waits on it.
+  gate:
     needs: changes
+    if: needs.changes.outputs.apps != '[]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm test
+
+  deploy:
+    needs: [changes, gate]
     if: needs.changes.outputs.apps != '[]'
     runs-on: ubuntu-latest
     strategy:

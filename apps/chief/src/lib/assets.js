@@ -28,29 +28,50 @@ import { ORGS } from './data.js';
 
 const DAY = 86_400_000;
 
-/** @param {number|null|undefined} n */
-export function money(n) {
-	if (n === null || n === undefined) return '—';
-	const sign = n < 0 ? '−' : '';
-	return `${sign}$${Math.round(Math.abs(n)).toLocaleString('en-US')}`;
+/**
+ * Every amount in this book is an integer number of cents.
+ *
+ * Dollars as floating point lose a cent here and there and the loss
+ * compounds through a total; and `money()` used to round to whole
+ * dollars, so $12.49 was shown as $12 and a cheque never matched a
+ * statement. Cents in, formatted out.
+ *
+ * Fixture figures below are written in dollars for readability and
+ * converted once, at the point the book is built.
+ * @param {number} n
+ */
+export const dollars = (n) => Math.round(n * 100);
+
+/**
+ * Cents as a person would write them. Whole dollars keep their cents
+ * off, because "$485,000.00" on a house is noise; anything with cents
+ * shows them, because that is the figure that has to match.
+ * @param {number|null|undefined} cents
+ */
+export function money(cents) {
+	if (cents === null || cents === undefined) return '—';
+	const sign = cents < 0 ? '−' : '';
+	const a = Math.abs(Math.round(cents));
+	const whole = Math.floor(a / 100).toLocaleString('en-US');
+	const rest = a % 100;
+	return rest === 0 ? `${sign}$${whole}` : `${sign}$${whole}.${String(rest).padStart(2, '0')}`;
 }
 
 /**
  * For the three-up stat strip, where a seven-figure sum does not fit.
- * @param {number|null|undefined} n
+ * @param {number|null|undefined} cents
  */
-export function short(n) {
-	if (n === null || n === undefined) return '—';
-	const a = Math.abs(n);
-	const sign = n < 0 ? '−' : '';
+export function short(cents) {
+	if (cents === null || cents === undefined) return '—';
+	const a = Math.abs(cents) / 100;
+	const sign = cents < 0 ? '−' : '';
 	if (a >= 1e6) return `${sign}$${(a / 1e6).toFixed(2).replace(/\.?0+$/, '')}M`;
 	if (a >= 1e4) return `${sign}$${Math.round(a / 1e3)}K`;
-	return `${sign}$${Math.round(a).toLocaleString('en-US')}`;
+	return `${sign}${money(Math.round(a * 100)).replace('−', '')}`;
 }
 
-/** @param {number} n */
-export const signed = (n) =>
-	`${n < 0 ? '−' : '+'}$${Math.round(Math.abs(n)).toLocaleString('en-US')}`;
+/** @param {number} cents */
+export const signed = (cents) => `${cents < 0 ? '−' : '+'}${money(Math.abs(cents))}`;
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const MONTHS_LONG = [
@@ -167,15 +188,31 @@ export const categoryName = (id) => ASSET_CATEGORIES.find((c) => c.id === id)?.n
  *   inventory: 'Inventory'|'Not inventory',
  *   notes: string, spheres: string[], claims: Claim[],
  *   endeavors: string[], storage: string,
+ *   units?: number, parent?: string|null,
+ *   valuation?: 'whole'|'parts',
  *   movement?: string, letGo?: boolean
  * }} Asset
  */
 
+/**
+ * Ownership of one asset is divided into this many units by default.
+ *
+ * Percentages cannot carry a share to the hundredth without fractions:
+ * 2.25% of 1,000 units is 22.5 of them. Out of 10,000, every share to
+ * one hundredth of a percent is a whole number — 2.25% is 225 units,
+ * half is 5,000, and the smallest share Chief can record is 1.
+ */
+export const SHARE_UNITS = 10_000;
+
 /** Claims that speak to who holds the thing, as opposed to where it is. */
 const OWNERSHIP_CLAIMS = ['Ownership token', 'Title / provenance', 'Agreement', 'Statement'];
 
-/** @type {Record<string, Asset>} */
-export const ASSETS = {
+/**
+ * The sample assets, with figures written in dollars. RAW is private;
+ * ASSETS below is the same book with every figure in cents.
+ * @type {Record<string, Asset>}
+ */
+const RAW_ASSETS = {
 	'family-home': {
 		name: 'Family home',
 		category: 'real-estate',
@@ -360,6 +397,7 @@ export const ASSETS = {
 		name: 'NFTA artwork #022',
 		category: 'art',
 		blurb: 'Held inside the Studio collection.',
+		parent: 'studio-collection',
 		value: 39000,
 		valuedDaysAgo: 102,
 		quantity: 1,
@@ -383,6 +421,7 @@ export const ASSETS = {
 		name: 'Studio collection',
 		category: 'art',
 		blurb: 'Four linked works held together.',
+		valuation: 'whole',
 		value: 64000,
 		valuedDaysAgo: 425,
 		quantity: 4,
@@ -439,6 +478,26 @@ export const ASSETS = {
 	}
 };
 
+/**
+ * Every asset, in cents, with the two fields decision 6 asked for:
+ * `parent` for an asset that sits inside another, and `valuation` for
+ * whether a thing is worth what it says or the sum of its parts.
+ * Defaults keep a plain asset plain.
+ * @type {Record<string, Asset>}
+ */
+export const ASSETS = Object.fromEntries(
+	Object.entries(RAW_ASSETS).map(([id, a]) => [
+		id,
+		{
+			...a,
+			value: a.value == null ? null : dollars(a.value),
+			units: a.units ?? SHARE_UNITS,
+			parent: a.parent ?? null,
+			valuation: a.valuation ?? 'whole'
+		}
+	])
+);
+
 /** @typedef {Asset & { id: string }} AssetRow */
 
 /** Assets still held. One that has been let go keeps its record and its history. */
@@ -451,8 +510,67 @@ export function activeAssets() {
 /** @param {string} id */
 export const assetOf = (id) => ASSETS[id] ?? null;
 
-/** @param {{ value: number|null }[]} list */
-export const sumValue = (list) => list.reduce((n, a) => n + (a.value ?? 0), 0);
+/**
+ * What one asset is worth on its own terms.
+ *
+ * Decision 6: an asset is valued as a whole by default, so a car is
+ * worth what the car is worth and its parts are not added on top. An
+ * asset marked `parts` is worth the sum of the assets that name it as
+ * their parent, which is what a junk car or an unpriced collection
+ * needs. Either way a thing is counted one way, never both.
+ *
+ * @param {Asset & { id?: string }} a
+ * @param {Record<string, Asset>} [assets]
+ * @param {Set<string>} [seen]  guards a parent loop
+ * @returns {number|null}  cents, or null when nothing is known
+ */
+export function effectiveValue(a, assets = ASSETS, seen = new Set()) {
+	if (a.valuation !== 'parts') return a.value ?? null;
+	const id = a.id ?? Object.keys(assets).find((k) => assets[k] === a);
+	if (!id || seen.has(id)) return a.value ?? null;
+	seen.add(id);
+	let total = null;
+	for (const [cid, child] of Object.entries(assets)) {
+		if (child.parent !== id || child.letGo) continue;
+		const v = effectiveValue({ ...child, id: cid }, assets, seen);
+		if (v !== null) total = (total ?? 0) + v;
+	}
+	return total ?? a.value ?? null;
+}
+
+/**
+ * The known total of a list, and how many of its assets have no value.
+ *
+ * Decision 7: an asset with no value is not worth nothing, so it is
+ * left out of the total and counted separately. A total that quietly
+ * read unknown as zero made net worth look settled when it was not.
+ * An asset held inside another in the same list is skipped, because
+ * its value is already inside its parent's.
+ *
+ * @param {(Asset & { id?: string })[]} list
+ * @param {Record<string, Asset>} [assets]
+ */
+export function valueSummary(list, assets = ASSETS) {
+	const held = new Set(list.map((a) => a.id).filter(Boolean));
+	let known = 0;
+	let unvalued = 0;
+	for (const a of list) {
+		if (a.parent && held.has(a.parent)) continue;
+		const v = effectiveValue(a, assets);
+		if (v === null) unvalued += 1;
+		else known += v;
+	}
+	return { known, unvalued };
+}
+
+/**
+ * The part of a list's value that is known. Kept as its own name
+ * because most callers want the figure; the ones that have to say how
+ * complete it is use valueSummary.
+ * @param {(Asset & { id?: string })[]} list
+ * @param {Record<string, Asset>} [assets]
+ */
+export const sumValue = (list, assets = ASSETS) => valueSummary(list, assets).known;
 
 /**
  * Verified, Insured, Stored — read off the claims, never set by hand.
@@ -495,7 +613,7 @@ export function categorySummary() {
  * @typedef {'Owner'|'Manager'|'Guarantor'} OwnerType
  * @typedef {{
  *   id: string, owner: Node, owned: Node, role: OwnerType,
- *   shares: number|null, startValue: number|null, currentValue: number|null,
+ *   units: number|null, startValue: number|null, currentValue: number|null,
  *   disposable: number|null, since: string, claims: number
  * }} Link
  */
@@ -512,9 +630,11 @@ export const OWNER_TYPES = ['Owner', 'Manager', 'Guarantor'];
 const ORG_LINK_DETAIL = {
 	'tn>azbolt': {
 		role: 'Owner',
-		shares: 100,
+		units: SHARE_UNITS,
 		startValue: 50000,
-		currentValue: 420000,
+		/* No stored current value: what TN's share of Azbolt is worth is
+		   Azbolt's own net worth times the share, and a second copy of a
+		   figure is a second figure to go stale. */
 		since: 'January 2021',
 		claims: 3
 	},
@@ -527,14 +647,14 @@ const ORG_LINK_DETAIL = {
  * Asset links. `currentValue` is left out on purpose: for an asset it is
  * the asset's own value times the share, and storing it twice is how the
  * two would come to disagree.
- * @type {{ owner: Node, owned: string, role: OwnerType, shares: number|null, startValue: number|null, since: string, claims: number }[]}
+ * @type {{ owner: Node, owned: string, role: OwnerType, units: number|null, startValue: number|null, since: string, claims: number }[]}
  */
 const ASSET_LINKS = [
 	{
 		owner: { cls: 'organization', id: 'tn' },
 		owned: 'family-home',
 		role: 'Owner',
-		shares: 100,
+		units: SHARE_UNITS,
 		startValue: 410000,
 		since: 'June 2021',
 		claims: 2
@@ -543,7 +663,7 @@ const ASSET_LINKS = [
 		owner: { cls: 'organization', id: 'tn' },
 		owned: 'family-car',
 		role: 'Owner',
-		shares: 100,
+		units: SHARE_UNITS,
 		startValue: 31000,
 		since: 'May 2024',
 		claims: 2
@@ -552,7 +672,7 @@ const ASSET_LINKS = [
 		owner: { cls: 'organization', id: 'tn' },
 		owned: 'household-savings',
 		role: 'Owner',
-		shares: 100,
+		units: SHARE_UNITS,
 		startValue: 5000,
 		since: 'January 2022',
 		claims: 1
@@ -561,7 +681,7 @@ const ASSET_LINKS = [
 		owner: { cls: 'organization', id: 'azbolt' },
 		owned: 'delivery-van',
 		role: 'Owner',
-		shares: 100,
+		units: SHARE_UNITS,
 		startValue: 38000,
 		since: 'February 2025',
 		claims: 2
@@ -570,7 +690,7 @@ const ASSET_LINKS = [
 		owner: { cls: 'organization', id: 'azbolt' },
 		owned: 'storage-racking',
 		role: 'Manager',
-		shares: null,
+		units: null,
 		startValue: null,
 		since: 'February',
 		claims: 1
@@ -579,7 +699,7 @@ const ASSET_LINKS = [
 		owner: { cls: 'organization', id: 'azbolt' },
 		owned: 'azbolt-operating',
 		role: 'Owner',
-		shares: 100,
+		units: SHARE_UNITS,
 		startValue: 10000,
 		since: 'January 2021',
 		claims: 1
@@ -588,7 +708,7 @@ const ASSET_LINKS = [
 		owner: { cls: 'organization', id: 'azbolt' },
 		owned: 'build-suite-code',
 		role: 'Owner',
-		shares: 100,
+		units: SHARE_UNITS,
 		startValue: 20000,
 		since: 'June 2025',
 		claims: 1
@@ -597,7 +717,7 @@ const ASSET_LINKS = [
 		owner: { cls: 'organization', id: 'azbolt' },
 		owned: 'carmen-contract',
 		role: 'Owner',
-		shares: 100,
+		units: SHARE_UNITS,
 		startValue: null,
 		since: 'January',
 		claims: 1
@@ -606,7 +726,7 @@ const ASSET_LINKS = [
 		owner: { cls: 'organization', id: 'ame' },
 		owned: 'nfta-014',
 		role: 'Owner',
-		shares: 100,
+		units: SHARE_UNITS,
 		startValue: 36000,
 		since: 'January',
 		claims: 2
@@ -615,7 +735,7 @@ const ASSET_LINKS = [
 		owner: { cls: 'organization', id: 'ame' },
 		owned: 'studio-collection',
 		role: 'Owner',
-		shares: 100,
+		units: SHARE_UNITS,
 		startValue: 58000,
 		since: 'September 2025',
 		claims: 1
@@ -625,7 +745,7 @@ const ASSET_LINKS = [
 		owner: { cls: 'asset', id: 'studio-collection' },
 		owned: 'nfta-022',
 		role: 'Owner',
-		shares: 100,
+		units: SHARE_UNITS,
 		startValue: 30000,
 		since: 'February',
 		claims: 1
@@ -644,9 +764,9 @@ function buildLinks() {
 			owner: { cls: 'organization', id: o.controlledBy },
 			owned: { cls: 'organization', id },
 			role: d.role ?? 'Manager',
-			shares: d.shares ?? null,
-			startValue: d.startValue ?? null,
-			currentValue: d.currentValue ?? null,
+			units: d.units ?? null,
+			startValue: d.startValue == null ? null : dollars(d.startValue),
+			currentValue: d.currentValue == null ? null : dollars(d.currentValue),
 			disposable: null,
 			since: d.since ?? '',
 			claims: d.claims ?? 0
@@ -654,17 +774,20 @@ function buildLinks() {
 	}
 	for (const l of ASSET_LINKS) {
 		const a = ASSETS[l.owned];
-		const share = l.shares === null ? null : l.shares / 100;
+		/* Units out of the asset's own total, so a share is exact to a
+		   hundredth of a percent and never a floating-point fraction. */
+		const share = l.units === null || !a ? null : l.units / (a.units ?? SHARE_UNITS);
+		const held = a?.value == null || share === null ? null : Math.round(a.value * share);
 		out.push({
 			id: `${l.owner.id}-${l.owned}`,
 			owner: l.owner,
 			owned: { cls: 'asset', id: l.owned },
 			role: l.role,
-			shares: l.shares,
-			startValue: l.startValue,
+			units: l.units,
+			startValue: l.startValue == null ? null : dollars(l.startValue),
 			// A manager holds no share of the value; an owner holds theirs.
-			currentValue: share === null || a?.value == null ? null : a.value * share,
-			disposable: a?.liquidity === 'Liquid' && share !== null ? (a.value ?? 0) * share : null,
+			currentValue: l.role === 'Owner' ? held : null,
+			disposable: a?.liquidity === 'Liquid' && l.role === 'Owner' ? held : null,
 			since: l.since,
 			claims: l.claims
 		});
@@ -674,6 +797,41 @@ function buildLinks() {
 
 /** @type {Link[]} */
 export const LINKS = buildLinks();
+
+/**
+ * What to put where the amount goes.
+ *
+ * Decision 7: an unvalued asset is not worth nothing and does not read
+ * as a dash either. It says what it needs, so it can be fixed from the
+ * list it is in.
+ * @param {number|null|undefined} cents
+ */
+export const amountOrAsk = (cents) =>
+	cents === null || cents === undefined ? 'Needs value' : money(cents);
+
+/**
+ * A link's share as a percentage, for showing. Units are the stored
+ * truth; a percentage is how a person reads it. Trailing zeros go, so
+ * half reads "50%" and a quarter of a percent "0.25%".
+ * @param {Link} l
+ * @param {Record<string, Asset>} [assets]
+ */
+export function sharePercent(l, assets = ASSETS) {
+	if (l.units === null) return null;
+	const total = (l.owned.cls === 'asset' ? assets[l.owned.id]?.units : SHARE_UNITS) ?? SHARE_UNITS;
+	if (!total) return null;
+	return Number(((l.units / total) * 100).toFixed(2));
+}
+
+/**
+ * The links the Asset tab is about: who owns what, and who manages a
+ * thing they do not own. An organization controlling another with no
+ * share in it is governance, which the Directory's Structure view
+ * shows; counting it here made a ward look like it held its council.
+ * @param {Link[]} [links]
+ */
+export const ownershipLinks = (links = LINKS) =>
+	links.filter((l) => l.owned.cls === 'asset' || l.units !== null);
 
 /** @param {string} id */
 export const linkOf = (id) => LINKS.find((l) => l.id === id) ?? null;
@@ -690,10 +848,12 @@ export function nodeHref(n) {
 }
 
 /** @param {Node} n */
-export const ownersOf = (n) => LINKS.filter((l) => l.owned.cls === n.cls && l.owned.id === n.id);
+export const ownersOf = (n, links = LINKS) =>
+	links.filter((l) => l.owned.cls === n.cls && l.owned.id === n.id);
 
 /** @param {Node} n */
-export const ownedBy = (n) => LINKS.filter((l) => l.owner.cls === n.cls && l.owner.id === n.id);
+export const ownedBy = (n, links = LINKS) =>
+	links.filter((l) => l.owner.cls === n.cls && l.owner.id === n.id);
 
 /**
  * Follows an asset's owners upward until organizations are reached.
@@ -704,14 +864,14 @@ export const ownedBy = (n) => LINKS.filter((l) => l.owner.cls === n.cls && l.own
  * @param {Set<string>} [seen]
  * @returns {string[]} organization ids
  */
-export function controllingOrgs(assetId, seen = new Set()) {
+export function controllingOrgs(assetId, links = LINKS, seen = new Set()) {
 	if (seen.has(assetId)) return [];
 	seen.add(assetId);
 	/** @type {string[]} */
 	const out = [];
-	for (const l of ownersOf({ cls: 'asset', id: assetId })) {
+	for (const l of ownersOf({ cls: 'asset', id: assetId }, links)) {
 		if (l.owner.cls === 'organization') out.push(l.owner.id);
-		else out.push(...controllingOrgs(l.owner.id, seen));
+		else out.push(...controllingOrgs(l.owner.id, links, seen));
 	}
 	return [...new Set(out)];
 }
@@ -736,16 +896,75 @@ export function ownerLine(assetId) {
  * @param {string} assetId
  * @returns {string[]}
  */
-export function attention(assetId) {
-	const a = ASSETS[assetId];
+/**
+ * How long a value stays believable, by what kind of thing it is.
+ *
+ * One rule for everything flagged a house at a year old and let a bank
+ * balance sit for eleven months without a word. A balance is stale in
+ * a month; land moves slowly.
+ * @type {Record<string, number>}
+ */
+const STALE_AFTER_DAYS = {
+	'cash-account': 31,
+	'savings-account': 31,
+	investment: 92,
+	stock: 31,
+	'accounts-receivable': 62,
+	inventory: 92,
+	vehicle: 365,
+	equipment: 365,
+	'real-estate': 730,
+	art: 730,
+	copyright: 1095,
+	patent: 1095,
+	trademark: 1095
+};
+
+/**
+ * The age at which this kind of asset's value needs looking at again.
+ * @param {string} category
+ */
+export const staleAfter = (category) => STALE_AFTER_DAYS[category] ?? 365;
+
+/**
+ * Shares in one asset that add up to more than the asset has.
+ * @param {Book} [book]
+ */
+export function overSoldAssets(book = sample) {
+	/** @type {{ id: string, units: number, total: number }[]} */
+	const out = [];
+	for (const [id, a] of Object.entries(book.assets)) {
+		const total = a.units ?? SHARE_UNITS;
+		const held = book.links
+			.filter((l) => l.role === 'Owner' && l.owned.cls === 'asset' && l.owned.id === id)
+			.reduce((n, l) => n + (l.units ?? 0), 0);
+		if (held > total) out.push({ id, units: held, total });
+	}
+	return out;
+}
+
+/**
+ * Why an asset needs looking at, in words, or an empty list if it does
+ * not. Reasons, never a bare badge.
+ * @param {string} assetId
+ * @param {Book} [book]
+ */
+export function attention(assetId, book = sample) {
+	const a = book.assets[assetId];
 	if (!a || a.letGo) return [];
 	/** @type {string[]} */
 	const why = [];
-	if (!controllingOrgs(assetId).length)
+	if (!a.parent && !controllingOrgs(assetId, book.links).length)
 		why.push('No owner — it has to end up with an organization');
-	if (a.value === null) why.push('No value recorded');
-	else if (a.valuedDaysAgo !== null && a.valuedDaysAgo > 365) {
-		why.push(`Valuation ${Math.round(a.valuedDaysAgo / 30.4)} months old`);
+	const over = overSoldAssets(book).find((o) => o.id === assetId);
+	if (over) {
+		why.push(`Shares add up to ${Number(((over.units / over.total) * 100).toFixed(2))}% of it`);
+	}
+	const v = effectiveValue({ ...a, id: assetId }, book.assets);
+	if (v === null) why.push('Needs a value');
+	else if (a.valuedDaysAgo !== null && a.valuedDaysAgo > staleAfter(a.category)) {
+		const months = Math.round(a.valuedDaysAgo / 30.4);
+		why.push(`Valued ${months} ${months === 1 ? 'month' : 'months'} ago`);
 	}
 	if (a.movement) why.push(a.movement);
 	return why;
@@ -790,7 +1009,7 @@ export function ownershipTree() {
  * @typedef {{
  *   name: string, type: string, lender: string|null, asset: string|null,
  *   borrower: string, startAmount: number, balance: number, rate: number,
- *   payment: number, frequency: 'Monthly'|'Quarterly', months: number,
+ *   payment: number, frequency: 'Monthly'|'Quarterly'|'Yearly', months: number,
  *   started: string, dueDay: number, notes: string
  * }} Liability
  */
@@ -798,7 +1017,7 @@ export function ownershipTree() {
 export const LOAN_TYPES = ['Loan Note', 'Lease', 'Contract', 'Contingent', 'Other'];
 
 /** @type {Record<string, Liability>} */
-export const LIABILITIES = {
+const RAW_LIABILITIES = {
 	'house-note': {
 		name: 'House note',
 		type: 'Loan Note',
@@ -849,6 +1068,23 @@ export const LIABILITIES = {
 	}
 };
 
+/**
+ * The same loans with every figure in cents. The rate is a percentage
+ * and the term a count of months, so neither is converted.
+ * @type {Record<string, Liability>}
+ */
+export const LIABILITIES = Object.fromEntries(
+	Object.entries(RAW_LIABILITIES).map(([id, l]) => [
+		id,
+		{
+			...l,
+			startAmount: dollars(l.startAmount),
+			balance: dollars(l.balance),
+			payment: dollars(l.payment)
+		}
+	])
+);
+
 /** @typedef {Liability & { id: string }} LiabilityRow */
 
 export const liabilities = () =>
@@ -858,7 +1094,16 @@ export const owedTotal = () => liabilities().reduce((n, l) => n + l.balance, 0);
 
 /** What goes out each month across every liability, quarterlies spread. */
 export const owedMonthly = () =>
-	liabilities().reduce((n, l) => n + (l.frequency === 'Quarterly' ? l.payment / 3 : l.payment), 0);
+	liabilities().reduce(
+		(n, l) =>
+			n +
+			(l.frequency === 'Quarterly'
+				? Math.round(l.payment / 3)
+				: l.frequency === 'Yearly'
+					? Math.round(l.payment / 12)
+					: l.payment),
+		0
+	);
 
 /** @param {string} assetId */
 export const owedAgainst = (assetId) => liabilities().filter((l) => l.asset === assetId);
@@ -869,13 +1114,48 @@ export const owedAgainst = (assetId) => liabilities().filter((l) => l.asset === 
  */
 export function nextDue(l, now = new Date()) {
 	const today = startOfDay(now);
-	// Quarterlies fall in March, June, September and December.
-	const step = l.frequency === 'Quarterly' ? 3 : 1;
-	let m = today.getMonth();
-	if (step === 3) m = Math.floor(m / 3) * 3 + 2;
-	let d = new Date(today.getFullYear(), m, l.dueDay);
-	if (d < today) d = new Date(today.getFullYear(), m + step, l.dueDay);
+	const step = l.frequency === 'Quarterly' ? 3 : l.frequency === 'Yearly' ? 12 : 1;
+	/* Decision 15: the cadence counts from the agreement's own start, so
+	   a quarterly lease that began in February falls due in February,
+	   May, August and November — not in March because the calendar
+	   quarter says so. */
+	const start = startMonth(l, today);
+	let n = Math.max(0, Math.ceil(monthsBetween(start, today) / step));
+	let d = onDay(start, n * step, l.dueDay);
+	while (d < today) d = onDay(start, ++n * step, l.dueDay);
 	return d;
+}
+
+/**
+ * The month an agreement started, read from its written start. An
+ * agreement with no readable start is treated as starting this month,
+ * which keeps the cadence steady rather than guessing a history.
+ * @param {{ started?: string }} l
+ * @param {Date} today
+ */
+function startMonth(l, today) {
+	const text = String(l.started ?? '').trim();
+	const m = MONTHS_LONG.findIndex((name) => text.toLowerCase().startsWith(name.toLowerCase()));
+	if (m < 0) return new Date(today.getFullYear(), today.getMonth(), 1);
+	const year = Number(text.match(/\d{4}/)?.[0] ?? today.getFullYear());
+	return new Date(year, m, 1);
+}
+
+/** @param {Date} a @param {Date} b */
+const monthsBetween = (a, b) =>
+	(b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth());
+
+/**
+ * The nth period after a start, on a given day of the month, with the
+ * day clamped to the end of a short one: a payment due on the 31st
+ * falls on 28 February, not on 3 March.
+ * @param {Date} start @param {number} months @param {number} day
+ */
+function onDay(start, months, day) {
+	const y = start.getFullYear();
+	const m = start.getMonth() + months;
+	const last = new Date(y, m + 1, 0).getDate();
+	return new Date(y, m, Math.min(day, last));
 }
 
 /** The liability whose next payment comes first. */
@@ -905,31 +1185,159 @@ export function termsLine(l) {
 
 /* ── The three numbers ──────────────────────────────────────────────── */
 
-export const assetValue = () => sumValue(activeAssets());
-export const netWorth = () => assetValue() - owedTotal();
+/* ── What things are worth, per organization ────────────────────────── */
+
+/**
+ * The book a figure is worked out from. Every function below takes one,
+ * defaulting to the sample records, so the same arithmetic can run over
+ * live records, over a test's handful of rows, and over a scenario's
+ * own book without being written three times.
+ * @typedef {{
+ *   assets: Record<string, Asset>,
+ *   links: Link[],
+ *   liabilities: Record<string, Liability>,
+ *   orgs: Record<string, any>
+ * }} Book
+ */
+
+/** @type {Book} */
+export const sample = { assets: ASSETS, links: LINKS, liabilities: LIABILITIES, orgs: ORGS };
+
+/** Everything on file, whoever holds it. Not a net worth: see netWorthOf. */
+export const assetValue = (book = sample) =>
+	sumValue(
+		Object.entries(book.assets)
+			.filter(([, a]) => !a.letGo)
+			.map(([id, a]) => ({ ...a, id })),
+		book.assets
+	);
+
+/**
+ * What one organization is worth.
+ *
+ * Decision 2: each organization has its own figure, counted from the
+ * shares it owns. Only an Owner link counts — managing a thing or
+ * guaranteeing a loan is not holding value — and a share counts for
+ * its share, so half a house is half a house.
+ *
+ * An organization that owns another counts its share of that one's net
+ * worth rather than its assets, so nothing is counted twice however
+ * deep the chain runs. A loop in the chain stops rather than spinning.
+ *
+ * @param {string} orgId
+ * @param {Book} [book]
+ * @param {Set<string>} [open]  organizations already being worked out
+ * @returns {number} cents
+ */
+export function netWorthOf(orgId, book = sample, open = new Set()) {
+	if (open.has(orgId)) return 0;
+	open.add(orgId);
+	let total = 0;
+	for (const l of book.links) {
+		if (l.role !== 'Owner' || l.owner.cls !== 'organization' || l.owner.id !== orgId) continue;
+		if (l.owned.cls === 'asset') {
+			const a = book.assets[l.owned.id];
+			/* An asset inside another is counted through its parent. */
+			if (!a || a.letGo || (a.parent && book.assets[a.parent])) continue;
+			const v = effectiveValue({ ...a, id: l.owned.id }, book.assets);
+			if (v === null || l.units === null) continue;
+			total += Math.round(v * (l.units / (a.units ?? SHARE_UNITS)));
+		} else {
+			const share = l.units === null ? 1 : l.units / SHARE_UNITS;
+			total += Math.round(netWorthOf(l.owned.id, book, open) * share);
+		}
+	}
+	for (const l of Object.values(book.liabilities)) {
+		if (l.borrower === orgId) total -= l.balance;
+	}
+	open.delete(orgId);
+	return total;
+}
+
+/**
+ * Organizations nobody owns. These are the tops of the chains, so
+ * adding their figures counts everything owned, once.
+ * @param {Book} [book]
+ */
+export function rootOrgs(book = sample) {
+	const owned = new Set(
+		book.links
+			.filter((l) => l.role === 'Owner' && l.owned.cls === 'organization')
+			.map((l) => l.owned.id)
+	);
+	return Object.keys(book.orgs).filter((id) => !owned.has(id));
+}
+
+/**
+ * The headline figure: every organization on file, net of what each
+ * owes, counted once.
+ *
+ * It used to add every asset at full value whoever held it, so a
+ * leased thing counted as yours and a half share as a whole one. Only
+ * the tops of the chains are added now, and each counts its share, so
+ * nothing below them is counted twice.
+ *
+ * It is not yet "your" net worth, and the hub says so. Decision 2 puts
+ * a figure on each organization and decision 3 says yours is your own
+ * organization's — and that organization is not a record until the
+ * Directory can save one.
+ * @param {Book} [book]
+ */
+export const netWorth = (book = sample) =>
+	rootOrgs(book).reduce((n, id) => n + netWorthOf(id, book), 0);
+
+/**
+ * How many assets on file are not held by any organization at all, and
+ * so appear in no organization's figure.
+ * @param {Book} [book]
+ */
+export function unheldAssets(book = sample) {
+	return Object.entries(book.assets)
+		.filter(([id, a]) => !a.letGo && !a.parent && !controllingOrgs(id, book.links).length)
+		.map(([id, a]) => ({ ...a, id }));
+}
 
 /**
  * Net worth by the organization that ends up holding each asset. An
  * asset with no organization is counted under null, so the parts still
  * add up to the whole.
  */
-export function worthByOrganization() {
-	/** @type {Map<string|null, { assets: number, value: number, owed: number }>} */
-	const by = new Map();
-	/** @param {string|null} k */
-	const slot = (k) => {
-		if (!by.has(k)) by.set(k, { assets: 0, value: 0, owed: 0 });
-		return /** @type {{ assets: number, value: number, owed: number }} */ (by.get(k));
-	};
-	for (const a of activeAssets()) {
-		const s = slot(controllingOrgs(a.id)[0] ?? null);
-		s.assets += 1;
-		s.value += a.value ?? 0;
+export function worthByOrganization(book = sample) {
+	/** @type {{ org: string|null, assets: number, value: number, held: number, owed: number, net: number }[]} */
+	const rows = [];
+	for (const org of Object.keys(book.orgs)) {
+		let assets = 0;
+		let value = 0;
+		let held = 0;
+		for (const l of book.links) {
+			if (l.role !== 'Owner' || l.owner.cls !== 'organization' || l.owner.id !== org) continue;
+			if (l.owned.cls === 'asset') {
+				const a = book.assets[l.owned.id];
+				if (!a || a.letGo || (a.parent && book.assets[a.parent])) continue;
+				const v = effectiveValue({ ...a, id: l.owned.id }, book.assets);
+				assets += 1;
+				if (v !== null && l.units !== null) {
+					value += Math.round(v * (l.units / (a.units ?? SHARE_UNITS)));
+				}
+			} else {
+				const share = l.units === null ? 1 : l.units / SHARE_UNITS;
+				held += Math.round(netWorthOf(l.owned.id, book) * share);
+			}
+		}
+		const owed = Object.values(book.liabilities)
+			.filter((l) => l.borrower === org)
+			.reduce((n, l) => n + l.balance, 0);
+		if (!assets && !held && !owed) continue;
+		rows.push({ org, assets, value, held, owed, net: value + held - owed });
 	}
-	for (const l of liabilities()) slot(l.borrower).owed += l.balance;
-	return [...by.entries()]
-		.map(([org, v]) => ({ org, ...v, net: v.value - v.owed }))
-		.sort((a, b) => b.net - a.net);
+	/* Anything no organization owns is its own row, so it is visible
+	   rather than quietly dropped out of the total. */
+	const loose = unheldAssets(book);
+	if (loose.length) {
+		const { known } = valueSummary(loose, book.assets);
+		rows.push({ org: null, assets: loose.length, value: known, held: 0, owed: 0, net: known });
+	}
+	return rows.sort((a, b) => b.net - a.net);
 }
 
 /* ── Cash ───────────────────────────────────────────────────────────── */
@@ -977,7 +1385,7 @@ export const direction = (type) => (INWARD.includes(type) ? 'in' : 'out');
  */
 
 /** Lines that repeat. `day` is the day of the month they land on. */
-const RECURRING = [
+const RAW_RECURRING = [
 	{
 		label: 'Build Suite subscriptions',
 		org: 'azbolt',
@@ -1024,7 +1432,7 @@ const RECURRING = [
 ];
 
 /** One-offs, as an age in days (negative is still to come). */
-const ONE_OFF = [
+const RAW_ONE_OFF = [
 	{
 		label: 'Consulting — Fifita Rugby Club',
 		org: 'azbolt',
@@ -1066,6 +1474,9 @@ const ONE_OFF = [
 		age: 4
 	}
 ];
+/* Both cash fixtures, in cents. */
+const RECURRING = RAW_RECURRING.map((r) => ({ ...r, amount: dollars(r.amount) }));
+const ONE_OFF = RAW_ONE_OFF.map((o) => ({ ...o, amount: dollars(o.amount) }));
 
 /**
  * Every entry for the twelve months up to now, plus what is expected in
@@ -1216,14 +1627,14 @@ export function cashLines(list) {
 	/** @type {Map<string, { label: string, dir: string, frequency: string, total: number }>} */
 	const lines = new Map();
 	for (const t of list.filter(counted)) {
-		const cur = lines.get(t.label) ?? {
-			label: t.label,
-			dir: direction(t.type),
-			frequency: t.frequency,
-			total: 0
-		};
+		/* Keyed by direction as well as label. Keyed by label alone, an
+		   expense called "Adjustment" was added into income of the same
+		   name and the expense row vanished. */
+		const dir = direction(t.type);
+		const key = `${dir}:${t.label}`;
+		const cur = lines.get(key) ?? { label: t.label, dir, frequency: t.frequency, total: 0 };
 		cur.total += t.amount;
-		lines.set(t.label, cur);
+		lines.set(key, cur);
 	}
 	const all = [...lines.values()].sort((a, b) => b.total - a.total);
 	return { in: all.filter((l) => l.dir === 'in'), out: all.filter((l) => l.dir === 'out') };
@@ -1235,12 +1646,36 @@ export function cashLines(list) {
  * months.
  * @param {Date} [now]
  */
-export function runway(now = new Date()) {
-	const liquid = sumValue(activeAssets().filter((a) => a.liquidity === 'Liquid'));
+/**
+ * How long the liquid money lasts at the recent rate of spending.
+ * @param {Date} [now]
+ * @param {string|null} [org]  one organization, or every one together
+ * @param {Book} [book]
+ */
+export function runway(now = new Date(), org = null, book = sample) {
+	/* Decision 14: an organization's runway is its own. A business
+	   should not look safe because the household has savings, and a
+	   household is simply another organization, like a joint account. */
+	const mine = Object.entries(book.assets)
+		.filter(([id, a]) => {
+			if (a.letGo || a.liquidity !== 'Liquid') return false;
+			if (!org) return true;
+			return book.links.some(
+				(l) =>
+					l.role === 'Owner' &&
+					l.owner.cls === 'organization' &&
+					l.owner.id === org &&
+					l.owned.cls === 'asset' &&
+					l.owned.id === id
+			);
+		})
+		.map(([id, a]) => ({ ...a, id }));
+	const liquid = sumValue(mine, book.assets);
 	const from = new Date(now.getFullYear(), now.getMonth() - 3, 1);
 	const to = new Date(now.getFullYear(), now.getMonth(), 1);
 	const out = transactions(now)
 		.filter((t) => t.type === 'Actual Expense' && t.date >= from && t.date < to)
+		.filter((t) => !org || t.org === org)
 		.reduce((n, t) => n + t.amount, 0);
 	const monthly = out / 3;
 	return { liquid, monthly, months: monthly ? liquid / monthly : null };

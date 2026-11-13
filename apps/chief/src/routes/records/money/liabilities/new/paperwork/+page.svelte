@@ -27,12 +27,12 @@
 		value={1}
 		meta="Step 2 of 2 · you may need to look these up"
 	/>
-	<Field label="Starting date" placeholder="When it began" bind:value={started} />
-	<Field label="Start amount" placeholder="What was borrowed" bind:value={amount} />
-	<Field label="Interest rate" placeholder="I don't know yet" bind:value={rate} />
-	<Field label="Payment amount" placeholder="Each payment" bind:value={payment} />
+	<Field label="Starting date" type="date" bind:value={started} />
+	<Field label="Start amount" type="money" placeholder="What was borrowed" bind:value={amount} />
+	<Field label="Interest rate" type="money" placeholder="I don't know yet" bind:value={rate} />
+	<Field label="Payment amount" type="money" placeholder="Each payment" bind:value={payment} />
 	<Select label="Frequency" options={['Monthly', 'Quarterly']} bind:value={frequency} />
-	<Field label="Term in months" placeholder="How long in all" bind:value={months} />
+	<Field label="Term in months" type="money" placeholder="How long in all" bind:value={months} />
 	<Btn t="warm" href="/records/money/liabilities" label="Save liability" />
 	<Btn primary={false} href="/records/money/liabilities" label="Save without this" />
 </Screen>

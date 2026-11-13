@@ -20,5 +20,5 @@
 	<Field label="Name" placeholder="Organization name" />
 	<Chips t="cool" items={['Company', 'Holding', 'Nonprofit', 'DAO']} active={-1} />
 	<Field label="What does it do" placeholder="One sentence is enough" />
-	<Btn t="cool" label="Create sphere" />
+	<Btn t="cool" label="Create organization" soon />
 </Screen>

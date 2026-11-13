@@ -39,7 +39,7 @@
 		valuedLine
 	} from '$lib/assets.js';
 
-	const id = $derived(ASSETS[$page.params.id ?? ''] ? ($page.params.id ?? '') : 'nfta-014');
+	const id = $derived($page.params.id ?? '');
 	const a = $derived(ASSETS[id]);
 	const why = $derived(attention(id));
 	const marks = $derived(statuses(a));
@@ -156,5 +156,5 @@
 		<Btn primary={false} href="/records/assets/{id}/timeline" label="Whole timeline" />
 	{/if}
 
-	<Btn t="ai" primary={false} href="/jot" label="Jot an asset update" />
+	<Btn t="ai" primary={false} href="/" label="Jot an asset update" />
 </Screen>

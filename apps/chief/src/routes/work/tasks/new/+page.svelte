@@ -17,5 +17,5 @@
 	<Row t="cool" title="When" meta="No date yet" trailing="›" />
 	<Row t="cool" href="/people" title="Who" meta="Unassigned" trailing="↗" />
 	<Row t="cool" href="/work/endeavors" title="Endeavor" meta="Not linked" trailing="›" />
-	<Btn t="cool" label="Create task" />
+	<Btn t="cool" label="Create task" soon />
 </Screen>

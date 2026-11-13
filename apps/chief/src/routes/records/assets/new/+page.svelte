@@ -46,7 +46,7 @@
 			placeholder="Choose category"
 		/>
 		<Select label="Owner" options={owners} bind:value={owner} placeholder="Organization" />
-		<Field label="Current value" placeholder="Optional" bind:value />
+		<Field label="Current value" type="money" placeholder="Optional" bind:value />
 		<Btn t="warm" type="submit" label="Create asset draft" disabled={!name.trim()} />
 	</form>
 	<Note>

@@ -7,6 +7,7 @@
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Alert, Banner, Field, Row, Btn } from '$lib/kit';
+	import { session } from '$lib/session.svelte.js';
 
 	let typed = $state('');
 	const armed = $derived(typed.trim().toUpperCase() === 'DELETE');
@@ -20,12 +21,14 @@
 		meta="Confirm the account below. Export first if you need a copy."
 	/>
 	<Banner
-		title="Pamela Anderson · personal account"
-		meta="All connected spheres and records in scope are listed before production release."
+		title={session.signedIn ? session.label : 'Not signed in'}
+		meta="Deleting is not built yet. Nothing on this screen can remove anything."
 	/>
 	<Field label="Type DELETE to confirm" placeholder="DELETE" bind:value={typed} />
-	<Row title="Current account" meta="Pamela Anderson · signed in" trailing="✓" />
-	<button class="danger" disabled={!armed}>Delete account and data</button>
+	{#if session.signedIn}
+		<Row title="Current account" meta={session.user?.email ?? ''} />
+	{/if}
+	<button class="danger" disabled={!armed || true}>Delete account and data</button>
 	<Btn primary={false} href="/settings/account" label="Keep my account" />
 </Screen>
 

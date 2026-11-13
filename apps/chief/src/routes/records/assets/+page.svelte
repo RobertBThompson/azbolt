@@ -45,7 +45,7 @@
 			meta="An asset is anything you would want proof of later — a painting, a laptop, a domain, a contract."
 		/>
 		<Btn t="warm" href="/records/assets/new" label="Add the first one" />
-		<Btn primary={false} label="Import from a spreadsheet" />
+		<Btn primary={false} label="Import from a spreadsheet" soon />
 	{:else}
 		<Row
 			t="warm"
