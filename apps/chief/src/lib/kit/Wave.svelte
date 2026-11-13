@@ -19,25 +19,30 @@
 
 <style>
 	.wave {
-		border: 1px solid color-mix(in srgb, var(--t-ink) 35%, transparent);
-		border-radius: 11px;
-		background: var(--t-tint);
-		padding: 13px;
+		border: 1px solid color-mix(in srgb, var(--t-ink) 30%, #ffffff);
+		border-radius: var(--r-md);
+		background: linear-gradient(180deg, #ffffff 0%, var(--t-tint) 85%);
+		box-shadow: var(--glass-shadow);
+		padding: 15px 16px;
 	}
 	.bars {
 		display: flex;
 		align-items: center;
 		gap: 3px;
-		height: 44px;
+		height: 48px;
 	}
 	.bars span {
 		flex: 1;
-		border-radius: 2px;
-		background: var(--t-ink);
+		border-radius: 999px;
+		background: linear-gradient(
+			180deg,
+			color-mix(in srgb, var(--t-ink) 60%, #ffffff),
+			var(--t-ink)
+		);
 	}
 	.t {
-		margin: 11px 0 0;
-		font-size: 13px;
+		margin: 12px 0 0;
+		font-size: 15.5px;
 		line-height: 1.45;
 	}
 </style>

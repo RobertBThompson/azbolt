@@ -83,7 +83,7 @@
 
 			<div class="grid">
 				{#each shown as p (p.id)}
-					<a class="person" href="/people/{p.id}">
+					<a class="person edged" href="/people/{p.id}">
 						<span class="who">
 							<span class="nm">{p.name}</span>
 							<span class="mt">{p.meta}</span>
@@ -115,10 +115,11 @@
 	   filters off the screen. */
 	.filter {
 		display: flex;
-		gap: 6px;
+		gap: 8px;
 		overflow-x: auto;
-		padding-bottom: 2px;
 		scrollbar-width: none;
+		padding: 2px var(--shell-gutter) 8px;
+		margin: -2px calc(var(--shell-gutter) * -1) -6px;
 	}
 	.filter::-webkit-scrollbar {
 		display: none;
@@ -128,39 +129,50 @@
 		align-items: center;
 		gap: 6px;
 		flex: none;
-		min-height: 32px;
-		padding: 0 11px;
+		min-height: 36px;
+		padding: 0 14px;
 		border-radius: 999px;
-		border: 1px solid var(--line-2);
-		background: var(--card);
-		font-family: var(--font-mono);
-		font-size: 9.5px;
+		border: 1px solid var(--glass-line);
+		background: var(--glass);
+		font-family: var(--font-label);
+		font-size: 12.5px;
 		font-weight: 700;
 		letter-spacing: 0.08em;
 		color: var(--ink-3);
 		cursor: pointer;
 		white-space: nowrap;
+		box-shadow:
+			inset 0 1px 0 #ffffff,
+			0 4px 10px -5px rgba(30, 20, 90, 0.45);
 	}
 	.filter button.on {
-		border-color: var(--tone-cool);
-		background: var(--tone-cool-tint);
+		border-color: color-mix(in srgb, var(--tone-cool) 55%, #ffffff);
+		background: linear-gradient(180deg, #ffffff 0%, var(--tone-cool-tint) 100%);
 		color: var(--tone-cool);
+		box-shadow:
+			inset 0 1px 0 #ffffff,
+			0 0 0 3px color-mix(in srgb, var(--tone-cool) 16%, transparent),
+			0 5px 12px -5px color-mix(in srgb, var(--tone-cool) 60%, transparent);
 	}
 	.sw {
 		width: 9px;
 		height: 9px;
-		border-radius: 2px;
+		border-radius: 50%;
+		box-shadow:
+			inset 0 1px 1px rgba(255, 255, 255, 0.55),
+			0 1px 3px rgba(30, 20, 90, 0.35);
 	}
 	.person {
 		display: flex;
 		flex-direction: column;
 		gap: 7px;
-		padding: 11px 13px;
-		border: 1px solid var(--line-3);
-		border-left: 3px solid var(--tone-cool);
-		border-radius: 3px 12px 12px 3px;
-		background: var(--card);
+		padding: 14px 16px 14px 20px;
+		border: 1px solid var(--glass-line);
+		border-radius: var(--r-md);
+		background: var(--glass);
+		box-shadow: var(--glass-shadow);
 		text-decoration: none;
+		--edge-ink: var(--tone-cool);
 	}
 	.who {
 		display: flex;
@@ -168,25 +180,27 @@
 		gap: 2px;
 	}
 	.nm {
-		font-size: 14.5px;
-		font-weight: 600;
+		font-size: 18px;
+		font-weight: 700;
 		color: var(--ink);
+		font-family: var(--font-display);
+		letter-spacing: -0.005em;
 	}
 	.mt {
-		font-size: 12px;
+		font-size: 14.5px;
 		color: var(--ink-3);
 	}
 	.grid {
 		display: flex;
 		flex-direction: column;
-		gap: 9px;
+		gap: 12px;
 	}
 	.none {
 		margin: 0;
 		padding: 14px 2px;
 		text-align: center;
-		font-size: 12.5px;
-		color: var(--ink-3);
+		font-size: 14.5px;
+		color: var(--on-field-2);
 	}
 	/* Desktop. The filter has room to wrap, so nothing hides off the
 	   right edge, and the cards pair up rather than each stretching to a

@@ -62,26 +62,36 @@
 
 <style>
 	.opt {
-		min-height: 48px;
-		border: 1px solid var(--line-3);
-		border-radius: 11px;
-		background: var(--card);
+		min-height: 58px;
+		border: 1px solid var(--glass-line);
+		border-radius: var(--r-sm);
+		background: var(--glass);
 		display: flex;
 		align-items: center;
-		gap: 11px;
-		padding: 8px 13px;
+		gap: 13px;
+		padding: 10px 16px;
 		text-align: left;
 		font-family: inherit;
 		width: 100%;
+		box-shadow: var(--glass-shadow);
+		cursor: pointer;
 	}
 	.opt[aria-pressed='true'] {
-		border-color: var(--ink-4);
+		border-color: var(--glass-line);
+		box-shadow:
+			inset 0 1px 0 #ffffff,
+			inset 0 0 0 2px var(--ink-3),
+			0 0 0 3px rgba(255, 255, 255, 0.45),
+			0 12px 26px -10px rgba(30, 20, 90, 0.5);
 	}
 	.sw {
-		width: 14px;
-		height: 14px;
-		border-radius: 4px;
+		width: 16px;
+		height: 16px;
+		border-radius: 50%;
 		flex: none;
+		box-shadow:
+			inset 0 1px 1px rgba(255, 255, 255, 0.55),
+			0 2px 5px rgba(30, 20, 90, 0.4);
 	}
 	.body {
 		flex: 1;
@@ -89,19 +99,21 @@
 	}
 	.t {
 		display: block;
-		font-family: var(--font-mono);
-		font-size: 11.5px;
-		font-weight: 600;
-		letter-spacing: 0.09em;
+		font-family: var(--font-label);
+		font-size: 14.5px;
+		font-weight: 800;
+		letter-spacing: 0.1em;
 		color: var(--ink);
 	}
 	.m {
 		display: block;
-		font-size: 12px;
+		font-size: 14.5px;
 		color: var(--ink-3);
 		margin-top: 3px;
 	}
 	.tick {
-		font-weight: 700;
+		font-weight: 800;
+		font-size: 18px;
+		color: var(--ink-2);
 	}
 </style>

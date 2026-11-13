@@ -34,9 +34,11 @@
 
 <style>
 	/* One size for every switch in the app. 75% on a phone so it reads as
-	   a control over the page rather than another band of content; a
-	   fixed width on the left at desktop, where centring it in a wide
-	   column would leave it stranded. */
+	   a control over the page rather than another band of content.
+
+	   The track is smoke and the thumb is the lit part, which is the
+	   reverse of how it was: a white track with a wine thumb made the
+	   whole control a card, and the eye went to the track. */
 	.track {
 		width: 75%;
 		margin: 0 auto;
@@ -44,34 +46,58 @@
 		gap: 4px;
 		padding: 4px;
 		border-radius: 999px;
-		background: var(--card);
-		box-shadow:
-			0 1px 2px rgba(30, 26, 24, 0.05),
-			0 6px 16px rgba(30, 26, 24, 0.08);
+		background: var(--smoke);
+		border: 1px solid var(--smoke-line);
+		box-shadow: var(--smoke-shadow);
+		backdrop-filter: blur(14px) saturate(1.3);
+		-webkit-backdrop-filter: blur(14px) saturate(1.3);
 	}
 	a {
-		flex: 1;
+		/* Grows from its own width, not from zero: 'Organizations' is
+		   twice 'People', and equal halves clipped it. */
+		flex: 1 1 auto;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		gap: 7px;
-		min-height: 40px;
+		min-width: 0;
+		min-height: 42px;
+		padding: 0 12px;
+		border: 0;
 		border-radius: 999px;
-		font-size: 14px;
+		background: transparent;
+		font-family: var(--font-display);
+		font-size: 16px;
 		font-weight: 600;
-		color: var(--ink-3);
+		letter-spacing: 0.01em;
+		color: var(--on-field);
 		text-decoration: none;
+		cursor: pointer;
 		white-space: nowrap;
 	}
 	.on {
-		background: var(--tone-brand);
-		color: #ffffff;
-		box-shadow: 0 1px 3px rgba(30, 26, 24, 0.18);
+		background: var(--thumb);
+		color: var(--thumb-ink);
+		box-shadow: var(--thumb-shadow);
+		font-weight: 700;
+	}
+	a:focus-visible {
+		outline: 2px solid #ffffff;
+		outline-offset: 2px;
 	}
 	@media (min-width: 900px) {
 		.track {
 			width: 340px;
 			margin-left: 0;
+		}
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		a {
+			transition:
+				background 160ms ease,
+				color 160ms ease,
+				box-shadow 160ms ease;
 		}
 	}
 </style>

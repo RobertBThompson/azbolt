@@ -47,7 +47,7 @@
 <svelte:head><title>Sphere it · Chief</title></svelte:head>
 
 <Screen back="/" nav={false}>
-	<blockquote class="jot">
+	<blockquote class="jot edged">
 		<p>{jot.text}</p>
 		<span class="said">Your words, kept exactly · thrown {jot.thrown}</span>
 	</blockquote>
@@ -124,56 +124,72 @@
 <style>
 	.jot {
 		margin: 0;
-		border-left: 3px solid var(--tone-clay);
-		background: var(--card);
-		border-radius: 0 11px 11px 0;
-		padding: 11px 13px;
+		background: var(--glass);
+		border-radius: var(--r-md);
+		padding: 14px 16px 14px 20px;
+		border: 1px solid var(--glass-line);
+		box-shadow: var(--glass-shadow);
+		--edge-ink: var(--tone-clay);
 	}
 	.jot p {
 		margin: 0 0 5px;
-		font-family: var(--font-serif);
-		font-size: 16px;
+		font-family: var(--font-display);
+		font-size: 19px;
 		line-height: 1.35;
 		color: var(--ink);
+		font-weight: 600;
 	}
 	.said {
-		font-family: var(--font-mono);
-		font-size: 10px;
+		font-family: var(--font-label);
+		font-size: 12.5px;
 		letter-spacing: 0.05em;
 		color: var(--ink-3);
+		font-weight: 600;
 	}
 	.grid {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 7px;
+		gap: 9px;
 	}
 	.pick {
 		display: flex;
 		align-items: center;
 		gap: 7px;
 		min-height: var(--tap-min);
-		padding: 0 13px;
-		border-radius: 11px;
-		border: 1px solid var(--line-2);
-		background: var(--card);
+		padding: 0 16px;
+		border-radius: 999px;
+		border: 1px solid var(--glass-line);
+		background: var(--glass);
 		font-family: inherit;
-		font-size: 13px;
+		font-size: 16px;
 		color: var(--ink-2);
 		cursor: pointer;
+		box-shadow:
+			inset 0 1px 0 #ffffff,
+			0 6px 14px -6px rgba(30, 20, 90, 0.5);
+		font-weight: 500;
 	}
 	/* Selected state carries a filled background and a heavier border, so
 	   it survives being read without colour. */
 	.pick.on {
-		border-color: var(--tone-clay);
-		background: var(--tone-clay-tint);
+		border-color: color-mix(in srgb, var(--tone-clay) 60%, #ffffff);
+		background: linear-gradient(180deg, #ffffff 0%, var(--tone-clay-tint) 100%);
 		color: var(--ink);
-		font-weight: 600;
+		font-weight: 700;
+		box-shadow:
+			inset 0 1px 0 #ffffff,
+			inset 0 0 0 1.5px color-mix(in srgb, var(--tone-clay) 60%, transparent),
+			0 0 0 3px color-mix(in srgb, var(--tone-clay) 18%, transparent),
+			0 8px 16px -8px color-mix(in srgb, var(--tone-clay) 70%, transparent);
 	}
 	.swatch {
-		width: 11px;
-		height: 11px;
-		border-radius: 3px;
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
 		flex: none;
+		box-shadow:
+			inset 0 1px 1px rgba(255, 255, 255, 0.55),
+			0 1px 3px rgba(30, 20, 90, 0.35);
 	}
 	.nm {
 		white-space: nowrap;

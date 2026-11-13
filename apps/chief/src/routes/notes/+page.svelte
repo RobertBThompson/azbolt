@@ -178,26 +178,27 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1px;
-		border: 1px solid var(--line-3);
-		border-radius: 12px;
+		border: 1px solid var(--glass-line);
+		border-radius: var(--r-md);
 		overflow: hidden;
-		background: var(--line-4);
+		background: var(--line-3);
+		box-shadow: var(--glass-shadow);
 	}
 	li {
 		display: flex;
 		align-items: center;
-		gap: 9px;
+		gap: 10px;
 		background: var(--card);
 		/* Indent is drawn, not stored as padding on the text, so the
 		   bullet column stays aligned with its own level. */
-		padding-left: calc(13px + var(--d) * 18px);
+		padding-left: calc(16px + var(--d) * 20px);
 	}
 	li.on {
 		background: var(--tone-cool-tint);
 	}
 	.bullet {
-		width: 6px;
-		height: 6px;
+		width: 7px;
+		height: 7px;
 		border-radius: 50%;
 		background: var(--ink-4);
 		flex: none;
@@ -208,12 +209,12 @@
 	input {
 		flex: 1;
 		min-width: 0;
-		min-height: 42px;
+		min-height: 48px;
 		border: 0;
 		background: transparent;
 		padding: 0 13px 0 0;
 		font-family: inherit;
-		font-size: 14px;
+		font-size: 16.5px;
 		color: var(--ink);
 	}
 	input:focus {
@@ -223,21 +224,24 @@
 		color: var(--ink-4);
 	}
 	.tools {
-		gap: 5px;
-		padding: 5px 9px 7px calc(13px + var(--d) * 18px);
+		gap: 7px;
+		padding: 6px 11px 9px calc(16px + var(--d) * 20px);
 		background: var(--tone-cool-tint);
 	}
 	.tools button {
-		min-width: 38px;
-		min-height: 34px;
+		min-width: 42px;
+		min-height: 38px;
 		border: 1px solid var(--line-2);
-		border-radius: 9px;
-		background: var(--card);
-		font-family: var(--font-mono);
-		font-size: 14px;
+		border-radius: var(--r-xs);
+		background: linear-gradient(180deg, #ffffff 0%, #f6f3fd 100%);
+		font-family: var(--font-label);
+		font-size: 17px;
 		font-weight: 700;
 		color: var(--ink-2);
 		cursor: pointer;
+		box-shadow:
+			inset 0 1px 0 #ffffff,
+			0 2px 6px -2px rgba(60, 44, 140, 0.3);
 	}
 	.tools .del {
 		margin-left: auto;
@@ -250,13 +254,13 @@
 		justify-content: center;
 		gap: 9px;
 		min-height: var(--tap-min);
-		border: 1px dashed var(--line-2);
-		border-radius: 11px;
-		background: transparent;
-		font-family: inherit;
-		font-size: 13.5px;
+		border: 1.5px dashed rgba(255, 255, 255, 0.75);
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.16);
+		font-family: var(--font-display);
+		font-size: 16px;
 		font-weight: 600;
-		color: var(--ink-3);
+		color: var(--on-field);
 		cursor: pointer;
 	}
 </style>

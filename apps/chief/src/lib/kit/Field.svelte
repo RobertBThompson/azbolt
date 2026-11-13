@@ -63,30 +63,37 @@
 	}
 	.eyebrow {
 		display: block;
-		margin-bottom: 5px;
+		margin-bottom: 6px;
+		/* Most forms sit straight on the field, so the label defaults to
+		   white; a card that holds a Field sets --label-ink to an ink
+		   value and inheritance carries it down. */
+		color: var(--label-ink, var(--on-field-2));
 	}
-	input {
-		width: 100%;
-		min-height: var(--tap-min);
-		border: 1px solid var(--line-2);
-		border-radius: 10px;
-		background: var(--sunk);
-		padding: 9px 13px;
-		font-family: inherit;
-		font-size: 13.5px;
-		color: var(--ink);
-	}
+	input,
 	textarea {
 		width: 100%;
-		border: 1px solid var(--line-2);
-		border-radius: 10px;
-		background: var(--sunk);
-		padding: 10px 13px;
+		border: 1px solid var(--glass-line);
+		border-radius: var(--r-sm);
+		background: var(--glass);
+		box-shadow: var(--glass-shadow);
 		font-family: inherit;
-		font-size: 13.5px;
-		line-height: 1.5;
+		/* 16px and up: below that a phone zooms the page on focus. */
+		font-size: 16.5px;
 		color: var(--ink);
+	}
+	input {
+		min-height: 50px;
+		padding: 10px 16px;
+	}
+	textarea {
+		padding: 12px 16px;
+		line-height: 1.5;
 		resize: vertical;
+	}
+	input:focus-visible,
+	textarea:focus-visible {
+		outline: 2px solid #ffffff;
+		outline-offset: 2px;
 	}
 	input::placeholder,
 	textarea::placeholder {

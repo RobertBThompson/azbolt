@@ -123,7 +123,7 @@
 	</div>
 
 	<SectionHead label="Relationship" t={rel.tone} />
-	<div class="rel" style="--t:var(--tone-{rel.tone})">
+	<div class="rel edged" style="--t:var(--tone-{rel.tone})">
 		<p class="says">{rel.says}</p>
 		<p class="act">{rel.act}</p>
 		<dl class="facts">
@@ -174,103 +174,128 @@
 	}
 	.who h1 {
 		margin: 0;
-		font-family: var(--font-serif);
-		font-weight: 500;
-		font-size: 27px;
+		font-family: var(--font-display);
+		font-weight: 700;
+		font-size: 31px;
 		line-height: 1.1;
-		color: var(--ink);
+		color: var(--on-field);
+		letter-spacing: -0.015em;
+		text-shadow: var(--on-field-shade);
 	}
 	.who p {
 		margin: 3px 0 0;
-		font-size: 13px;
-		color: var(--ink-3);
+		font-size: 16px;
+		color: var(--on-field-2);
 	}
 	.note {
-		margin: 0 2px;
-		font-size: 12px;
+		margin: 0;
+		font-size: 14px;
 		line-height: 1.45;
-		color: var(--ink-3);
+		color: var(--ink-2);
+		background: var(--glass-dim);
+		border-radius: var(--r-xs);
+		padding: 9px 13px;
+		box-shadow: inset 3px 0 0 rgba(255, 255, 255, 0.95);
 	}
 	.picks {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 6px;
+		gap: 8px;
 	}
 	.pick {
 		display: flex;
 		align-items: center;
 		gap: 6px;
-		min-height: 36px;
-		padding: 0 11px;
+		min-height: 38px;
+		padding: 0 14px;
 		border-radius: 999px;
-		border: 1px solid var(--line-2);
-		background: var(--card);
-		font-family: var(--font-mono);
-		font-size: 9.5px;
+		border: 1px solid var(--glass-line);
+		background: var(--glass);
+		font-family: var(--font-label);
+		font-size: 12.5px;
 		font-weight: 700;
 		letter-spacing: 0.08em;
 		color: var(--ink-3);
 		cursor: pointer;
+		box-shadow:
+			inset 0 1px 0 #ffffff,
+			0 4px 10px -5px rgba(30, 20, 90, 0.45);
 	}
 	.pick.on {
-		border-color: var(--tone-cool);
-		background: var(--tone-cool-tint);
+		border-color: color-mix(in srgb, var(--tone-cool) 55%, #ffffff);
+		background: linear-gradient(180deg, #ffffff 0%, var(--tone-cool-tint) 100%);
 		color: var(--tone-cool);
+		box-shadow:
+			inset 0 1px 0 #ffffff,
+			0 0 0 3px color-mix(in srgb, var(--tone-cool) 16%, transparent),
+			0 5px 12px -5px color-mix(in srgb, var(--tone-cool) 60%, transparent);
 	}
 	.pick.add {
-		border-style: dashed;
+		border: 1.5px dashed rgba(255, 255, 255, 0.9);
+		background: rgba(255, 255, 255, 0.16);
+		box-shadow: none;
+		color: var(--on-field);
 	}
 	.sw {
 		width: 9px;
 		height: 9px;
-		border-radius: 2px;
+		border-radius: 50%;
+		box-shadow:
+			inset 0 1px 1px rgba(255, 255, 255, 0.55),
+			0 1px 3px rgba(30, 20, 90, 0.35);
 	}
 	.new {
 		display: flex;
 		gap: 5px;
 	}
 	.new input {
-		min-height: 36px;
+		min-height: 38px;
 		width: 150px;
-		border: 1px solid var(--tone-cool);
+		border: 1px solid var(--glass-line);
 		border-radius: 999px;
-		padding: 0 12px;
+		padding: 0 14px;
 		font-family: inherit;
-		font-size: 12.5px;
-		background: var(--card);
+		font-size: 16px;
+		background: var(--glass);
 		color: var(--ink);
+		box-shadow: var(--glass-shadow);
 	}
 	.new button {
-		min-height: 36px;
-		padding: 0 13px;
+		min-height: 38px;
+		padding: 0 16px;
 		border: 0;
 		border-radius: 999px;
-		background: var(--tone-cool);
+		background: var(--gloss), linear-gradient(118deg, #4b8dd3 0%, #2f6aa8 45%, #204d7b 100%);
 		color: #fff;
-		font-family: inherit;
-		font-size: 12.5px;
-		font-weight: 600;
+		font-family: var(--font-display);
+		font-size: 14.5px;
+		font-weight: 700;
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.6),
+			0 8px 16px -8px rgba(32, 77, 123, 0.9);
 	}
 	.new button:disabled {
 		opacity: 0.45;
 	}
 
 	.rel {
-		border: 1px solid var(--line-3);
-		border-left: 4px solid var(--t);
-		border-radius: 3px 12px 12px 3px;
-		background: var(--card);
-		padding: 11px 13px;
+		border: 1px solid var(--glass-line);
+		border-radius: var(--r-md);
+		background: var(--glass);
+		padding: 14px 16px 14px 20px;
+		box-shadow: var(--glass-shadow);
+		--edge-ink: var(--t);
 	}
 	.says {
 		margin: 0;
-		font-size: 15px;
-		font-weight: 600;
+		font-size: 18px;
+		font-weight: 700;
 		color: var(--t);
+		font-family: var(--font-display);
 	}
 	.act {
 		margin: 3px 0 9px;
-		font-size: 12.5px;
+		font-size: 14.5px;
 		line-height: 1.45;
 		color: var(--ink-2);
 	}
@@ -286,44 +311,47 @@
 		gap: 1px;
 	}
 	dt {
-		font-family: var(--font-mono);
-		font-size: 9px;
-		letter-spacing: 0.1em;
+		font-family: var(--font-label);
+		font-size: 11.5px;
+		letter-spacing: 0.12em;
 		text-transform: uppercase;
-		color: var(--ink-4);
+		color: var(--ink-3);
+		font-weight: 700;
 	}
 	dd {
 		margin: 0;
-		font-size: 12.5px;
+		font-size: 15.5px;
 		color: var(--ink);
 	}
 	.acts {
 		display: flex;
 		flex-direction: column;
-		gap: 7px;
+		gap: 9px;
 	}
 	.act-btn {
 		display: flex;
 		align-items: center;
-		gap: 9px;
+		gap: 10px;
 		min-height: var(--tap-min);
-		padding: 0 13px;
-		border: 1px solid var(--line-2);
-		border-radius: 11px;
-		background: var(--card);
-		font-size: 13.5px;
+		padding: 0 16px;
+		border: 1px solid var(--glass-line);
+		border-radius: var(--r-sm);
+		background: var(--glass);
+		font-size: 16px;
 		font-weight: 600;
 		color: var(--ink-2);
 		text-decoration: none;
+		box-shadow: var(--glass-shadow);
 	}
 	.contact {
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
 		margin: 0;
-		border: 1px solid var(--line-3);
-		border-radius: 12px;
-		background: var(--card);
-		padding: 12px 13px;
+		border: 1px solid var(--glass-line);
+		border-radius: var(--r-md);
+		background: var(--glass);
+		padding: 14px 16px;
+		box-shadow: var(--glass-shadow);
 	}
 </style>

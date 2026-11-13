@@ -34,7 +34,7 @@
 
 <svelte:head><title>Today · Chief</title></svelte:head>
 
-<Screen>
+<Screen horizon>
 	<div class="home-top">
 		<div class="home-switch">
 			<StateSwitch
@@ -91,7 +91,7 @@
 								aria-pressed={input === 0}
 								onclick={() => (input = 0)}
 							>
-								<Icon name="keyboard" size={15} />
+								<Icon name="keyboard" size={17} />
 								<span>Text</span>
 							</button>
 							<button
@@ -101,19 +101,19 @@
 								aria-pressed={input === 1}
 								onclick={() => (input = 1)}
 							>
-								<Icon name="mic" size={15} />
+								<Icon name="mic" size={17} />
 								<span>Voice</span>
 							</button>
 						</div>
 
 						{#if input === 0}
 							<button class="go" type="button" disabled={!canThrow} onclick={() => (draft = '')}>
-								<Icon name="throw" size={16} />
+								<Icon name="throw" size={18} />
 								Throw it
 							</button>
 						{:else}
 							<a class="go" href="/jot/listening">
-								<Icon name="mic" size={16} />
+								<Icon name="mic" size={18} />
 								Speak
 							</a>
 						{/if}
@@ -205,7 +205,7 @@
 	.dash-panel:not([hidden]) {
 		display: flex;
 		flex-direction: column;
-		gap: 9px;
+		gap: 11px;
 	}
 	.jot-panel {
 		container-type: inline-size;
@@ -218,54 +218,70 @@
 	}
 
 	.hello {
-		padding: 4px 2px 0;
-		margin-bottom: 9px;
+		padding: 6px 2px 0;
+		margin-bottom: 11px;
 	}
 	.hello-date {
 		display: none;
 	}
+	/* The one line of display type on the screen, set heavy enough to
+	   hold against the sunrise behind it. */
 	.hello h1 {
 		margin: 0;
-		font-family: var(--font-serif);
-		font-weight: 400;
-		font-size: 25px;
-		line-height: 1.1;
-		letter-spacing: -0.01em;
-		color: var(--ink-3);
+		font-family: var(--font-display);
+		font-weight: 700;
+		font-size: 33px;
+		line-height: 1.08;
+		letter-spacing: -0.018em;
+		color: var(--on-field);
+		text-shadow: var(--on-field-shade);
 	}
 	.lead {
-		margin: 3px 0 0;
-		font-size: 12.5px;
+		margin: 5px 0 0;
+		font-size: 15px;
+		font-weight: 500;
 		line-height: 1.4;
-		color: var(--ink-4);
+		color: var(--on-field-2);
+		text-shadow: 0 1px 10px rgba(24, 16, 80, 0.4);
 	}
+	/* Still the attention tone, lifted to carry on the field. */
 	.lead.urgent {
-		color: var(--tone-alert);
+		color: #ffd9ad;
 		font-weight: 600;
 	}
 	.date {
 		margin: 0 2px;
+		color: var(--on-field-2);
 	}
 
+	/* A light object held inside the coloured panel: lit along its top,
+	   shaded underneath, with the panel's own shadow falling on it. */
 	.composer {
-		border: 1px solid var(--line-2);
-		border-radius: 12px;
-		background: var(--sunk);
-		padding: 4px;
+		border: 1px solid rgba(255, 255, 255, 0.95);
+		border-radius: var(--r-md);
+		background: linear-gradient(180deg, #ffffff 0%, #fbf9ff 55%, #f1edfc 100%);
+		padding: 6px;
+		box-shadow:
+			inset 0 1px 0 #ffffff,
+			inset 0 -12px 18px -14px rgba(86, 66, 170, 0.3),
+			0 12px 26px -12px rgba(24, 4, 50, 0.7);
 	}
 	.composer:focus-within {
-		border-color: var(--tone-brand);
-		box-shadow: 0 0 0 3px var(--tone-brand-tint);
+		box-shadow:
+			inset 0 1px 0 #ffffff,
+			inset 0 -12px 18px -14px rgba(86, 66, 170, 0.3),
+			0 0 0 3px rgba(255, 255, 255, 0.45),
+			0 12px 26px -12px rgba(24, 4, 50, 0.7);
 	}
 	textarea {
 		display: block;
 		width: 100%;
 		border: 0;
 		background: transparent;
-		padding: 9px 9px 4px;
+		padding: 12px 12px 6px;
 		font-family: inherit;
-		font-size: 15px;
-		line-height: 1.5;
+		font-size: 17px;
+		line-height: 1.45;
 		color: var(--ink);
 		resize: none;
 	}
@@ -277,8 +293,8 @@
 	}
 	.listening {
 		margin: 0;
-		padding: 13px 9px 9px;
-		font-size: 13.5px;
+		padding: 15px 12px 10px;
+		font-size: 16px;
 		line-height: 1.5;
 		color: var(--ink-3);
 	}
@@ -287,55 +303,72 @@
 		flex-wrap: wrap;
 		align-items: center;
 		gap: 7px;
-		padding: 2px 2px 0;
+		padding: 4px 4px 4px;
 	}
 	.modes {
 		display: flex;
-		gap: 3px;
-		padding: 3px;
-		border-radius: 9px;
-		background: var(--wash-1);
+		gap: 7px;
 	}
+	/* Each a pill of its own rather than two halves of a grey track. */
 	.mode {
 		display: flex;
 		align-items: center;
-		gap: 5px;
-		min-height: 30px;
-		padding: 0 9px;
-		border: 0;
-		border-radius: 7px;
-		background: transparent;
+		gap: 6px;
+		min-height: 42px;
+		padding: 0 13px;
+		border: 1px solid var(--line-2);
+		border-radius: 999px;
+		background: linear-gradient(180deg, #ffffff 0%, #f6f3fd 100%);
+		box-shadow:
+			inset 0 1px 0 #ffffff,
+			0 2px 6px -2px rgba(60, 44, 140, 0.3);
 		font-family: inherit;
-		font-size: 12.5px;
+		font-size: 15.5px;
 		font-weight: 600;
-		color: var(--ink-3);
+		color: var(--ink-2);
 		cursor: pointer;
 	}
 	.mode.on {
-		background: var(--card);
+		border-color: color-mix(in srgb, var(--tone-brand) 42%, #ffffff);
+		background: linear-gradient(180deg, #ffffff 0%, var(--tone-brand-tint) 100%);
 		color: var(--tone-brand);
-		box-shadow: 0 1px 2px rgba(30, 26, 24, 0.1);
+		box-shadow:
+			inset 0 1px 0 #ffffff,
+			0 0 0 3px color-mix(in srgb, var(--tone-brand) 13%, transparent),
+			0 4px 10px -3px color-mix(in srgb, var(--tone-brand) 50%, transparent);
 	}
 	.go {
 		margin-left: auto;
 		display: flex;
 		align-items: center;
-		gap: 7px;
-		min-height: 38px;
-		padding: 0 15px;
+		gap: 8px;
+		min-height: 44px;
+		padding: 0 16px;
 		border: 0;
-		border-radius: 9px;
-		background: #26527d;
+		border-radius: 999px;
+		background: var(--gloss), linear-gradient(118deg, #4b8dd3 0%, #2f6aa8 45%, #204d7b 100%);
 		color: #ffffff;
-		font-family: inherit;
-		font-size: 14px;
-		font-weight: 600;
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.6),
+			0 0 0 1px rgba(32, 77, 123, 0.35),
+			0 10px 20px -8px rgba(32, 77, 123, 0.9);
+		font-family: var(--font-display);
+		font-size: 16px;
+		font-weight: 700;
+		letter-spacing: 0.01em;
 		text-decoration: none;
+		text-shadow: 0 1px 2px rgba(10, 30, 60, 0.4);
 		cursor: pointer;
 	}
+	/* Disabled reads as waiting, not as a different colour of button:
+	   the same pill in unlit glass. */
 	.go:disabled {
-		background: var(--line);
-		color: var(--ink-4);
+		background: linear-gradient(180deg, #ebe7f8 0%, #dcd6f0 100%);
+		color: #6a6592;
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.9),
+			inset 0 0 0 1px rgba(86, 66, 170, 0.14);
+		text-shadow: none;
 		cursor: default;
 	}
 	.mode:focus-visible,
@@ -344,12 +377,19 @@
 		outline-offset: 2px;
 	}
 
-	@media (max-width: 22rem) {
+	/* 360px phones: the three controls only share a line if each gives
+	   up a little padding. */
+	@media (max-width: 23.5rem) {
+		.modes {
+			gap: 5px;
+		}
 		.mode {
-			padding-inline: 7px;
+			padding-inline: 10px;
+			font-size: 15px;
 		}
 		.go {
-			padding-inline: 11px;
+			padding-inline: 13px;
+			font-size: 15px;
 		}
 	}
 
@@ -361,12 +401,13 @@
 			align-items: start;
 			gap: 18px;
 			padding: clamp(20px, 2.5vw, 32px);
-			margin-bottom: 9px;
-			border: 1px solid var(--line-2);
-			border-radius: 18px;
-			background:
-				radial-gradient(ellipse at 86% 0%, #ffedcd, transparent 65%),
-				linear-gradient(115deg, var(--sunk) 25%, var(--tone-brand-tint) 72%, var(--tone-cool-tint));
+			margin-bottom: 11px;
+			/* Smoke, not paper: the greeting stays white on the field at
+			   every width, and the sunrise shows through behind it. */
+			border: 1px solid var(--smoke-line);
+			border-radius: var(--r-lg);
+			background: rgba(26, 18, 92, 0.16);
+			box-shadow: var(--smoke-shadow);
 		}
 		.home-switch {
 			grid-area: switch;
@@ -379,47 +420,35 @@
 		.hello-date {
 			display: block;
 			margin: 0 0 9px;
-			color: var(--ink-3);
+			color: var(--on-field-2);
 		}
 		.hello h1 {
-			font-size: clamp(2.125rem, 3.6vw, 3rem);
-			color: var(--ink);
+			font-size: clamp(2.25rem, 3.6vw, 3.1rem);
 		}
 		.lead {
 			margin-top: 8px;
-			font-size: 14px;
-			color: var(--ink-3);
+			font-size: 16.5px;
 		}
 		.dash-panel .date {
 			display: none;
 		}
 		.stages,
 		.rest {
-			gap: 16px;
+			gap: 18px;
 		}
 		.composer {
-			padding: 6px;
+			padding: 8px;
 		}
 		textarea,
 		.listening {
 			min-height: 8rem;
-			padding: 12px;
-			font-size: 16px;
+			padding: 14px;
+			font-size: 18px;
 		}
 		textarea {
 			resize: vertical;
 		}
 		textarea::placeholder {
-			color: var(--ink-3);
-		}
-		.mode {
-			min-height: 38px;
-		}
-		.go {
-			min-height: 44px;
-		}
-		.go:disabled {
-			background: var(--line-2);
 			color: var(--ink-3);
 		}
 

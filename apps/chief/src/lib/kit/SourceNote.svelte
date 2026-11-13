@@ -23,14 +23,15 @@
 <style>
 	.src {
 		margin: 0;
-		font-family: var(--font-mono);
-		font-size: 10.5px;
-		letter-spacing: 0.06em;
-		color: var(--ink-4);
+		font-family: var(--font-label);
+		font-size: 12.5px;
+		font-weight: 500;
+		letter-spacing: 0.05em;
+		color: var(--on-field-3);
 		text-align: center;
 		padding: 2px 0 4px;
 	}
 	.src a {
-		color: var(--tone-cool);
+		color: var(--on-field);
 	}
 </style>

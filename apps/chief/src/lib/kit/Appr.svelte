@@ -45,22 +45,24 @@
 	.appr {
 		width: 100%;
 		min-height: var(--tap-min);
-		border: 1px solid color-mix(in srgb, var(--t-ink) 35%, transparent);
-		border-radius: 11px;
-		background: var(--card);
-		padding: 9px 11px;
+		border: 1px solid color-mix(in srgb, var(--t-ink) 30%, #ffffff);
+		border-radius: var(--r-sm);
+		background: var(--glass);
+		box-shadow: var(--glass-shadow);
+		padding: 11px 13px;
 		display: flex;
-		gap: 10px;
+		gap: 11px;
 		align-items: flex-start;
 		text-align: left;
 		font-family: inherit;
 	}
 	.box {
-		width: 19px;
-		height: 19px;
-		border-radius: 6px;
+		width: 21px;
+		height: 21px;
+		border-radius: 7px;
 		border: 1.5px solid var(--t-ink);
-		background: transparent;
+		background: var(--well);
+		box-shadow: inset 0 2px 3px rgba(60, 44, 140, 0.16);
 		flex: none;
 		margin-top: 1px;
 	}
@@ -73,25 +75,26 @@
 	}
 	.t {
 		display: block;
-		font-size: 14px;
+		font-size: 16.5px;
 		font-weight: 600;
 		line-height: 1.25;
 	}
 	.m {
 		display: block;
-		font-size: 12px;
+		font-size: 14px;
 		color: var(--ink-3);
 		line-height: 1.3;
 		margin-top: 2px;
 	}
 	.c {
 		flex: none;
-		font-family: var(--font-mono);
-		font-size: 11px;
+		font-family: var(--font-label);
+		font-size: 13px;
 		font-weight: 700;
+		font-variant-numeric: tabular-nums;
 		color: var(--t-ink);
 		background: var(--t-tint);
-		border-radius: 11px;
-		padding: 4px 9px;
+		border-radius: 999px;
+		padding: 4px 10px;
 	}
 </style>

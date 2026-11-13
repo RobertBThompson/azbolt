@@ -96,31 +96,38 @@ handle_path /cloud/* &lbrace;
 
 <style>
 	.lede {
-		margin: 0 2px;
-		font-size: 12.5px;
+		margin: 0;
+		font-size: 14.5px;
 		line-height: 1.5;
-		color: var(--ink-3);
+		color: var(--ink-2);
+		background: var(--glass-dim);
+		border-radius: var(--r-xs);
+		padding: 9px 13px;
+		box-shadow: inset 3px 0 0 rgba(255, 255, 255, 0.95);
 	}
 	code {
-		font-family: var(--font-mono);
+		font-family: var(--font-code);
 		font-size: 0.92em;
 	}
 	pre {
 		margin: 0;
-		padding: 11px 13px;
-		border: 1px solid var(--line-3);
-		border-radius: 11px;
-		background: var(--sunk);
+		padding: 13px 16px;
+		border: 1px solid var(--glass-line);
+		border-radius: var(--r-sm);
+		background: var(--glass);
 		overflow-x: auto;
-		font-size: 11.5px;
+		font-size: 13.5px;
 		line-height: 1.6;
 		color: var(--ink-2);
+		box-shadow: var(--glass-shadow);
+		font-family: var(--font-code);
 	}
 	iframe {
 		width: 100%;
 		min-height: 60vh;
-		border: 1px solid var(--line-3);
-		border-radius: 12px;
+		border: 1px solid var(--glass-line);
+		border-radius: var(--r-md);
 		background: var(--card);
+		box-shadow: var(--glass-shadow);
 	}
 </style>

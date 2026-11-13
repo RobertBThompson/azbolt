@@ -65,7 +65,7 @@
 	<ul class="entries">
 		{#each ENTRIES as e (e.href)}
 			<li>
-				<a href={e.href} style="--t:{tone(e.tone).ink}">
+				<a class="edged" href={e.href} style="--t:{tone(e.tone).ink}">
 					<span class="glyph"><Icon name={e.icon} size={18} /></span>
 					<span class="body">
 						<span class="t">{e.label}</span>
@@ -81,15 +81,17 @@
 <style>
 	.head {
 		padding: 2px 2px 0;
+		color: var(--on-field-2);
 	}
 	.head h1 {
 		margin: 1px 0 0;
-		font-family: var(--font-serif);
-		font-weight: 500;
-		font-size: 29px;
+		font-family: var(--font-display);
+		font-weight: 800;
+		font-size: 33px;
 		line-height: 1.1;
-		letter-spacing: 0.04em;
-		color: var(--ink);
+		letter-spacing: 0.02em;
+		color: var(--on-field);
+		text-shadow: var(--on-field-shade);
 	}
 	.entries {
 		list-style: none;
@@ -97,29 +99,33 @@
 		padding: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 10px;
+		gap: 12px;
 	}
 	a {
 		display: flex;
 		align-items: center;
-		gap: 12px;
-		padding: 12px 13px;
-		border: 1px solid var(--line-3);
-		border-left: 4px solid var(--t);
-		border-radius: 4px 13px 13px 4px;
-		background: var(--card);
+		gap: 14px;
+		padding: 14px 16px 14px 20px;
+		border: 1px solid var(--glass-line);
+		border-radius: var(--r-md);
+		background: var(--glass);
+		box-shadow: var(--glass-shadow);
 		text-decoration: none;
-		box-shadow: 0 1px 2px rgba(30, 26, 24, 0.04);
+		--edge-ink: var(--t);
 	}
 	.glyph {
-		width: 36px;
-		height: 36px;
+		width: 42px;
+		height: 42px;
 		border-radius: 50%;
 		display: grid;
 		place-items: center;
-		background: var(--sunk);
+		background: radial-gradient(circle at 34% 24%, #ffffff 0%, #ffffff 46%, #e6e0fa 100%);
 		color: var(--t);
 		flex: none;
+		box-shadow:
+			inset 0 1px 0 #ffffff,
+			inset 0 -5px 8px -5px rgba(86, 66, 170, 0.4),
+			0 4px 10px -3px color-mix(in srgb, var(--t) 50%, transparent);
 	}
 	.body {
 		flex: 1;
@@ -129,18 +135,20 @@
 		gap: 2px;
 	}
 	.t {
-		font-size: 15px;
-		font-weight: 600;
+		font-size: 18px;
+		font-weight: 700;
 		color: var(--ink);
+		font-family: var(--font-display);
 	}
 	.m {
-		font-size: 12px;
+		font-size: 14.5px;
 		line-height: 1.4;
 		color: var(--ink-3);
 	}
 	.x {
-		color: var(--ink-4);
-		font-size: 17px;
+		color: var(--ink-3);
+		font-size: 24px;
+		font-weight: 500;
 	}
 	@media (min-width: 900px) {
 		.entries {

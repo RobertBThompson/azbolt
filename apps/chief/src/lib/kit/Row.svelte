@@ -19,23 +19,33 @@
 </svelte:element>
 
 <style>
+	/* A row is a pane like any other. It reads --pane-line and
+	   --pane-shadow so a container that is itself glass can ask its rows
+	   to sit flatter than they do on the open field. */
 	.row {
-		min-height: 48px;
-		border: 1px solid var(--line-3);
-		border-radius: 11px;
-		background: var(--card);
+		min-height: 58px;
+		border: 1px solid var(--pane-line, var(--glass-line));
+		border-radius: var(--r-sm);
+		background: var(--glass);
+		box-shadow: var(--pane-shadow, var(--glass-shadow));
 		display: flex;
 		align-items: center;
-		gap: 11px;
-		padding: 8px 13px;
+		gap: 12px;
+		padding: 10px 15px;
 		color: inherit;
 		text-decoration: none;
 	}
+	/* A bead, lit like the count orbs, rather than a flat dot. */
 	.dot {
-		width: 9px;
-		height: 9px;
+		width: 11px;
+		height: 11px;
 		border-radius: 50%;
-		background: var(--t-ink);
+		background: radial-gradient(
+			circle at 34% 26%,
+			color-mix(in srgb, var(--t-ink) 45%, #ffffff) 0%,
+			var(--t-ink) 60%
+		);
+		box-shadow: 0 2px 5px -1px color-mix(in srgb, var(--t-ink) 70%, transparent);
 		flex: none;
 	}
 	.body {
@@ -44,21 +54,21 @@
 	}
 	.t {
 		display: block;
-		font-size: 14px;
+		font-size: 16.5px;
 		font-weight: 600;
 		line-height: 1.25;
 	}
 	.m {
 		display: block;
-		font-size: 12px;
+		font-size: 14px;
 		color: var(--ink-3);
 		line-height: 1.3;
 		margin-top: 2px;
 	}
 	.x {
-		font-size: 12px;
+		font-size: 14.5px;
 		font-weight: 700;
-		color: var(--tone-graphite);
+		color: var(--ink-3);
 		flex: none;
 	}
 </style>
