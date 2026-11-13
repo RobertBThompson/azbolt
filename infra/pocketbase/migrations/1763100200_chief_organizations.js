@@ -15,67 +15,84 @@
  */
 migrate(
 	function (app) {
-		if (exists(app, 'organizations')) return;
-		const users = app.findCollectionByNameOrId('users');
-		const spheres = app.findCollectionByNameOrId('spheres');
-		const collection = new Collection({
-			name: 'organizations',
-			type: 'base',
-			listRule: 'owner = @request.auth.id',
-			viewRule: 'owner = @request.auth.id',
-			createRule: "@request.auth.id != '' && owner = @request.auth.id",
-			updateRule: 'owner = @request.auth.id',
-			deleteRule: 'owner = @request.auth.id',
-			fields: [
-				{ name: 'name', type: 'text', required: true, presentable: true, max: 120 },
-				{
-					name: 'code',
-					type: 'select',
-					required: true,
-					maxSelect: 1,
-					// C individual · B business · CO common organization ·
-					// CC common committee · DO decentralized organization ·
-					// DB decentralized branch · P project group ·
-					// DN decentralized charity · CN the Church
-					values: ['C', 'B', 'CO', 'CC', 'DO', 'DB', 'P', 'DN', 'CN']
-				},
-				{ name: 'charter', type: 'text', max: 500 },
-				{ name: 'blurb', type: 'text', max: 240 },
-				{
-					name: 'spheres',
-					type: 'relation',
-					maxSelect: 20,
-					cascadeDelete: false,
-					collectionId: spheres.id
-				},
-				{
-					name: 'owner',
-					type: 'relation',
-					required: true,
-					maxSelect: 1,
-					cascadeDelete: true,
-					collectionId: users.id
-				}
-			],
-			indexes: ['CREATE UNIQUE INDEX idx_organizations_owner_name ON organizations (owner, name)']
-		});
-		app.save(collection);
-
-		/* The self-relation has to wait for the collection to have an id. */
-		const saved = app.findCollectionByNameOrId('organizations');
-		saved.fields.add({
-			name: 'controlled_by',
-			type: 'relation',
-			maxSelect: 1,
-			cascadeDelete: false,
-			collectionId: saved.id
-		});
-		app.save(saved);
+		if (!exists(app, 'organizations')) create(app);
+		addSelfRelation(app);
 	},
 	function (app) {
 		app.delete(app.findCollectionByNameOrId('organizations'));
 	}
 );
+
+/** @param {any} app */
+function create(app) {
+	const users = app.findCollectionByNameOrId('users');
+	const spheres = app.findCollectionByNameOrId('spheres');
+	const collection = new Collection({
+		name: 'organizations',
+		type: 'base',
+		listRule: 'owner = @request.auth.id',
+		viewRule: 'owner = @request.auth.id',
+		createRule: "@request.auth.id != '' && owner = @request.auth.id",
+		updateRule: 'owner = @request.auth.id',
+		deleteRule: 'owner = @request.auth.id',
+		fields: [
+			{ name: 'name', type: 'text', required: true, presentable: true, max: 120 },
+			{
+				name: 'code',
+				type: 'select',
+				required: true,
+				maxSelect: 1,
+				// C individual · B business · CO common organization ·
+				// CC common committee · DO decentralized organization ·
+				// DB decentralized branch · P project group ·
+				// DN decentralized charity · CN the Church
+				values: ['C', 'B', 'CO', 'CC', 'DO', 'DB', 'P', 'DN', 'CN']
+			},
+			{ name: 'charter', type: 'text', max: 500 },
+			{ name: 'blurb', type: 'text', max: 240 },
+			{
+				name: 'spheres',
+				type: 'relation',
+				maxSelect: 20,
+				cascadeDelete: false,
+				collectionId: spheres.id
+			},
+			{
+				name: 'owner',
+				type: 'relation',
+				required: true,
+				maxSelect: 1,
+				cascadeDelete: true,
+				collectionId: users.id
+			}
+		],
+		indexes: ['CREATE UNIQUE INDEX idx_organizations_owner_name ON organizations (owner, name)']
+	});
+	app.save(collection);
+}
+
+/**
+ * An organization directing another is governance, so the field points
+ * at this same collection — which means it can only be added once the
+ * collection has an id of its own.
+ *
+ * `fields.add` takes a Field, not a plain object: the plain form is
+ * converted by the Collection constructor and nowhere else.
+ * @param {any} app
+ */
+function addSelfRelation(app) {
+	const saved = app.findCollectionByNameOrId('organizations');
+	if (saved.fields.getByName('controlled_by')) return;
+	saved.fields.add(
+		new RelationField({
+			name: 'controlled_by',
+			maxSelect: 1,
+			cascadeDelete: false,
+			collectionId: saved.id
+		})
+	);
+	app.save(saved);
+}
 
 function exists(app, name) {
 	try {
