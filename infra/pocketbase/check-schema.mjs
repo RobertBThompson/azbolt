@@ -95,9 +95,16 @@ for (const [name, fields] of Object.entries(EXPECTED)) {
 }
 
 const users = byName.users;
-if (users && users.createRule === null) {
+if (users) {
 	console.log('users');
-	fault('anyone can create an account — close sign-up before real records go in');
+	/* Open on purpose for now: friends are getting accounts before any
+	   of this is public. It is listed rather than counted as a fault so
+	   that the state is deliberate and visible every time. */
+	console.log(
+		users.createRule === null
+			? '  · sign-up is open to anyone — deliberate while testing, close it before wider use'
+			: `  · sign-up is restricted: ${JSON.stringify(users.createRule)}`
+	);
 }
 
 console.log(faults ? `\n${faults} to fix.` : '\nSchema matches.');

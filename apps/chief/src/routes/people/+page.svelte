@@ -56,7 +56,7 @@
 
 	{#await load}
 		<Row t="cool" title="Loading people…" dot={false} />
-	{:then { data, source }}
+	{:then { data, source, error }}
 		{#if source === 'live' && data.length === 0}
 			<EmptyLive what="people" add="person" />
 		{:else}
@@ -92,7 +92,7 @@
 				<p class="none">Nobody in that sphere yet.</p>
 			{/if}
 
-			<SourceNote {source} />
+			<SourceNote {source} {error} onretry={() => (load = listPeople())} />
 		{/if}
 	{:catch}
 		<Alert

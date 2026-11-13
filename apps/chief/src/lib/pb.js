@@ -15,13 +15,20 @@ import { PEOPLE, ORGS } from './data.js';
  *   'anon'    a backend is up but nobody is signed in, so the
  *             owner-scoped rules return nothing and fixtures stand in
  *   'fixture' no backend at all — the prototype's normal state
+ *   'error'   signed in, and the read failed
  *
  * 'anon' is kept distinct from 'fixture' because they need different
  * words on screen: one is an invitation to sign in, the other is not.
+ *
+ * 'error' returns nothing rather than fixtures. A signed-in account
+ * shown design placeholders after a failed read cannot tell them from
+ * its own records, and a note at the foot of the screen is not enough
+ * when the rows above it look like data. The screen says the read
+ * failed and offers to try again.
  */
 export const pb = createPocketBase('', 'azbolt.chief.pb');
 
-/** @typedef {'live'|'anon'|'fixture'} Source */
+/** @typedef {'live'|'anon'|'fixture'|'error'} Source */
 
 /** @type {boolean|null} */
 let reachable = null;
@@ -36,18 +43,31 @@ export async function backendUp() {
  * @template T
  * @param {() => Promise<T>} live
  * @param {() => T} fixture
- * @returns {Promise<{ data: T, source: Source }>}
+ * @param {T} empty  what a failed read shows: nothing of this kind
+ * @returns {Promise<{ data: T, source: Source, error?: string }>}
  */
-async function readOr(live, fixture) {
+async function readOr(live, fixture, empty) {
 	if (!(await backendUp())) return { data: fixture(), source: 'fixture' };
 	if (!pb.authStore.isValid) return { data: fixture(), source: 'anon' };
 	try {
 		return { data: await live(), source: 'live' };
-	} catch {
-		// A reachable backend that rejects the read is still a failed read.
-		// Showing fixtures beats showing nothing, as long as we say so.
-		return { data: fixture(), source: 'fixture' };
+	} catch (/** @type {any} */ err) {
+		return {
+			data: empty,
+			source: 'error',
+			error: err?.message || 'The server did not answer.'
+		};
 	}
+}
+
+/**
+ * Retire a record without destroying it. Old records still name it, so
+ * a hard delete would leave them pointing at nothing.
+ * @param {string} collection
+ * @param {string} id
+ */
+export function archive(collection, id) {
+	return pb.collection(collection).update(id, { archived: new Date().toISOString() });
 }
 
 /** The id every write hangs its `owner` relation on. */
@@ -64,7 +84,9 @@ const fullName = (p) => [p.first_name, p.last_name].filter(Boolean).join(' ');
 export function listPeople() {
 	return readOr(
 		async () => {
-			const rows = await pb.collection('people').getFullList({ sort: 'first_name' });
+			const rows = await pb
+				.collection('people')
+				.getFullList({ sort: 'first_name', filter: 'archived = null' });
 			return rows.map((r) => ({
 				id: r.id,
 				name: fullName(r),
@@ -81,7 +103,8 @@ export function listPeople() {
 				name: p.name,
 				meta: `${p.role} · ${p.next}`,
 				spheres: p.spheres
-			}))
+			})),
+		[]
 	);
 }
 
@@ -96,7 +119,9 @@ export function listPeople() {
 export function listOrganizations() {
 	return readOr(
 		async () => {
-			const rows = await pb.collection('organizations').getFullList({ sort: 'name' });
+			const rows = await pb
+				.collection('organizations')
+				.getFullList({ sort: 'name', filter: 'archived = null' });
 			return rows.map((r) => ({ id: r.id, name: r.name, meta: r.blurb, kind: r.code }));
 		},
 		() =>
@@ -105,7 +130,8 @@ export function listOrganizations() {
 				name: o.name,
 				meta: o.blurb,
 				kind: o.code
-			}))
+			})),
+		[]
 	);
 }
 
@@ -125,4 +151,3 @@ export function createPerson(fields) {
 export function createOrganization(fields) {
 	return pb.collection('organizations').create({ ...fields, owner: ownerId() });
 }
-
