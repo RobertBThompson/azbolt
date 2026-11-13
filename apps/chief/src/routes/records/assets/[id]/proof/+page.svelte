@@ -11,7 +11,7 @@
 	import { ASSETS } from '$lib/assets.js';
 
 	const id = $derived($page.params.id ?? '');
-	const a = $derived(ASSETS[id] ?? ASSETS['nfta-014']);
+	const a = $derived(ASSETS[id]);
 	const verified = $derived(a.claims.filter((c) => c.verified).length);
 </script>
 

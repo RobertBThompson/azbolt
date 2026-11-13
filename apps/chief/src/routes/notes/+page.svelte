@@ -17,7 +17,8 @@
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
 	import LensSwitch from '$lib/shell/LensSwitch.svelte';
-	import { Icon, Note, SectionHead } from '$lib/kit';
+	import { Alert, Icon, Note, SectionHead } from '$lib/kit';
+	import { session } from '$lib/session.svelte.js';
 	import {
 		addAfter,
 		indent,
@@ -34,7 +35,11 @@
 		{ label: 'Documents', href: '/documents', icon: 'doc' }
 	];
 
-	const STORE = 'azbolt.chief.notes';
+	/* One key per account. With a single key, signing in as someone else
+	   on the same browser opened their notes in your outline. */
+	const STORE = $derived(
+		session.signedIn ? `azbolt.chief.notes.${session.user?.id}` : 'azbolt.chief.notes.anon'
+	);
 
 	const SEED = [
 		node('Storage build-out', 0),
@@ -47,6 +52,8 @@
 
 	/** @type {{ id: string, text: string, depth: number }[]} */
 	let list = $state(load());
+	/** Set when the browser refuses to keep the outline, so the screen can say so. */
+	let saveFault = $state('');
 	let focusId = $state('');
 	/** @type {Record<string, HTMLInputElement>} */
 	let els = {};
@@ -56,7 +63,10 @@
 			const raw = localStorage.getItem(STORE);
 			if (raw) {
 				const parsed = JSON.parse(raw);
-				if (Array.isArray(parsed) && parsed.length) return parsed;
+				/* An outline cleared down to nothing is a saved outline. It
+				   used to be read as "no save yet" and refilled with the
+				   samples, so clearing your notes was impossible. */
+				if (Array.isArray(parsed)) return parsed.length ? parsed : [node('', 0)];
 			}
 		} catch {
 			// Private windows and blocked site data both throw here. An
@@ -68,8 +78,14 @@
 	$effect(() => {
 		try {
 			localStorage.setItem(STORE, JSON.stringify(list));
+			saveFault = '';
 		} catch {
-			// Nothing to do about it, and nothing worth interrupting for.
+			/* Silence here meant typing into a page that was keeping
+			   nothing. Whatever the cause — a private window, a full
+			   disk, blocked site data — the person needs to know before
+			   they close the tab. */
+			saveFault =
+				'This browser is not keeping your notes. Copy anything you need before you leave.';
 		}
 	});
 
@@ -163,6 +179,9 @@
 		<Icon name="notes" size={16} /> Add a line
 	</button>
 
+	{#if saveFault}
+		<Alert title="Not saved" meta={saveFault} />
+	{/if}
 	<Note>
 		Enter adds a line, Tab indents, Shift-Tab outdents, Backspace on an empty line deletes it.
 		Deleting a line keeps whatever was filed under it, one level up. Notes are held in this browser

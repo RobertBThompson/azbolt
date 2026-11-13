@@ -17,5 +17,5 @@
 	<Row title="Your content" meta="Ownership and permissions" trailing="›" />
 	<Row title="Availability and liability" meta="Service limits" trailing="›" />
 	<Row title="Changes and ending service" meta="Notice and termination" trailing="›" />
-	<Btn primary={false} label="Download a copy" />
+	<Btn primary={false} label="Download a copy" soon />
 </Screen>

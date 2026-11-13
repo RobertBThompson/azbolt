@@ -12,7 +12,7 @@
 	import { ORGS } from '$lib/data.js';
 
 	const id = $derived($page.params.id ?? '');
-	const a = $derived(ASSETS[id] ?? ASSETS['nfta-014']);
+	const a = $derived(ASSETS[id]);
 	// The organization the chain ends at, however many assets it passes through.
 	const holder = $derived(
 		controllingOrgs(ASSETS[id] ? id : 'nfta-014')
@@ -35,10 +35,10 @@
 	<Row t="warm" title="When" meta="18–26 August" trailing="›" />
 	<Row
 		t="warm"
-		href="/people/pamela"
+		href="/people/dev"
 		title="Authorised by"
-		meta="Pamela Anderson · proof attached"
+		meta="Dev Patel · proof attached"
 		trailing="↗"
 	/>
-	<Btn t="warm" label="Approve movement" />
+	<Btn t="warm" label="Approve movement" soon />
 </Screen>

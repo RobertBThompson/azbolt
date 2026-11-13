@@ -11,7 +11,7 @@
 	import { ASSETS } from '$lib/assets.js';
 
 	const id = $page.params.id ?? '';
-	const a = ASSETS[id] ?? ASSETS['nfta-014'];
+	const a = ASSETS[id];
 
 	let rights = $state(a.rights);
 	let period = $state(a.period);

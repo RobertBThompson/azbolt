@@ -38,6 +38,11 @@
 	/>
 	<Select label="Lender" options={orgs} bind:value={lender} placeholder="Organization" />
 	<Select label="Secured against" options={assets} bind:value={asset} placeholder="Asset" />
-	<Field label="Current balance" placeholder="Approximate is fine" bind:value={balance} />
+	<Field
+		label="Current balance"
+		type="money"
+		placeholder="Approximate is fine"
+		bind:value={balance}
+	/>
 	<Btn t="warm" href="/records/money/liabilities/new/paperwork" label="Next: the paperwork" />
 </Screen>

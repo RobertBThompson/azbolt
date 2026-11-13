@@ -20,11 +20,12 @@
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Btn, Note, Row, SectionHead } from '$lib/kit';
 	import { PLACEABLE } from '$lib/spheres.js';
-	import { UNSPHERED, PEOPLE, ORGS } from '$lib/data.js';
+	import { PEOPLE, ORGS } from '$lib/data.js';
+	import { jotOf } from '$lib/jots.svelte.js';
 	import { activeAssets } from '$lib/assets.js';
 
 	const id = $derived($page.params.id ?? '');
-	const jot = $derived(UNSPHERED[id] ?? { text: 'Untitled jot', meta: 'No sphere', thrown: '' });
+	const jot = $derived(/** @type {NonNullable<ReturnType<typeof jotOf>>} */ (jotOf(id)));
 
 	/**
 	 * A jot is in All life until it is told otherwise. That is a real

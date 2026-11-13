@@ -26,7 +26,7 @@
 	import { page } from '$app/stores';
 
 	const id = $derived($page.params.id ?? '');
-	const org = $derived(ORGS[id] ?? ORGS.tn);
+	const org = $derived(ORGS[id]);
 	const type = $derived(orgType(org.code));
 	const persp = $derived(perspective(org));
 

@@ -10,7 +10,7 @@
 	import { ASSETS, events, short } from '$lib/assets.js';
 
 	const id = $derived($page.params.id ?? '');
-	const a = $derived(ASSETS[id] ?? ASSETS['nfta-014']);
+	const a = $derived(ASSETS[id]);
 	const reviews = $derived(
 		events(ASSETS[id] ? id : 'nfta-014').filter((e) => e.type === 'Re-valued')
 	);
@@ -39,5 +39,5 @@
 	{#each reviews as r (r.detail + r.when)}
 		<Row t="warm" title={r.detail} meta="Re-valued" trailing={r.when} />
 	{/each}
-	<Btn t="warm" label="Update valuation" />
+	<Btn t="warm" label="Update valuation" soon />
 </Screen>

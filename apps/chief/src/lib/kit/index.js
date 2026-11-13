@@ -16,6 +16,7 @@ export { default as Filter } from './Filter.svelte';
 export { default as Hero } from './Hero.svelte';
 export { default as Icon } from './Icon.svelte';
 export { default as StateSwitch } from './StateSwitch.svelte';
+export { default as Missing } from './Missing.svelte';
 export { default as Note } from './Note.svelte';
 export { default as PageHead } from './PageHead.svelte';
 export { default as Prog } from './Prog.svelte';

@@ -14,7 +14,12 @@
 	import { page } from '$app/stores';
 	import { LINKS, linkOf, money, nodeHref, nodeName } from '$lib/assets.js';
 
-	const l = $derived(linkOf($page.params.id ?? '') ?? LINKS[0]);
+	/* The route guard in +layout.js has already turned an unknown id
+	   into a not-found screen, so the link is there by the time this
+	   component runs. */
+	const l = $derived(
+		/** @type {NonNullable<ReturnType<typeof linkOf>>} */ (linkOf($page.params.id ?? ''))
+	);
 	const verb = $derived(
 		l.role === 'Owner' ? 'owns' : l.role === 'Manager' ? 'manages' : 'guarantees'
 	);

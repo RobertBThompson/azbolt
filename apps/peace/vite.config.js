@@ -10,6 +10,7 @@ import { manifest, runtimeCaching } from '@azbolt/pwa';
  * copy answers there instead. strictPort means a clash is an error
  * rather than a silent move to another port.
  */
+/** @param {{ mode: string }} config */
 export default ({ mode }) => {
 	const env = loadEnv(mode, process.cwd(), '');
 	const port = Number(env.DEV_PORT) || 7174;

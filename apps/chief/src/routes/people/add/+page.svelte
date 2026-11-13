@@ -22,7 +22,7 @@
 	<Appr
 		t="cool"
 		bind:included={carmen}
-		title="Carmen Mendez"
+		title="Carmen Ruiz"
 		meta="In device contacts"
 		confidence="Add"
 		index={1}
@@ -37,6 +37,6 @@
 		index={2}
 		total={2}
 	/>
-	<Btn t="cool" label="Import {count} selected" />
-	<Btn primary={false} label="Enter someone manually" />
+	<Btn t="cool" label="Import {count} selected" soon />
+	<Btn primary={false} label="Enter someone manually" soon />
 </Screen>

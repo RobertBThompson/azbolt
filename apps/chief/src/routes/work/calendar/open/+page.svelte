@@ -16,6 +16,6 @@
 	<Row t="cool" title="Tuesday · 10:00–10:45" meta="No conflicts · work hours" trailing="›" />
 	<Row t="cool" title="Tuesday · 2:15–3:00" meta="Before Carmen call" trailing="›" />
 	<Row t="cool" title="Wednesday · 9:00–10:00" meta="Longest open block" trailing="›" />
-	<Btn t="cool" label="Choose a task for a block" />
+	<Btn t="cool" label="Choose a task for a block" soon />
 	<Note>Chief never auto-books, even when confidence is high.</Note>
 </Screen>

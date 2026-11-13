@@ -11,9 +11,9 @@
 <svelte:head><title>Add a link · Chief</title></svelte:head>
 
 <Screen back="/organizations/structure" nav={false}>
-	<Banner t="cool" title="Build one sentence" meta="Carmen reports to Pamela as Operations lead." />
-	<Field label="Who" placeholder="Carmen Mendez" />
-	<Field label="Reports to" placeholder="Pamela Anderson" />
+	<Banner t="cool" title="Build one sentence" meta="Carmen reports to Dev as Operations lead." />
+	<Field label="Who" placeholder="Carmen Ruiz" />
+	<Field label="Reports to" placeholder="Dev Patel" />
 	<Field label="As" placeholder="Operations lead" />
-	<Btn t="cool" label="Save this connection" />
+	<Btn t="cool" label="Save this connection" soon />
 </Screen>

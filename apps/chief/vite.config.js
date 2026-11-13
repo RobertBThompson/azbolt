@@ -10,6 +10,7 @@ import { manifest, runtimeCaching } from '@azbolt/pwa';
  * copy answers there instead. strictPort means a clash is an error
  * rather than a silent move to another port.
  */
+/** @param {{ mode: string }} config */
 export default ({ mode }) => {
 	const env = loadEnv(mode, process.cwd(), '');
 	const port = Number(env.DEV_PORT) || 7171;
@@ -31,6 +32,14 @@ export default ({ mode }) => {
 					// an indigo app is a white flash on every launch.
 					backgroundColor: '#2c2580'
 				}),
+				/*
+				 * Chief is a single-page app: the adapter writes one 200.html
+				 * and Caddy serves it for every path. Without this the service
+				 * worker precaches the scripts but no page to run them in, and
+				 * the installed app shows the browser's error page with no
+				 * connection — which is what it did until now.
+				 */
+				kit: { spa: true, adapterFallback: '200.html' },
 				workbox: {
 					globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
 					runtimeCaching

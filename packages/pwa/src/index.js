@@ -51,29 +51,21 @@ export function manifest({
 	};
 }
 
-const NETWORK_FIRST = /** @type {const} */ ('NetworkFirst');
 const CACHE_FIRST = /** @type {const} */ ('CacheFirst');
 
 /**
  * Workbox runtime caching shared by every app.
- * The app shell is precached; Supabase reads get a short network-first
- * window so the app opens offline with last-known data; writes are never
- * cached.
+ *
+ * The app shell is precached, so an installed app opens with no
+ * connection. Records are not cached: a screen that quietly serves
+ * yesterday's figures is worse than one that says it cannot reach the
+ * server, and that is a decision each app's data layer makes, not the
+ * service worker.
  *
  * workbox-build is not a direct dependency here, so the route callbacks
  * are typed explicitly rather than inferred from its RuntimeCaching type.
  */
 export const runtimeCaching = [
-	{
-		/** @param {{ url: URL }} ctx */
-		urlPattern: ({ url }) => url.pathname.startsWith('/rest/v1/'),
-		handler: NETWORK_FIRST,
-		options: {
-			cacheName: 'supabase-rest',
-			networkTimeoutSeconds: 4,
-			expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 }
-		}
-	},
 	{
 		/** @param {{ request: Request }} ctx */
 		urlPattern: ({ request }) => request.destination === 'image',

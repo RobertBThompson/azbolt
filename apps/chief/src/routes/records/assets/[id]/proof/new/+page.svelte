@@ -9,7 +9,7 @@
 	import { page } from '$app/stores';
 	import { ASSETS } from '$lib/assets.js';
 
-	const a = $derived(ASSETS[$page.params.id ?? ''] ?? ASSETS['nfta-014']);
+	const a = $derived(ASSETS[$page.params.id ?? '']);
 </script>
 
 <svelte:head><title>Add proof · Chief</title></svelte:head>

@@ -10,7 +10,7 @@
 	import { page } from '$app/stores';
 
 	let active = $state(0);
-	const e = $derived(ENDEAVORS[$page.params.id ?? ''] ?? ENDEAVORS.website);
+	const e = $derived(ENDEAVORS[$page.params.id ?? '']);
 </script>
 
 <svelte:head><title>{e.name} · Chief</title></svelte:head>

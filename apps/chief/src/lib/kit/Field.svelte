@@ -4,7 +4,7 @@
 	 *   label: string,
 	 *   placeholder?: string,
 	 *   value?: string,
-	 *   type?: 'text'|'email'|'password'|'tel'|'url',
+	 *   type?: 'text'|'email'|'password'|'tel'|'url'|'date'|'money',
 	 *   autocomplete?: AutoFill|null,
 	 *   required?: boolean,
 	 *   disabled?: boolean,
@@ -50,6 +50,24 @@
 			autocomplete={autocomplete ?? 'email'}
 			autocapitalize="none"
 			spellcheck="false"
+			bind:value
+		/>
+	{:else if type === 'date'}
+		<!-- A date typed as words cannot be checked, sorted or compared. -->
+		<input type="date" {required} {disabled} {autocomplete} bind:value />
+	{:else if type === 'money'}
+		<!--
+			text rather than number: a number input drops what it cannot
+			parse, so a typo is silently lost. inputmode brings up the
+			number keyboard on a phone all the same.
+		-->
+		<input
+			type="text"
+			inputmode="decimal"
+			{placeholder}
+			{required}
+			{disabled}
+			{autocomplete}
 			bind:value
 		/>
 	{:else}
