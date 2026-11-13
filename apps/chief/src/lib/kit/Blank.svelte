@@ -13,14 +13,18 @@
 <p class="blank">{@render children()}</p>
 
 <style>
+	/* White on the open field, ink inside a pane. A pane that holds one
+	   sets --label-ink, the same way every other kit piece learns where
+	   it is; the dashes and the wash are mixed from whichever colour
+	   that turns out to be, so this reads in both places. */
 	.blank {
 		margin: 0;
 		padding: 13px 16px;
-		border: 1.5px dashed rgba(255, 255, 255, 0.7);
+		border: 1.5px dashed color-mix(in srgb, currentColor 55%, transparent);
 		border-radius: var(--r-sm);
-		background: rgba(255, 255, 255, 0.12);
+		background: color-mix(in srgb, currentColor 8%, transparent);
 		font-size: 15px;
 		line-height: 1.4;
-		color: var(--on-field);
+		color: var(--label-ink, var(--on-field));
 	}
 </style>

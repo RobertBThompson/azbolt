@@ -1,7 +1,7 @@
 <script>
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Blank, Expander, Icon, Row, StateSwitch, Stats } from '$lib/kit';
-	import { jots, throwJot } from '$lib/jots.svelte.js';
+	import { Blank, Expander, Icon, Row, SourceNote, StateSwitch, Stats } from '$lib/kit';
+	import { jots, kept, load, retry, throwJot } from '$lib/jots.svelte.js';
 
 	const viewId = 'home-view';
 	let view = $state(0);
@@ -10,6 +10,11 @@
 	let draft = $state('');
 
 	const canThrow = $derived(draft.trim().length > 0);
+	/* The queue is read once when Home opens; a jot thrown after that
+	   joins it without another round trip. */
+	$effect(() => {
+		if (!jots.loaded) load();
+	});
 
 	const now = new Date();
 	const hour = now.getHours();
@@ -123,7 +128,13 @@
 							</button>
 						{/if}
 					</div>
-					<p class="caveat">Thrown jots are kept until you close Chief. Saving comes next.</p>
+					{#if jots.loaded && !kept()}
+						<p class="caveat">
+							{jots.source === 'anon'
+								? 'Signed out, so a jot is kept only until you close Chief.'
+								: 'No server, so a jot is kept only until you close Chief.'}
+						</p>
+					{/if}
 				</div>
 			</Expander>
 
@@ -135,15 +146,29 @@
 					count={jots.list.length}
 					lede="Organize your spheres"
 				>
+					{#if jots.source === 'error'}
+						<SourceNote source="error" error={jots.error} onretry={load} />
+					{/if}
 					{#each jots.list as jot (jot.id)}
-						<Row
-							t="cool"
-							href="/jot/{jot.id}/sphere"
-							title={jot.text}
-							meta={jot.meta}
-							trailing="›"
-						/>
+						{#if jot.state === 'failed'}
+							<div class="unsaved">
+								<p class="ut">{jot.text}</p>
+								<p class="um">Not saved. {jot.fault}</p>
+								<button type="button" onclick={() => retry(jot.id)}>Try again</button>
+							</div>
+						{:else}
+							<Row
+								t="cool"
+								href="/jot/{jot.id}/sphere"
+								title={jot.text}
+								meta={jot.state === 'saving' ? 'Saving…' : jot.meta}
+								trailing="›"
+							/>
+						{/if}
 					{/each}
+					{#if jots.loaded && jots.source !== 'error' && jots.list.length === 0}
+						<Blank>Nothing waiting. A jot you throw lands here.</Blank>
+					{/if}
 				</Expander>
 
 				<Expander label="Task it" icon="task" t="warm" count={2} lede="Turn into action">
@@ -289,6 +314,37 @@
 	}
 	/* The one caveat on this screen, where the promise is made rather
 	   than on a settings page nobody opens. */
+	/* A jot the server refused stays on screen with its words intact. */
+	.unsaved {
+		padding: 13px 15px;
+		border: 1px solid color-mix(in srgb, var(--tone-alert) 45%, #ffffff);
+		border-radius: var(--r-sm);
+		background: color-mix(in srgb, var(--tone-alert) 10%, #ffffff);
+	}
+	.unsaved .ut {
+		margin: 0;
+		font-size: 16.5px;
+		font-weight: 600;
+		color: var(--ink);
+	}
+	.unsaved .um {
+		margin: 4px 0 0;
+		font-size: 14px;
+		color: var(--ink-2);
+	}
+	.unsaved button {
+		margin-top: 9px;
+		min-height: 40px;
+		padding: 0 16px;
+		border-radius: 999px;
+		border: 1px solid var(--glass-line);
+		background: var(--glass);
+		font-family: var(--font-display);
+		font-size: 15px;
+		font-weight: 600;
+		color: var(--ink);
+		cursor: pointer;
+	}
 	.caveat {
 		margin: 10px 2px 0;
 		font-size: 13.5px;

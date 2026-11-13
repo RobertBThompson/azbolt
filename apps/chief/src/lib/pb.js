@@ -151,3 +151,53 @@ export function createPerson(fields) {
 export function createOrganization(fields) {
 	return pb.collection('organizations').create({ ...fields, owner: ownerId() });
 }
+
+/* ── Jots ───────────────────────────────────────────────────────────── */
+
+/**
+ * @typedef {{ id: string, text: string, created: string,
+ *             sphere: string, sphered: string }} JotRow
+ */
+
+/**
+ * Jots still waiting to be placed, newest first.
+ *
+ * Only the unplaced ones: a jot that has been given a sphere has left
+ * the queue, which is the whole of what Sphere it does.
+ */
+export function listJots() {
+	return readOr(
+		async () => {
+			const rows = await pb.collection('jots').getFullList({
+				sort: '-created',
+				filter: 'archived = null && sphered = null'
+			});
+			return rows.map((r) => ({
+				id: r.id,
+				text: r.text,
+				created: r.created,
+				sphere: r.sphere ?? '',
+				sphered: r.sphered ?? ''
+			}));
+		},
+		() => [],
+		[]
+	);
+}
+
+/**
+ * Keep a thrown jot.
+ *
+ * @param {string} text
+ * @returns {Promise<JotRow>}
+ */
+export async function writeJot(text) {
+	const row = await pb.collection('jots').create({ text: text.trim(), owner: ownerId() });
+	return {
+		id: row.id,
+		text: row.text,
+		created: row.created,
+		sphere: row.sphere ?? '',
+		sphered: row.sphered ?? ''
+	};
+}

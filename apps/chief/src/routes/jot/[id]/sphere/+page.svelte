@@ -112,7 +112,13 @@
 	</div>
 
 	<div class="done">
-		<Btn t="warm" href="/" label={sphere === 'all' ? 'Keep it in all life' : 'Sphere it'} />
+		<!--
+			The pick does not save yet: a jot's sphere is a relation, and
+			spheres are not records until the next step. The jot itself is
+			kept, which is what Throw it promised.
+		-->
+		<Btn t="warm" label={sphere === 'all' ? 'Keep it in all life' : 'Sphere it'} soon />
+		<Btn primary={false} href="/" label="Back to your jots" />
 		<Btn primary={false} href="/work/tasks/new" label="Task it" />
 	</div>
 
