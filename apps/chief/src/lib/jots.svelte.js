@@ -15,7 +15,7 @@
  * Signed out, or with no server, jots live here for the session only
  * and the composer says so.
  */
-import { listJots, writeJot } from './pb.js';
+import { listJots, sphereJot, writeJot } from './pb.js';
 
 /**
  * @typedef {{
@@ -98,6 +98,20 @@ async function send(tempId, body) {
 			fault: err?.message || 'The server did not answer.'
 		};
 	}
+}
+
+/**
+ * Place a jot in a sphere, which takes it out of the queue.
+ *
+ * Signed out there is nothing to write to, so the jot leaves the queue
+ * for this session and goes with it — the same bargain the composer
+ * already stated.
+ * @param {string} id
+ * @param {string} sphere  a sphere record id, or '' for all life
+ */
+export async function place(id, sphere) {
+	if (kept()) await sphereJot(id, sphere);
+	jots.list = jots.list.filter((j) => j.id !== id);
 }
 
 /** Try a failed write again. @param {string} id */

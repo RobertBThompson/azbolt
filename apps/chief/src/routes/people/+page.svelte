@@ -22,7 +22,7 @@
 	import LensSwitch from '$lib/shell/LensSwitch.svelte';
 	import { Alert, Field, Row, Btn, SourceNote, EmptyLive, SphereTags } from '$lib/kit';
 	import { listPeople } from '$lib/pb.js';
-	import { sphereOf } from '$lib/spheres.js';
+	import { sphereOf } from '$lib/spheres.svelte.js';
 
 	const LENSES = [
 		{ label: 'People', href: '/people', icon: 'people' },

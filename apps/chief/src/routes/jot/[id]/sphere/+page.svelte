@@ -17,11 +17,12 @@
 	 * backlog.
 	 */
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Btn, Note, Row, SectionHead } from '$lib/kit';
-	import { PLACEABLE } from '$lib/spheres.js';
+	import { Blank, Btn, Note, Row, SectionHead } from '$lib/kit';
+	import { placeable } from '$lib/spheres.svelte.js';
 	import { PEOPLE, ORGS } from '$lib/data.js';
-	import { jotOf } from '$lib/jots.svelte.js';
+	import { jotOf, place } from '$lib/jots.svelte.js';
 	import { activeAssets } from '$lib/assets.js';
 
 	const id = $derived($page.params.id ?? '');
@@ -37,6 +38,24 @@
 	let who = $state([]);
 	/** @type {string[]} */
 	let assets = $state([]);
+
+	let busy = $state(false);
+	let fault = $state('');
+
+	/* All life is stored as no sphere at all: the default is a real
+	   answer, and a row in the table for "everywhere" would be a second
+	   way to say the same thing. */
+	async function keep() {
+		busy = true;
+		fault = '';
+		try {
+			await place(id, sphere === 'all' ? '' : sphere);
+			goto('/');
+		} catch (/** @type {any} */ err) {
+			fault = err?.message || 'The server did not answer.';
+			busy = false;
+		}
+	}
 
 	/** @param {string[]} list @param {string} key */
 	function toggle(list, key) {
@@ -56,7 +75,7 @@
 
 	<SectionHead label="Select sphere" t="warm" />
 	<div class="grid">
-		{#each PLACEABLE as [key, sph] (key)}
+		{#each placeable() as [key, sph] (key)}
 			<button
 				type="button"
 				class="pick"
@@ -112,12 +131,13 @@
 	</div>
 
 	<div class="done">
-		<!--
-			The pick does not save yet: a jot's sphere is a relation, and
-			spheres are not records until the next step. The jot itself is
-			kept, which is what Throw it promised.
-		-->
-		<Btn t="warm" label={sphere === 'all' ? 'Keep it in all life' : 'Sphere it'} soon />
+		{#if fault}<Blank>{fault}</Blank>{/if}
+		<Btn
+			t="warm"
+			label={busy ? 'Saving…' : sphere === 'all' ? 'Keep it in all life' : 'Sphere it'}
+			onclick={keep}
+			disabled={busy}
+		/>
 		<Btn primary={false} href="/" label="Back to your jots" />
 		<Btn primary={false} href="/work/tasks/new" label="Task it" />
 	</div>

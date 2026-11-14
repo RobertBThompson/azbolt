@@ -11,11 +11,20 @@
 	 * and two Chiefs will not share them.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Banner, Note } from '$lib/kit';
-	import { SPHERES } from '$lib/spheres.js';
-	import { shell } from '$lib/state.svelte.js';
+	import { Banner, Blank, Btn, Field, Note, SourceNote } from '$lib/kit';
+	import {
+		addSphere,
+		kept,
+		load,
+		placeable,
+		rename,
+		retire,
+		spheres
+	} from '$lib/spheres.svelte.js';
+	import { shell, setSphere } from '$lib/state.svelte.js';
 	import { goto } from '$app/navigation';
 
+	/** Said of the stand-ins only; a Chief's own spheres speak for themselves. */
 	/** @type {Record<string, string>} */
 	const BLURBS = {
 		all: 'Every sphere at once — and the default',
@@ -28,11 +37,46 @@
 		hobby: 'Time that answers to nobody'
 	};
 
+	let adding = $state('');
+	let editing = $state('');
+	let editName = $state('');
+	let busy = $state(false);
+	let fault = $state('');
+
+	$effect(() => {
+		if (!spheres.loaded) load();
+	});
+
 	/** @param {string} key */
 	function pick(key) {
-		shell.sphere = key;
+		setSphere(key);
 		goto('/sphere');
 	}
+
+	/** @param {() => Promise<unknown>} work */
+	async function run(work) {
+		busy = true;
+		fault = '';
+		try {
+			await work();
+		} catch (/** @type {any} */ err) {
+			fault = err?.message || 'The server did not answer.';
+		} finally {
+			busy = false;
+		}
+	}
+
+	const add = () =>
+		run(async () => {
+			await addSphere(adding);
+			adding = '';
+		});
+
+	const save = () =>
+		run(async () => {
+			await rename(editing, editName);
+			editing = '';
+		});
 </script>
 
 <svelte:head><title>Sphere · Chief</title></svelte:head>
@@ -43,16 +87,58 @@
 		meta="Records you create land in the sphere you pick here."
 	/>
 
-	{#each Object.entries(SPHERES) as [key, sphere] (key)}
-		<button class="opt" onclick={() => pick(key)} aria-pressed={shell.sphere === key}>
-			<span class="sw" style="background:{sphere.swatch}"></span>
-			<span class="body">
-				<span class="t">{sphere.name}</span>
-				<span class="m">{BLURBS[key]}</span>
-			</span>
-			{#if shell.sphere === key}<span class="tick" aria-hidden="true">✓</span>{/if}
-		</button>
+	{#if spheres.source === 'error'}
+		<SourceNote source="error" error={spheres.error} onretry={load} />
+	{/if}
+	{#each placeable() as [key, sphere] (key)}
+		{#if editing === key}
+			<div class="edit">
+				<Field label="Name" bind:value={editName} />
+				<Btn label={busy ? 'Saving…' : 'Save'} onclick={save} disabled={busy} />
+				<Btn primary={false} label="Cancel" onclick={() => (editing = '')} />
+				<Btn
+					primary={false}
+					label="Retire it"
+					onclick={() => run(() => retire(key)).then(() => (editing = ''))}
+					disabled={busy}
+				/>
+			</div>
+		{:else}
+			<div class="opt-row">
+				<button class="opt" onclick={() => pick(key)} aria-pressed={shell.sphere === key}>
+					<span class="sw" style="background:{sphere.swatch}"></span>
+					<span class="body">
+						<span class="t">{sphere.name}</span>
+						<span class="m">{BLURBS[key] ?? 'Yours'}</span>
+					</span>
+					{#if shell.sphere === key}<span class="tick" aria-hidden="true">✓</span>{/if}
+				</button>
+				{#if kept() && key !== 'all'}
+					<button
+						class="pen"
+						onclick={() => {
+							editing = key;
+							editName = sphere.name;
+						}}
+						aria-label="Change {sphere.name}">Change</button
+					>
+				{/if}
+			</div>
+		{/if}
 	{/each}
+
+	{#if kept()}
+		<div class="add">
+			<Field label="Add a sphere" placeholder="Grandchildren" bind:value={adding} />
+			<Btn label={busy ? 'Adding…' : 'Add it'} onclick={add} disabled={busy || !adding.trim()} />
+		</div>
+	{:else if spheres.loaded && spheres.source !== 'error'}
+		<Blank>
+			These are stand-ins. {spheres.source === 'anon' ? 'Sign in' : 'Connect a server'} to write your
+			own, which are nobody else's business.
+		</Blank>
+	{/if}
+	{#if fault}<Blank>{fault}</Blank>{/if}
 
 	<Note>
 		Spheres overlap and compete for the same hours — that is the point of naming them, not a problem
@@ -61,6 +147,39 @@
 </Screen>
 
 <style>
+	.opt-row {
+		display: flex;
+		align-items: stretch;
+		gap: 8px;
+	}
+	.opt-row .opt {
+		flex: 1;
+		min-width: 0;
+	}
+	.pen {
+		flex: none;
+		min-height: var(--tap-min);
+		padding: 0 14px;
+		border: 1px solid var(--glass-line);
+		border-radius: var(--r-sm);
+		background: var(--glass);
+		box-shadow: var(--glass-shadow);
+		font-family: var(--font-display);
+		font-size: 14.5px;
+		font-weight: 600;
+		color: var(--ink);
+		cursor: pointer;
+	}
+	.edit,
+	.add {
+		display: grid;
+		gap: 10px;
+		padding: 14px 16px;
+		border: 1px solid var(--glass-line);
+		border-radius: var(--r-sm);
+		background: var(--glass);
+		box-shadow: var(--glass-shadow);
+	}
 	.opt {
 		min-height: 58px;
 		border: 1px solid var(--glass-line);

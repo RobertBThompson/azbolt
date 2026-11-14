@@ -21,7 +21,7 @@
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Btn, Icon, SectionHead } from '$lib/kit';
 	import { PEOPLE } from '$lib/data.js';
-	import { sphereOf, PLACEABLE } from '$lib/spheres.js';
+	import { placeable, sphereOf } from '$lib/spheres.svelte.js';
 	import { page } from '$app/stores';
 
 	const person = $derived(PEOPLE[$page.params.id ?? '']);
@@ -52,8 +52,8 @@
 
 	/** Spheres on offer: the Chief's own, plus any this person already has. */
 	const offered = $derived([
-		...PLACEABLE.filter(([k]) => k !== 'all').map(([k]) => k),
-		...spheres.filter((k) => !PLACEABLE.some(([pk]) => pk === k))
+		...placeable().filter(([k]) => k !== 'all').map(([k]) => k),
+		...spheres.filter((k) => !placeable().some(([pk]) => pk === k))
 	]);
 
 	/**

@@ -152,6 +152,51 @@ export function createOrganization(fields) {
 	return pb.collection('organizations').create({ ...fields, owner: ownerId() });
 }
 
+/* ── Spheres ────────────────────────────────────────────────────────── */
+
+/** @typedef {{ id: string, name: string, hue: string }} SphereRow */
+
+/** A Chief's own spheres, in the order they were made. */
+export function listSpheres() {
+	return readOr(
+		async () => {
+			const rows = await pb
+				.collection('spheres')
+				.getFullList({ sort: 'created', filter: 'archived = null && retired = false' });
+			return rows.map((r) => ({ id: r.id, name: r.name, hue: r.hue ?? '' }));
+		},
+		() => [],
+		[]
+	);
+}
+
+/**
+ * @param {string} name
+ * @param {string} [hue]
+ * @returns {Promise<SphereRow>}
+ */
+export async function writeSphere(name, hue = '') {
+	const row = await pb
+		.collection('spheres')
+		.create({ name: name.trim(), hue, retired: false, owner: ownerId() });
+	return { id: row.id, name: row.name, hue: row.hue ?? '' };
+}
+
+/** @param {string} id @param {string} name */
+export async function renameSphere(id, name) {
+	const row = await pb.collection('spheres').update(id, { name: name.trim() });
+	return { id: row.id, name: row.name, hue: row.hue ?? '' };
+}
+
+/**
+ * Retired, not deleted: a sphere stops being offered without taking
+ * the jots, people and assets that name it with it.
+ * @param {string} id
+ */
+export function retireSphere(id) {
+	return pb.collection('spheres').update(id, { retired: true });
+}
+
 /* ── Jots ───────────────────────────────────────────────────────────── */
 
 /**
@@ -183,6 +228,19 @@ export function listJots() {
 		() => [],
 		[]
 	);
+}
+
+/**
+ * Place a jot in a sphere. An empty sphere means all life, which is a
+ * real answer rather than a blank, so it still counts as placed.
+ * @param {string} id
+ * @param {string} sphere  a sphere record id, or '' for all life
+ */
+export async function sphereJot(id, sphere) {
+	const row = await pb
+		.collection('jots')
+		.update(id, { sphere: sphere || null, sphered: new Date().toISOString() });
+	return { id: row.id, text: row.text, created: row.created, sphere: row.sphere ?? '' };
 }
 
 /**

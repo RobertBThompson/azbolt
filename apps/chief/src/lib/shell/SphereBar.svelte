@@ -7,13 +7,13 @@
 	 * band of every screen plus the leading slot in the app bar, in three
 	 * redundant channels.
 	 */
-	import { SPHERES } from '$lib/spheres.js';
+	import { sphereOf } from '$lib/spheres.svelte.js';
 	import { shell } from '$lib/state.svelte.js';
 	import Icon from '$lib/kit/Icon.svelte';
 
 	/** @type {{ search?: boolean, back?: string|null }} */
 	let { search = false, back = null } = $props();
-	const sphere = $derived(SPHERES[shell.sphere] ?? SPHERES.all);
+	const sphere = $derived(sphereOf(shell.sphere));
 </script>
 
 <div class="band" style="background:{sphere.swatch}"></div>

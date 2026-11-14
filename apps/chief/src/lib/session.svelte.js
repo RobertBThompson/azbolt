@@ -1,4 +1,5 @@
 import { pb } from './pb.js';
+import { rememberSphereFor } from './state.svelte.js';
 
 /**
  * Chief's session, mirrored out of the PocketBase auth store into runes.
@@ -18,10 +19,15 @@ class Session {
 
 	constructor() {
 		this.user = pb.authStore.record ?? null;
+		rememberSphereFor(this.user?.id ?? null);
 		// fireImmediately is false: the line above already did it, and
 		// calling back during construction would assign before `user` exists.
 		pb.authStore.onChange(() => {
 			this.user = pb.authStore.record ?? null;
+			/* Which sphere you are looking through is remembered per
+			   account, so signing in as someone else does not leave you
+			   in theirs. */
+			rememberSphereFor(this.user?.id ?? null);
 		});
 	}
 
