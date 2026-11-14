@@ -28,7 +28,9 @@
 
 	const cat = $derived($page.params.category ?? 'all');
 	const all = $derived(cat === 'all');
-	const inCat = $derived(activeAssets().filter((a) => all || a.category === cat));
+	const inCat = $derived(
+		activeAssets().filter((a) => all || (cat === 'none' ? !a.category : a.category === cat))
+	);
 
 	let q = $state('');
 	let show = $state($page.url.searchParams.get('show') === 'attention' ? 2 : 0);

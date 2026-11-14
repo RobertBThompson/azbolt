@@ -12,7 +12,7 @@
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Banner, Missing, Select, Field, Btn, Note } from '$lib/kit';
-	import { ORGS } from '$lib/data.js';
+	import { ORGS } from '$lib/assets.js';
 	import { page } from '$app/stores';
 	import { CASH_TYPES, EXPENSE_CATEGORIES, FREQUENCIES, direction, money } from '$lib/assets.js';
 	import { readAmount } from '$lib/amount.js';

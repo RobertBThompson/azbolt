@@ -8,7 +8,7 @@
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
 	import { PageHead, Tabs, Field, Select, Btn } from '$lib/kit';
-	import { ORGS } from '$lib/data.js';
+	import { ORGS } from '$lib/assets.js';
 	import { page } from '$app/stores';
 	import { LIABILITIES, LOAN_TYPES, activeAssets } from '$lib/assets.js';
 

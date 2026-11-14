@@ -15,9 +15,10 @@
 	 * answers for it without holding any of it, and that difference is
 	 * the point of recording the role at all.
 	 */
+	import { book } from '$lib/book.svelte.js';
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Alert, Blank, Btn, Row, SectionHead, SourceNote, Stats, Tabs } from '$lib/kit';
-	import { ORGS } from '$lib/data.js';
+	import { ORGS } from '$lib/assets.js';
 	import { page } from '$app/stores';
 	import {
 		ownershipLinks,
@@ -141,5 +142,5 @@
 
 	<Btn t="warm" href="/records/ownership/add" label="Add ownership link" />
 	<Btn primary={false} href="/records/ownership/tree" label="Ownership tree" />
-	<SourceNote source="fixture" />
+	<SourceNote source={book.source} error={book.error} />
 </Screen>

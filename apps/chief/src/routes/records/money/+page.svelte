@@ -15,6 +15,7 @@
 	 * same entries regroup by month or by cash type, each group with its
 	 * own subtotal.
 	 */
+	import { book } from '$lib/book.svelte.js';
 	import Screen from '$lib/shell/Screen.svelte';
 	import LensSwitch from '$lib/shell/LensSwitch.svelte';
 	import {
@@ -31,7 +32,7 @@
 		Blank,
 		SourceNote
 	} from '$lib/kit';
-	import { ORGS } from '$lib/data.js';
+	import { ORGS } from '$lib/assets.js';
 	import { page } from '$app/stores';
 	import { MONEY_LENSES } from '$lib/asset/money-lenses.js';
 	import {
@@ -168,7 +169,7 @@
 			Net is cash in minus cash out, counting only what has actually moved. It is not profit.
 			Receivable, projected, accrued and payable entries are listed, not counted.
 		</Note>
-		<SourceNote source="fixture" />
+		<SourceNote source={book.source} error={book.error} />
 	{/if}
 </Screen>
 

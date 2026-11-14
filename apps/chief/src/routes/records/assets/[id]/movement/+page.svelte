@@ -9,7 +9,7 @@
 	import { Alert, Row, Btn } from '$lib/kit';
 	import { page } from '$app/stores';
 	import { ASSETS, controllingOrgs } from '$lib/assets.js';
-	import { ORGS } from '$lib/data.js';
+	import { ORGS } from '$lib/assets.js';
 
 	const id = $derived($page.params.id ?? '');
 	const a = $derived(ASSETS[id]);

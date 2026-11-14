@@ -1,7 +1,10 @@
 import { linkOf } from '$lib/assets.js';
 import { mustExist } from '$lib/notfound.js';
 
-export function load({ params }) {
+export async function load({ params, parent }) {
+	// The book is opened by the Asset tab's layout; without waiting for
+	// it this would look the id up in whichever book was open before.
+	await parent();
 	mustExist(linkOf(params.id ?? ''), 'ownership link', '/records/ownership', 'All ownership');
 	return {};
 }

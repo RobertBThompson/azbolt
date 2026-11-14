@@ -402,3 +402,154 @@ export async function writeJot(text) {
 		sphered: row.sphered ?? ''
 	};
 }
+
+/* ── The asset book ─────────────────────────────────────────────────── */
+
+/**
+ * The categories a new account starts with: the lexicon's set. Written
+ * once, the first time the book is read, and the Chief's to rename,
+ * add to or retire from then on.
+ */
+const STARTING_CATEGORIES = [
+	'Real estate',
+	'Vehicle',
+	'Equipment',
+	'Cash account',
+	'Savings account',
+	'Investment',
+	'Stock',
+	'Copyright',
+	'Patent',
+	'Trademark',
+	'Contract',
+	'MOU',
+	'Company goodwill',
+	'Accounts receivable',
+	'Prepaid expense',
+	'Product',
+	'Services',
+	'Skills',
+	'Consulting',
+	'Labor',
+	'Inventory',
+	'Office space',
+	'Office supplies',
+	'Department'
+];
+
+/**
+ * @typedef {{ id: string, name: string }} CategoryRow
+ * @typedef {{ id: string, asset: string, amount: number, currency: string,
+ *             valued_on: string, note: string }} ValuationRow
+ * @typedef {{
+ *   categories: CategoryRow[],
+ *   assets: Record<string, any>[],
+ *   valuations: ValuationRow[],
+ *   organizations: OrgRow[]
+ * }} BookRows
+ */
+
+/**
+ * Everything the Asset tab is worked out from, read together so the
+ * figures on one screen cannot come from two different moments.
+ */
+export function readBook() {
+	return readOr(
+		async () => {
+			await selfOrganization();
+			const [categories, assets, valuations, organizations] = await Promise.all([
+				ownCategories(),
+				pb.collection('assets').getFullList({ sort: 'name', filter: 'archived = null' }),
+				pb.collection('valuations').getFullList({ sort: 'valued_on' }),
+				pb.collection('organizations').getFullList({ sort: 'name', filter: 'archived = null' })
+			]);
+			return /** @type {BookRows} */ ({
+				categories,
+				assets,
+				valuations: valuations.map((v) => ({
+					id: v.id,
+					asset: v.asset,
+					amount: v.amount ?? 0,
+					currency: v.currency || 'USD',
+					valued_on: v.valued_on,
+					note: v.note ?? ''
+				})),
+				organizations: organizations.map(organization)
+			});
+		},
+		() => /** @type {BookRows|null} */ (null),
+		/** @type {BookRows|null} */ ({ categories: [], assets: [], valuations: [], organizations: [] })
+	);
+}
+
+/** @returns {Promise<CategoryRow[]>} */
+async function ownCategories() {
+	const list = () => pb.collection('asset_categories').getFullList({ sort: 'name' });
+	let rows = await list();
+	if (rows.length === 0) {
+		// Never had any, archived ones included: a first visit. One at a
+		// time, and a clash is ignored — it means another tab got there.
+		for (const name of STARTING_CATEGORIES) {
+			try {
+				await pb.collection('asset_categories').create({ name, owner: ownerId() });
+			} catch {
+				/* already there */
+			}
+		}
+		rows = await list();
+	}
+	return rows.filter((r) => !r.archived).map((r) => ({ id: r.id, name: r.name }));
+}
+
+/** @param {string} name @returns {Promise<CategoryRow>} */
+export async function createCategory(name) {
+	const row = await pb
+		.collection('asset_categories')
+		.create({ name: name.trim(), owner: ownerId() });
+	return { id: row.id, name: row.name };
+}
+
+/**
+ * @param {{ name: string, category?: string }} fields
+ * @returns {Promise<string>} the new asset's id
+ */
+export async function createAsset(fields) {
+	const row = await pb.collection('assets').create({
+		name: fields.name.trim(),
+		category: fields.category || null,
+		quantity: 1,
+		units: 10_000,
+		valuation: 'whole',
+		owner: ownerId()
+	});
+	return row.id;
+}
+
+/**
+ * @param {string} id
+ * @param {Record<string, any>} fields
+ */
+export function updateAsset(id, fields) {
+	return pb.collection('assets').update(id, fields);
+}
+
+/**
+ * What an asset was worth on a day. Added, never edited over: the
+ * figure it replaces stays on the record as what was believed then.
+ * @param {string} asset
+ * @param {number} cents
+ * @param {string} day  YYYY-MM-DD
+ * @param {string} [note]
+ */
+export function addValuation(asset, cents, day, note = '') {
+	return pb.collection('valuations').create({
+		asset,
+		amount: cents,
+		currency: 'USD',
+		// Noon UTC, so the day is the same day in every time zone the
+		// Chief is likely to read it from.
+		valued_on: `${day} 12:00:00.000Z`,
+		note: note.trim(),
+		owner: ownerId()
+	});
+}

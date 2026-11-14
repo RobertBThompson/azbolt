@@ -24,7 +24,8 @@
 		Btn,
 		Blank
 	} from '$lib/kit';
-	import { ENDEAVORS, ORGS } from '$lib/data.js';
+	import { ENDEAVORS } from '$lib/data.js';
+	import { ORGS } from '$lib/assets.js';
 	import { page } from '$app/stores';
 	import {
 		ASSETS,
@@ -67,7 +68,10 @@
 
 <svelte:head><title>{a.name} · Chief</title></svelte:head>
 
-<Screen back="/records/assets/in/{a.category}" nav={false}>
+<Screen
+	back={a.category ? `/records/assets/in/${a.category}` : '/records/assets/in/all'}
+	nav={false}
+>
 	<PageHead eyebrow={categoryName(a.category)} title={a.name} meta={a.blurb} />
 	{#if marks.length}<Chips t="warm" items={marks} active={-1} />{/if}
 	<SphereTags keys={a.spheres} />

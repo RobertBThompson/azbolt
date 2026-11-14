@@ -1,4 +1,12 @@
-import { ORGS } from './data.js';
+import { ORGS as SAMPLE_ORGS } from './data.js';
+
+/**
+ * Organizations as the asset book sees them: the samples until an
+ * account's own book is opened, then that account's. Kept apart from
+ * the Directory's samples so opening a book cannot change those.
+ * @type {Record<string, any>}
+ */
+export const ORGS = { ...SAMPLE_ORGS };
 
 /**
  * The asset book — everything behind the Asset tab, in one place.
@@ -169,8 +177,13 @@ const CATEGORY_NAMES = [
 /** @type {{ id: string, name: string }[]} */
 export const ASSET_CATEGORIES = CATEGORY_NAMES.map((name) => ({ id: slug(name), name }));
 
-/** @param {string} id */
-export const categoryName = (id) => ASSET_CATEGORIES.find((c) => c.id === id)?.name ?? id;
+/**
+ * An asset can be saved before it is filed anywhere, so no category is
+ * an answer and is named as one.
+ * @param {string} id
+ */
+export const categoryName = (id) =>
+	id && id !== 'none' ? (ASSET_CATEGORIES.find((c) => c.id === id)?.name ?? id) : 'No category';
 
 /* ── Assets ─────────────────────────────────────────────────────────── */
 
@@ -590,8 +603,11 @@ export const isVerified = (a) => statuses(a).includes('Verified');
 /** Categories that hold something, with their count and sum, then the empty ones. */
 export function categorySummary() {
 	const assets = activeAssets();
-	const rows = ASSET_CATEGORIES.map((c) => {
-		const inIt = assets.filter((a) => a.category === c.id);
+	/* Unfiled assets get a row of their own, under the address `none`,
+	   so nothing on file is missing from the list of where things are. */
+	const unfiled = assets.some((a) => !a.category) ? [{ id: 'none', name: 'No category' }] : [];
+	const rows = [...ASSET_CATEGORIES, ...unfiled].map((c) => {
+		const inIt = assets.filter((a) => (c.id === 'none' ? !a.category : a.category === c.id));
 		return {
 			...c,
 			count: inIt.length,
@@ -924,7 +940,8 @@ const STALE_AFTER_DAYS = {
  * The age at which this kind of asset's value needs looking at again.
  * @param {string} category
  */
-export const staleAfter = (category) => STALE_AFTER_DAYS[category] ?? 365;
+export const staleAfter = (category) =>
+	STALE_AFTER_DAYS[category] ?? STALE_AFTER_DAYS[slug(categoryName(category))] ?? 365;
 
 /**
  * Shares in one asset that add up to more than the asset has.
@@ -1489,6 +1506,9 @@ const ONE_OFF = RAW_ONE_OFF.map((o) => ({ ...o, amount: dollars(o.amount) }));
  * @returns {Tx[]}
  */
 export function transactions(now = new Date()) {
+	/* Cash is not kept yet. An account's own book has none, rather than
+	   the samples' figures beside its real assets. */
+	if (open !== 'sample') return [];
 	const today = startOfDay(now);
 	const horizon = new Date(today.getTime() + 35 * DAY);
 	/** @type {Tx[]} */
@@ -1775,4 +1795,79 @@ export function valuedLine(a, now = new Date()) {
 	if (a.value === null) return 'No value recorded';
 	if (a.valuedDaysAgo === null) return money(a.value);
 	return `${money(a.value)} · reviewed ${inSentence(dayLabel(daysAgo(a.valuedDaysAgo, now), now))}`;
+}
+
+/* ── Which book is open ─────────────────────────────────────────────── */
+
+/**
+ * Every screen reads the same book, and there is one open at a time:
+ * the samples, or an account's own records. Opening one replaces the
+ * contents of the collections above in place, so every function here
+ * and every screen that imports them reads the new book without being
+ * told which it is.
+ *
+ * Screens are built after the book is opened — the Asset tab's layout
+ * waits for it — so nothing is drawn from one book and then left
+ * showing it after the other is opened.
+ */
+
+/** @type {'sample'|'own'} */
+let open = 'sample';
+
+/** Whether the figures on screen are the account's own. */
+export const ownBook = () => open === 'own';
+
+const SAMPLE_BOOK = {
+	assets: { ...ASSETS },
+	links: [...LINKS],
+	liabilities: { ...LIABILITIES },
+	orgs: { ...ORGS },
+	categories: [...ASSET_CATEGORIES],
+	events: [...EVENTS]
+};
+
+/**
+ * @template T
+ * @param {Record<string, T>} into
+ * @param {Record<string, T>} from
+ */
+function refill(into, from) {
+	for (const k of Object.keys(into)) delete into[k];
+	Object.assign(into, from);
+}
+
+/**
+ * @param {{
+ *   assets: Record<string, Asset>, links: Link[],
+ *   liabilities: Record<string, Liability>, orgs: Record<string, any>,
+ *   categories: { id: string, name: string }[],
+ *   events: { asset: string, type: string, detail: string, age: number }[]
+ * }} next
+ * @param {'sample'|'own'} which
+ */
+function fill(next, which) {
+	refill(ASSETS, next.assets);
+	refill(LIABILITIES, next.liabilities);
+	refill(ORGS, next.orgs);
+	LINKS.splice(0, LINKS.length, ...next.links);
+	ASSET_CATEGORIES.splice(0, ASSET_CATEGORIES.length, ...next.categories);
+	EVENTS.splice(0, EVENTS.length, ...next.events);
+	open = which;
+}
+
+/**
+ * Open an account's own book. Anything not kept yet — ownership,
+ * liabilities — is empty rather than borrowed from the samples.
+ * @param {{
+ *   assets: Record<string, Asset>, orgs: Record<string, any>,
+ *   categories: { id: string, name: string }[],
+ *   events: { asset: string, type: string, detail: string, age: number }[]
+ * }} own
+ */
+export function openOwnBook(own) {
+	fill({ ...own, links: [], liabilities: {} }, 'own');
+}
+
+export function openSampleBook() {
+	fill(SAMPLE_BOOK, 'sample');
 }

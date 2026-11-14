@@ -12,7 +12,7 @@
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Prog, Field, Select, Btn } from '$lib/kit';
-	import { ORGS } from '$lib/data.js';
+	import { ORGS } from '$lib/assets.js';
 	import { LOAN_TYPES, activeAssets } from '$lib/assets.js';
 
 	const orgs = Object.entries(ORGS).map(([key, o]) => ({ value: key, label: o.name }));

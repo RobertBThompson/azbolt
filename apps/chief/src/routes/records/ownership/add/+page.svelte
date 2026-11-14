@@ -11,7 +11,7 @@
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Banner, Select, Field, Btn, Note } from '$lib/kit';
-	import { ORGS } from '$lib/data.js';
+	import { ORGS } from '$lib/assets.js';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { OWNER_TYPES, activeAssets } from '$lib/assets.js';

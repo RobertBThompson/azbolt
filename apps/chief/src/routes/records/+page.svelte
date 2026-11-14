@@ -15,6 +15,7 @@
 	 * spheres replaced, and the sphere is already named at the top of the
 	 * screen.
 	 */
+	import { book } from '$lib/book.svelte.js';
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Blank, Btn, Row, SourceNote, Stats } from '$lib/kit';
 	import {
@@ -29,6 +30,7 @@
 		inSentence,
 		needingAttention,
 		netWorth,
+		ownBook,
 		owedTotal,
 		ownershipTree,
 		short,
@@ -46,7 +48,8 @@
 	const last = events()[0];
 
 	const assetsLine =
-		`${count} assets in ${categories} categories` + (attn ? ` · ${attn} need attention` : '');
+		`${count} ${count === 1 ? 'asset' : 'assets'} in ${categories} ${categories === 1 ? 'category' : 'categories'}` +
+		(attn ? ` · ${attn} ${attn === 1 ? 'needs' : 'need'} attention` : '');
 	const moneyLine =
 		`Net ${signed(net)} this month` +
 		(due ? ` · ${due.l.name.toLowerCase()} due ${inSentence(dayLabel(due.due))}` : '');
@@ -78,12 +81,19 @@
 		{#if unvalued || loose}
 			{[
 				unvalued ? `${unvalued} ${unvalued === 1 ? 'asset has' : 'assets have'} no value yet` : '',
-				loose ? `${loose} ${loose === 1 ? 'is' : 'are'} held by no organization` : ''
+				loose
+					? `${loose}${unvalued ? '' : loose === 1 ? ' asset' : ' assets'} ${loose === 1 ? 'is' : 'are'} held by no organization`
+					: ''
 			]
 				.filter(Boolean)
 				.join(', and ')}, so {unvalued + loose === 1 ? 'it is' : 'they are'} left out of net worth.
 		{/if}
-		Across every organization on file — your own is not a record yet, so no figure here is yours alone.
+		{#if ownBook()}
+			Net worth counts what an organization owns. Saying who owns what comes next, so until then it
+			reads nothing however much is on file.
+		{:else}
+			These are sample figures, across every sample organization.
+		{/if}
 	</Blank>
 	<Row
 		t="warm"
@@ -122,5 +132,5 @@
 		trailing="›"
 	/>
 	<Btn t="warm" href="/records/assets/new" label="Add asset" />
-	<SourceNote source="fixture" />
+	<SourceNote source={book.source} error={book.error} />
 </Screen>

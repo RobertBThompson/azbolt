@@ -8,10 +8,11 @@
 	 * either is flagged, because that is the half of the record that makes
 	 * it mean something.
 	 */
+	import { book } from '$lib/book.svelte.js';
 	import Screen from '$lib/shell/Screen.svelte';
 	import LensSwitch from '$lib/shell/LensSwitch.svelte';
 	import { Stats, Row, Btn, SectionHead, SourceNote, Blank } from '$lib/kit';
-	import { ORGS } from '$lib/data.js';
+	import { ORGS } from '$lib/assets.js';
 	import { MONEY_LENSES } from '$lib/asset/money-lenses.js';
 	import {
 		ASSETS,
@@ -74,5 +75,5 @@
 	{/each}
 
 	<Btn t="warm" href="/records/money/liabilities/new" label="Add liability" />
-	<SourceNote source="fixture" />
+	<SourceNote source={book.source} error={book.error} />
 </Screen>
