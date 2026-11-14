@@ -103,6 +103,19 @@ const EXPECTED = {
 		'archived',
 		'owner'
 	],
+	endeavors: ['name', 'outcome', 'organization', 'stage', 'archived', 'owner'],
+	tasks: [
+		'name',
+		'state',
+		'waiting_on',
+		'due',
+		'done_on',
+		'endeavor',
+		'from_jot',
+		'notes',
+		'archived',
+		'owner'
+	],
 	cash_entries: [
 		'label',
 		'organization',

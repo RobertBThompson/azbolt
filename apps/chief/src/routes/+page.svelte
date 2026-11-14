@@ -1,4 +1,6 @@
 <script>
+	import { inOrder, isLate, taskLine } from '$lib/work.js';
+	import { work, kept as tasksKept, open as openWork } from '$lib/work.svelte.js';
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Blank, Expander, Icon, Row, SourceNote, StateSwitch, Stats } from '$lib/kit';
 	import { jots, kept, load, retry, throwJot } from '$lib/jots.svelte.js';
@@ -14,6 +16,7 @@
 	   joins it without another round trip. */
 	$effect(() => {
 		if (!jots.loaded) load();
+		openWork();
 	});
 
 	const now = new Date();
@@ -23,6 +26,9 @@
 	const greetLast = $derived(greeting.slice(greeting.lastIndexOf(' ') + 1));
 	const weekday = now.toLocaleDateString(undefined, { weekday: 'long' });
 	const date = now.toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
+
+	const nowTasks = $derived(inOrder(work.tasks.filter((t) => t.state === 'Now')));
+	const lateTasks = $derived(inOrder(work.tasks.filter((t) => isLate(t))));
 
 	/**
 	 * What the second line says. It used to name an overdue task and two
@@ -171,21 +177,45 @@
 					{/if}
 				</Expander>
 
-				<Expander label="Task it" icon="task" t="warm" count={2} lede="Turn into action">
-					<Row
-						t="warm"
-						href="/work/tasks/carmen"
-						title="Talk to Carmen"
-						meta="Business · today 3:30 PM"
-						trailing="›"
-					/>
-					<Row
-						t="warm"
-						href="/work"
-						title="Call my daughter"
-						meta="Children · tonight 7:00 PM"
-						trailing="›"
-					/>
+				<Expander
+					label="Task it"
+					icon="task"
+					t="warm"
+					count={tasksKept() ? nowTasks.length : 2}
+					lede="Turn into action"
+				>
+					{#if tasksKept()}
+						<!-- What is to be done now, from the account's own tasks. -->
+						{#each nowTasks.slice(0, 4) as t (t.id)}
+							<Row
+								t={isLate(t) ? 'alert' : 'warm'}
+								href="/work/tasks/{t.id}"
+								title={t.name}
+								meta={taskLine(t, work.endeavors)}
+								trailing="›"
+							/>
+						{:else}
+							<Blank>Nothing to do now. Sphere a jot, then task it.</Blank>
+						{/each}
+						{#if nowTasks.length > 4}
+							<Row t="warm" href="/work" title="All {nowTasks.length} for now" trailing="›" />
+						{/if}
+					{:else}
+						<Row
+							t="warm"
+							href="/work/tasks/carmen"
+							title="Talk to Carmen"
+							meta="Business · today 3:30 PM"
+							trailing="›"
+						/>
+						<Row
+							t="warm"
+							href="/work"
+							title="Call my daughter"
+							meta="Children · tonight 7:00 PM"
+							trailing="›"
+						/>
+					{/if}
 				</Expander>
 			</div>
 		</div>
@@ -204,12 +234,27 @@
 			the two rows under them were appointments Chief does not hold.
 			What is left is what Chief can answer today.
 		-->
-		<Stats items={[[String(jots.list.length), 'To sphere']]} />
-
-		<Blank>
-			Tasks, dates and what is due are not saved yet, so there is nothing true to count beside your
-			jots.
-		</Blank>
+		{#if tasksKept()}
+			<Stats
+				items={[
+					[String(jots.list.length), 'To sphere'],
+					[String(nowTasks.length), 'To do now'],
+					[String(lateTasks.length), 'Late']
+				]}
+			/>
+			{#each lateTasks.slice(0, 3) as t (t.id)}
+				<Row
+					t="alert"
+					href="/work/tasks/{t.id}"
+					title={t.name}
+					meta={taskLine(t, work.endeavors)}
+					trailing="›"
+				/>
+			{/each}
+		{:else}
+			<Stats items={[[String(jots.list.length), 'To sphere']]} />
+			<Blank>Sign in and your own tasks are counted here beside your jots.</Blank>
+		{/if}
 
 		<Row
 			t="cool"

@@ -98,7 +98,7 @@
 		{#if fault}<Blank>{fault}</Blank>{/if}
 		<Btn t="warm" label={busy ? 'Saving…' : 'Sphere it'} onclick={keep} disabled={busy || !org} />
 		<Btn primary={false} href="/" label="Back to your jots" />
-		<Btn primary={false} href="/work/tasks/new" label="Task it" />
+		<Btn primary={false} href="/work/tasks/new?jot={id}" label="Task it" />
 	</div>
 
 	<Note>

@@ -1,4 +1,5 @@
 import { createPocketBase, pocketBaseReachable } from '@azbolt/lib/pocketbase';
+import { sampleWork } from './work.js';
 import { PEOPLE, ORGS } from './data.js';
 
 /**
@@ -729,4 +730,126 @@ export function createAssetEvent(asset, type, detail, day, cents = null) {
 		happened_on: `${day} 12:00:00.000Z`,
 		owner: ownerId()
 	});
+}
+
+/* ── Tasks and endeavors ────────────────────────────────────────────── */
+
+/** @param {Record<string, any>} r @returns {import('./work.js').Task} */
+function task(r) {
+	return {
+		id: r.id,
+		name: r.name ?? '',
+		state: r.state || 'Now',
+		waiting: r.waiting_on ?? '',
+		due: String(r.due ?? '').slice(0, 10),
+		doneOn: String(r.done_on ?? '').slice(0, 10),
+		endeavor: r.endeavor ?? '',
+		notes: r.notes ?? ''
+	};
+}
+
+/** @param {Record<string, any>} r @returns {import('./work.js').Endeavor} */
+function endeavor(r) {
+	return {
+		id: r.id,
+		name: r.name ?? '',
+		outcome: r.outcome ?? '',
+		organization: r.organization ?? '',
+		stage: r.stage || 'Active'
+	};
+}
+
+/**
+ * Everything the Action tab reads, together: tasks, the endeavors they
+ * go up to, and the organizations those belong to.
+ */
+export function readWork() {
+	return readOr(
+		async () => {
+			await selfOrganization();
+			const live = { filter: 'archived = null' };
+			const [tasks, endeavors, orgs] = await Promise.all([
+				pb.collection('tasks').getFullList({ sort: 'created', ...live }),
+				pb.collection('endeavors').getFullList({ sort: 'name', ...live }),
+				pb.collection('organizations').getFullList({ sort: 'name', ...live })
+			]);
+			return {
+				tasks: tasks.map(task),
+				endeavors: endeavors.map(endeavor),
+				orgs: orgs.map(organization)
+			};
+		},
+		() => sampleWork(),
+		{ tasks: [], endeavors: [], orgs: [] }
+	);
+}
+
+/** A day as PocketBase keeps it, or null for none. @param {string|undefined} day */
+const stamp = (day) => (day ? `${day} 12:00:00.000Z` : null);
+
+/** @param {Partial<import('./work.js').Task>} f */
+function taskBody(f) {
+	/** @type {Record<string, any>} */
+	const body = {};
+	if (f.name !== undefined) body.name = f.name.trim();
+	if (f.state !== undefined) body.state = f.state;
+	if (f.waiting !== undefined) body.waiting_on = f.waiting.trim();
+	if (f.due !== undefined) body.due = stamp(f.due);
+	if (f.doneOn !== undefined) body.done_on = stamp(f.doneOn);
+	if (f.endeavor !== undefined) body.endeavor = f.endeavor || null;
+	if (f.notes !== undefined) body.notes = f.notes.trim();
+	return body;
+}
+
+/**
+ * @param {Partial<import('./work.js').Task> & { name: string }} fields
+ * @param {string} [fromJot]  the jot this task was made from
+ */
+export async function createTask(fields, fromJot = '') {
+	return task(
+		await pb.collection('tasks').create({
+			state: 'Now',
+			...taskBody(fields),
+			from_jot: fromJot || null,
+			owner: ownerId()
+		})
+	);
+}
+
+/** @param {string} id @param {Partial<import('./work.js').Task>} fields */
+export async function updateTask(id, fields) {
+	return task(await pb.collection('tasks').update(id, taskBody(fields)));
+}
+
+/** @param {{ name: string, outcome: string, organization: string, stage: string }} f */
+export async function createEndeavor(f) {
+	return endeavor(
+		await pb.collection('endeavors').create({
+			name: f.name.trim(),
+			outcome: f.outcome.trim(),
+			organization: f.organization,
+			stage: f.stage,
+			owner: ownerId()
+		})
+	);
+}
+
+/**
+ * @param {string} id
+ * @param {Partial<{ name: string, outcome: string, organization: string, stage: string }>} f
+ */
+export async function updateEndeavor(id, f) {
+	return endeavor(await pb.collection('endeavors').update(id, f));
+}
+
+/**
+ * A jot that became a task has been dealt with, and leaves the queue.
+ * It goes under the task's organization when the task has one.
+ * @param {string} id
+ * @param {string} organization  an organization id, or '' for none yet
+ */
+export function taskJot(id, organization) {
+	return pb
+		.collection('jots')
+		.update(id, { organization: organization || null, sphered: new Date().toISOString() });
 }

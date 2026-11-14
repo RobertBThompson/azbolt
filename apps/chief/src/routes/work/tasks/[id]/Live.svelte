@@ -1,0 +1,159 @@
+<script>
+	/**
+	 * One of the account's own tasks.
+	 *
+	 * Read first, with the one thing most often done to a task — marking
+	 * it done — a single tap away. Everything else is behind Edit.
+	 */
+	import Screen from '$lib/shell/Screen.svelte';
+	import { Alert, Btn, Chips, PageHead, Row, SphereTags } from '$lib/kit';
+	import { goto } from '$app/navigation';
+	import { archive, updateTask } from '$lib/pb.js';
+	import { isLate, spheresOf, taskLine } from '$lib/work.js';
+	import { work, load, taskOf, endeavorOf, orgOf } from '$lib/work.svelte.js';
+	import TaskFields from '$lib/work/TaskFields.svelte';
+	import { today } from '$lib/today.js';
+
+	/** @type {{ id: string }} */
+	let { id } = $props();
+
+	/* Guarded in +page.js. Kept as it was on arrival so the screen does
+	   not empty in the moment between removing it and leaving. */
+	// svelte-ignore state_referenced_locally
+	const first = /** @type {import('$lib/work.js').Task} */ (taskOf(id));
+	const task = $derived(taskOf(id) ?? first);
+	const e = $derived(endeavorOf(task.endeavor));
+	const org = $derived(e ? orgOf(e.organization) : null);
+
+	let editing = $state(false);
+	let fields = $state({ name: '', state: 'Now', endeavor: '', due: '', waiting: '', notes: '' });
+	let busy = $state(false);
+	let fault = $state('');
+	let confirming = $state(false);
+
+	const tags = $derived(
+		[
+			task.state,
+			isLate(task) ? 'Late' : '',
+			task.waiting && task.state !== 'Done' ? `Waiting on ${task.waiting}` : ''
+		].filter(Boolean)
+	);
+
+	function edit() {
+		const { id: _id, doneOn: _done, ...rest } = task;
+		fields = rest;
+		fault = '';
+		editing = true;
+	}
+
+	/** @param {() => Promise<unknown>} change @param {string} [then] */
+	async function run(change, then) {
+		if (busy) return;
+		busy = true;
+		fault = '';
+		try {
+			await change();
+			await load();
+			editing = false;
+			if (then) await goto(then, { replaceState: true });
+		} catch (/** @type {any} */ err) {
+			fault = err?.message || 'The server did not answer.';
+		}
+		busy = false;
+	}
+
+	const save = () =>
+		run(() =>
+			updateTask(id, {
+				...fields,
+				// Done is dated the day it was marked, and undated if reopened.
+				doneOn: fields.state === 'Done' ? task.doneOn || today() : ''
+			})
+		);
+	const done = () => run(() => updateTask(id, { state: 'Done', doneOn: today() }));
+	const reopen = () => run(() => updateTask(id, { state: 'Now', doneOn: '' }));
+	const remove = () => run(() => archive('tasks', id), '/work');
+</script>
+
+<svelte:head><title>{task.name} · Chief</title></svelte:head>
+
+<Screen back="/work" nav={false}>
+	{#if editing}
+		<form
+			onsubmit={(ev) => {
+				ev.preventDefault();
+				save();
+			}}
+		>
+			<TaskFields bind:value={fields} />
+			{#if fault}<Alert title="Not saved" meta={fault} />{/if}
+			<Btn
+				t="cool"
+				type="submit"
+				label={busy ? 'Saving…' : 'Save changes'}
+				disabled={busy || !fields.name.trim()}
+			/>
+			<Btn primary={false} label="Cancel" onclick={() => (editing = false)} />
+		</form>
+	{:else}
+		<PageHead eyebrow="Task" title={task.name} meta={taskLine(task, [])} />
+		<Chips t="cool" items={tags} active={-1} />
+		{#if org}<SphereTags keys={spheresOf(e, work.orgs)} />{/if}
+
+		{#if e}
+			<Row
+				t="cool"
+				href="/work/endeavors/{e.id}"
+				title="Endeavor"
+				meta="{e.name} · {org?.name ?? 'no organization'}"
+				trailing="›"
+			/>
+		{:else}
+			<Row t="cool" title="Endeavor" meta="Not part of one, so it is in no sphere yet" />
+		{/if}
+		{#if task.notes}<p class="notes">{task.notes}</p>{/if}
+
+		{#if fault}<Alert title="Not saved" meta={fault} />{/if}
+		{#if task.state === 'Done'}
+			<Btn
+				t="cool"
+				label={busy ? 'Saving…' : 'Not done after all'}
+				onclick={reopen}
+				disabled={busy}
+			/>
+		{:else}
+			<Btn t="cool" label={busy ? 'Saving…' : 'Mark done'} onclick={done} disabled={busy} />
+		{/if}
+		<Btn primary={false} label="Edit" onclick={edit} />
+		{#if confirming}
+			<Alert
+				title="Remove this task?"
+				meta="For one entered by mistake. A finished task is marked done instead."
+			/>
+			<Btn t="alert" label="Yes, remove it" onclick={remove} disabled={busy} />
+			<Btn primary={false} label="Keep it" onclick={() => (confirming = false)} />
+		{:else}
+			<Btn primary={false} label="Remove" onclick={() => (confirming = true)} />
+		{/if}
+	{/if}
+</Screen>
+
+<style>
+	form {
+		display: flex;
+		flex-direction: column;
+		gap: 11px;
+	}
+	.notes {
+		margin: 0;
+		padding: 14px 16px;
+		border: 1px solid var(--glass-line);
+		border-radius: var(--r-md);
+		background: var(--glass);
+		box-shadow: var(--glass-shadow);
+		font-size: 15.5px;
+		line-height: 1.5;
+		color: var(--ink);
+		white-space: pre-wrap;
+	}
+</style>
