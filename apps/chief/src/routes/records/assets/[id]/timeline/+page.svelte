@@ -7,7 +7,7 @@
 	import Screen from '$lib/shell/Screen.svelte';
 	import { PageHead, Row, Btn, Blank } from '$lib/kit';
 	import { page } from '$app/stores';
-	import { ASSETS, events } from '$lib/assets.js';
+	import { ASSETS, events, ownBook } from '$lib/assets.js';
 
 	const id = $derived($page.params.id ?? '');
 	const a = $derived(ASSETS[id]);
@@ -18,10 +18,13 @@
 
 <Screen back="/records/assets/{id}" nav={false}>
 	<PageHead eyebrow={a.name} title="Timeline" />
-	{#each history as h (h.type + h.detail)}
+	{#each history as h, i (i)}
 		<Row t="warm" title={h.type} meta={h.detail} trailing={h.when} />
 	{:else}
 		<Blank>Nothing recorded yet.</Blank>
 	{/each}
+	{#if ownBook() && !a.letGo}
+		<Btn t="warm" href="/records/assets/{id}/record" label="Record what happened" />
+	{/if}
 	<Btn t="ai" primary={false} href="/" label="Jot a timeline update" />
 </Screen>

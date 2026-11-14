@@ -455,6 +455,7 @@ const STARTING_CATEGORIES = [
  *   ownerships: OwnershipRow[],
  *   liabilities: Record<string, any>[],
  *   cash: Record<string, any>[],
+ *   events: Record<string, any>[],
  *   organizations: OrgRow[]
  * }} BookRows
  */
@@ -468,7 +469,7 @@ export function readBook() {
 		async () => {
 			await selfOrganization();
 			const live = { filter: 'archived = null' };
-			const [categories, assets, valuations, ownerships, liabilities, cash, organizations] =
+			const [categories, assets, valuations, ownerships, liabilities, cash, events, organizations] =
 				await Promise.all([
 					ownCategories(),
 					pb.collection('assets').getFullList({ sort: 'name', filter: 'archived = null' }),
@@ -476,6 +477,7 @@ export function readBook() {
 					pb.collection('ownerships').getFullList({ sort: 'created', filter: 'archived = null' }),
 					pb.collection('liabilities').getFullList({ sort: 'name', ...live }),
 					pb.collection('cash_entries').getFullList({ sort: '-date', ...live }),
+					pb.collection('asset_events').getFullList({ sort: 'happened_on,created', ...live }),
 					pb.collection('organizations').getFullList({ sort: 'name', filter: 'archived = null' })
 				]);
 			return /** @type {BookRows} */ ({
@@ -492,6 +494,7 @@ export function readBook() {
 				ownerships: ownerships.map(ownership),
 				liabilities,
 				cash,
+				events,
 				organizations: organizations.map(organization)
 			});
 		},
@@ -503,6 +506,7 @@ export function readBook() {
 			ownerships: [],
 			liabilities: [],
 			cash: [],
+			events: [],
 			organizations: []
 		})
 	);
@@ -701,6 +705,28 @@ export function createCashEntry(e) {
 		currency: 'USD',
 		frequency: e.frequency,
 		date: `${e.day} 12:00:00.000Z`,
+		owner: ownerId()
+	});
+}
+
+/**
+ * A dated line in an asset's history. What the event changed is
+ * changed on the asset or its ownership by the caller; this records
+ * that it happened.
+ * @param {string} asset
+ * @param {'Acquired'|'Moved'|'Transferred'|'Upkeep'|'Let go'} type
+ * @param {string} detail
+ * @param {string} day  YYYY-MM-DD
+ * @param {number|null} [cents]
+ */
+export function createAssetEvent(asset, type, detail, day, cents = null) {
+	return pb.collection('asset_events').create({
+		asset,
+		type,
+		detail: detail.trim(),
+		amount: cents ?? 0,
+		currency: 'USD',
+		happened_on: `${day} 12:00:00.000Z`,
 		owner: ownerId()
 	});
 }

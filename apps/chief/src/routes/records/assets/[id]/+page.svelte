@@ -27,6 +27,9 @@
 	import { ENDEAVORS } from '$lib/data.js';
 	import { ORGS } from '$lib/assets.js';
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
+	import { reopenBook } from '$lib/book.svelte.js';
+	import { updateAsset } from '$lib/pb.js';
 	import {
 		ASSETS,
 		attention,
@@ -34,6 +37,7 @@
 		events,
 		money,
 		owedAgainst,
+		ownBook,
 		ownerLine,
 		ownersOf,
 		statuses,
@@ -55,6 +59,24 @@
 				? `/records/ownership?owned=${id}`
 				: `/records/ownership/add?owned=${id}`
 	);
+
+	let busy = $state(false);
+	let fault = $state('');
+
+	/* Letting go is a date on the record, so undoing a mistaken one is
+	   clearing it. The line in the timeline stays: it did get recorded. */
+	async function bringBack() {
+		busy = true;
+		fault = '';
+		try {
+			await updateAsset(id, { let_go: null });
+			await reopenBook();
+			await goto(`/records/assets/${id}/timeline`);
+		} catch (/** @type {any} */ err) {
+			fault = err?.message || 'The server did not answer.';
+			busy = false;
+		}
+	}
 
 	const facts = $derived([
 		{ label: 'Rights', value: a.rights || '—' },
@@ -78,6 +100,15 @@
 
 	{#if a.letGo}
 		<Banner title="Let go" meta="No longer held. The record and its history stay." />
+		{#if ownBook()}
+			{#if fault}<Alert title="Not saved" meta={fault} />{/if}
+			<Btn
+				primary={false}
+				label={busy ? 'Saving…' : 'It is still held — bring it back'}
+				onclick={bringBack}
+				disabled={busy}
+			/>
+		{/if}
 	{:else if why.length}
 		<Alert title="Needs attention" meta={why.join(' · ')} />
 	{/if}
@@ -151,7 +182,7 @@
 	{/each}
 
 	<SectionHead label="Timeline" t="warm" count={history.length} />
-	{#each history.slice(0, 3) as h (h.type + h.detail)}
+	{#each history.slice(0, 3) as h, i (i)}
 		<Row t="warm" title={h.type} meta={h.detail} trailing={h.when} />
 	{:else}
 		<Blank>Nothing recorded yet.</Blank>
@@ -160,5 +191,8 @@
 		<Btn primary={false} href="/records/assets/{id}/timeline" label="Whole timeline" />
 	{/if}
 
+	{#if ownBook() && !a.letGo}
+		<Btn t="warm" href="/records/assets/{id}/record" label="Record what happened" />
+	{/if}
 	<Btn t="ai" primary={false} href="/" label="Jot an asset update" />
 </Screen>

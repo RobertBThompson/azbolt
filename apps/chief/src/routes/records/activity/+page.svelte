@@ -32,7 +32,7 @@
 
 <Screen back="/records" nav={false}>
 	<Filter label="Kind of event" {items} bind:active={type} />
-	{#each list as e (e.asset + e.type + e.detail)}
+	{#each list as e, i (i)}
 		<Row
 			t="warm"
 			href="/records/assets/{e.asset}"

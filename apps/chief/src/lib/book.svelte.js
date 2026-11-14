@@ -95,7 +95,7 @@ function shape(rows) {
 			valuation: r.valuation === 'parts' ? 'parts' : 'whole',
 			letGo: !!r.let_go
 		};
-		for (const v of history) {
+		for (const v of [...history].reverse()) {
 			events.push({
 				asset: r.id,
 				type: 'Re-valued',
@@ -104,6 +104,21 @@ function shape(rows) {
 			});
 		}
 	}
+
+	/** @type {typeof events} */
+	const happened = [];
+	// Latest first, so that of two things on one day the one recorded
+	// last is read first.
+	for (const e of [...rows.events].reverse()) {
+		if (!assets[e.asset]) continue;
+		happened.push({
+			asset: e.asset,
+			type: e.type,
+			detail: e.detail || '',
+			age: daysSince(e.happened_on)
+		});
+	}
+	events.unshift(...happened);
 
 	/** @type {Record<string, any>} */
 	const orgs = {};

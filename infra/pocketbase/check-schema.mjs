@@ -93,6 +93,16 @@ const EXPECTED = {
 		'archived',
 		'owner'
 	],
+	asset_events: [
+		'asset',
+		'type',
+		'detail',
+		'amount',
+		'currency',
+		'happened_on',
+		'archived',
+		'owner'
+	],
 	cash_entries: [
 		'label',
 		'organization',
