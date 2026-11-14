@@ -44,7 +44,7 @@ function shape(row) {
 	return {
 		id: row.id,
 		text: row.text,
-		meta: `Untitled · all life · ${at}`,
+		meta: `Not filed yet · ${at}`,
 		thrown: at,
 		state: 'kept',
 		fault: ''
@@ -101,16 +101,16 @@ async function send(tempId, body) {
 }
 
 /**
- * Place a jot in a sphere, which takes it out of the queue.
+ * File a jot under an organization, which takes it out of the queue.
  *
  * Signed out there is nothing to write to, so the jot leaves the queue
  * for this session and goes with it — the same bargain the composer
  * already stated.
  * @param {string} id
- * @param {string} sphere  a sphere record id, or '' for all life
+ * @param {string} organization  an organization record id
  */
-export async function place(id, sphere) {
-	if (kept()) await sphereJot(id, sphere);
+export async function place(id, organization) {
+	if (kept()) await sphereJot(id, organization);
 	jots.list = jots.list.filter((j) => j.id !== id);
 }
 

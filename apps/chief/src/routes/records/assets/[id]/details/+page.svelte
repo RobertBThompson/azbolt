@@ -5,7 +5,7 @@
 	 * the name optional, filled from what the record already holds.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Alert, PageHead, Btn, Field, Select, SectionHead, SpherePick } from '$lib/kit';
+	import { Alert, PageHead, Btn, Field, Select } from '$lib/kit';
 	import AttributeFields from '$lib/asset/AttributeFields.svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -21,7 +21,6 @@
 	let name = $state(a.name);
 	let category = $state(a.category);
 	let blurb = $state(a.blurb);
-	let spheres = $state([...a.spheres]);
 	let rights = $state(a.rights);
 	let period = $state(a.period);
 	let quantity = $state(String(a.quantity));
@@ -46,7 +45,6 @@
 				name: name.trim(),
 				category: category || null,
 				blurb: blurb.trim(),
-				spheres,
 				rights,
 				period: period.trim(),
 				quantity: count,
@@ -85,8 +83,6 @@
 		<Field label="Asset name" bind:value={name} required />
 		<Select label="Category" options={categories} bind:value={category} placeholder="No category" />
 		<Field label="In a few words" placeholder="Optional" bind:value={blurb} />
-		<SectionHead label="Spheres" t="warm" count={spheres.length} />
-		<SpherePick picked={spheres} onchange={(next) => (spheres = next)} />
 	{/if}
 	<AttributeFields
 		bind:rights

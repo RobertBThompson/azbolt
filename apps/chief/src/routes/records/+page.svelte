@@ -29,7 +29,9 @@
 		events,
 		inSentence,
 		needingAttention,
+		ORGS,
 		netWorth,
+		netWorthOf,
 		ownBook,
 		owedTotal,
 		ownershipTree,
@@ -38,6 +40,11 @@
 		upcomingPayment,
 		valueSummary
 	} from '$lib/assets.js';
+
+	/* Decision 2 and 3: a figure belongs to an organization, and yours
+	   is your own organization's. The samples have no "you", so they
+	   show the total across the tops of every chain instead. */
+	const mine = Object.entries(ORGS).find(([, o]) => o.self)?.[0] ?? null;
 
 	const count = activeAssets().length;
 	const categories = categorySummary().used.length;
@@ -70,7 +77,7 @@
 		items={[
 			[short(assetValue()), 'Asset value'],
 			[short(owedTotal()), 'Liabilities'],
-			[short(netWorth()), 'Net worth']
+			[short(mine ? netWorthOf(mine) : netWorth()), mine ? 'Your net worth' : 'Net worth']
 		]}
 	/>
 	<!--
@@ -89,8 +96,8 @@
 				.join(', and ')}, so {unvalued + loose === 1 ? 'it is' : 'they are'} left out of net worth.
 		{/if}
 		{#if ownBook()}
-			Net worth counts what an organization owns. Saying who owns what comes next, so until then it
-			reads nothing however much is on file.
+			Your net worth is what your own organization holds: its share of each thing, and its share of
+			what the organizations it owns are worth.
 		{:else}
 			These are sample figures, across every sample organization.
 		{/if}

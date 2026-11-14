@@ -17,6 +17,10 @@
  * car is worth. One marked `parts` is worth the sum of the assets that
  * name it as their parent — a collection, or a car being broken up.
  *
+ * An asset names no sphere. It belongs to the organizations that own
+ * it, and they are in spheres; saying it twice would let the two
+ * disagree.
+ *
  * `let_go` is a date, not a deletion. Something sold or given away
  * keeps its record and its history.
  */
@@ -33,7 +37,6 @@ migrate(
 /** @param {any} app */
 function create(app) {
 	const users = app.findCollectionByNameOrId('users');
-	const spheres = app.findCollectionByNameOrId('spheres');
 	const categories = app.findCollectionByNameOrId('asset_categories');
 	const collection = new Collection({
 		name: 'assets',
@@ -63,13 +66,6 @@ function create(app) {
 			{ name: 'notes', type: 'text', max: 2000 },
 			{ name: 'units', type: 'number', onlyInt: true, min: 1 },
 			{ name: 'valuation', type: 'select', maxSelect: 1, values: ['whole', 'parts'] },
-			{
-				name: 'spheres',
-				type: 'relation',
-				maxSelect: 20,
-				cascadeDelete: false,
-				collectionId: spheres.id
-			},
 			{ name: 'let_go', type: 'date' },
 			{ name: 'archived', type: 'date' },
 			{

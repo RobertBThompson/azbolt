@@ -41,7 +41,7 @@ const EXPECTED = {
 		'archived',
 		'owner'
 	],
-	jots: ['text', 'sphere', 'sphered', 'people', 'archived', 'owner'],
+	jots: ['text', 'organization', 'sphered', 'people', 'archived', 'owner'],
 	asset_categories: ['name', 'archived', 'owner'],
 	assets: [
 		'name',
@@ -58,12 +58,22 @@ const EXPECTED = {
 		'units',
 		'valuation',
 		'parent',
-		'spheres',
 		'let_go',
 		'archived',
 		'owner'
 	],
-	valuations: ['asset', 'amount', 'currency', 'valued_on', 'note', 'owner']
+	valuations: ['asset', 'amount', 'currency', 'valued_on', 'note', 'owner'],
+	ownerships: [
+		'holder_org',
+		'holder_asset',
+		'held_org',
+		'held_asset',
+		'role',
+		'units',
+		'since',
+		'archived',
+		'owner'
+	]
 };
 
 /** Every collection holding a person's records is owner-scoped, all five ways. */

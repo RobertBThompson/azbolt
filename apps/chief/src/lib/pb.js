@@ -344,13 +344,13 @@ export function retireSphere(id) {
 
 /**
  * @typedef {{ id: string, text: string, created: string,
- *             sphere: string, sphered: string }} JotRow
+ *             organization: string, sphered: string }} JotRow
  */
 
 /**
  * Jots still waiting to be placed, newest first.
  *
- * Only the unplaced ones: a jot that has been given a sphere has left
+ * Only the unplaced ones: a jot filed under an organization has left
  * the queue, which is the whole of what Sphere it does.
  */
 export function listJots() {
@@ -364,7 +364,7 @@ export function listJots() {
 				id: r.id,
 				text: r.text,
 				created: r.created,
-				sphere: r.sphere ?? '',
+				organization: r.organization ?? '',
 				sphered: r.sphered ?? ''
 			}));
 		},
@@ -374,16 +374,19 @@ export function listJots() {
 }
 
 /**
- * Place a jot in a sphere. An empty sphere means all life, which is a
- * real answer rather than a blank, so it still counts as placed.
+ * Sphere a jot: file it under the organization it belongs to.
+ *
+ * A jot names no sphere of its own. The organization is in spheres,
+ * and the jot is wherever its organization is — so renaming a sphere,
+ * or moving an organization between them, never leaves a jot behind.
  * @param {string} id
- * @param {string} sphere  a sphere record id, or '' for all life
+ * @param {string} organization  an organization record id
  */
-export async function sphereJot(id, sphere) {
+export async function sphereJot(id, organization) {
 	const row = await pb
 		.collection('jots')
-		.update(id, { sphere: sphere || null, sphered: new Date().toISOString() });
-	return { id: row.id, text: row.text, created: row.created, sphere: row.sphere ?? '' };
+		.update(id, { organization, sphered: new Date().toISOString() });
+	return { id: row.id, text: row.text, created: row.created };
 }
 
 /**
@@ -398,7 +401,7 @@ export async function writeJot(text) {
 		id: row.id,
 		text: row.text,
 		created: row.created,
-		sphere: row.sphere ?? '',
+		organization: row.organization ?? '',
 		sphered: row.sphered ?? ''
 	};
 }
@@ -441,10 +444,15 @@ const STARTING_CATEGORIES = [
  * @typedef {{ id: string, name: string }} CategoryRow
  * @typedef {{ id: string, asset: string, amount: number, currency: string,
  *             valued_on: string, note: string }} ValuationRow
+ * @typedef {{ id: string, holder: { cls: 'organization'|'asset', id: string },
+ *             held: { cls: 'organization'|'asset', id: string },
+ *             role: 'Owner'|'Manager'|'Guarantor', units: number|null,
+ *             since: string }} OwnershipRow
  * @typedef {{
  *   categories: CategoryRow[],
  *   assets: Record<string, any>[],
  *   valuations: ValuationRow[],
+ *   ownerships: OwnershipRow[],
  *   organizations: OrgRow[]
  * }} BookRows
  */
@@ -457,10 +465,11 @@ export function readBook() {
 	return readOr(
 		async () => {
 			await selfOrganization();
-			const [categories, assets, valuations, organizations] = await Promise.all([
+			const [categories, assets, valuations, ownerships, organizations] = await Promise.all([
 				ownCategories(),
 				pb.collection('assets').getFullList({ sort: 'name', filter: 'archived = null' }),
 				pb.collection('valuations').getFullList({ sort: 'valued_on' }),
+				pb.collection('ownerships').getFullList({ sort: 'created', filter: 'archived = null' }),
 				pb.collection('organizations').getFullList({ sort: 'name', filter: 'archived = null' })
 			]);
 			return /** @type {BookRows} */ ({
@@ -474,11 +483,18 @@ export function readBook() {
 					valued_on: v.valued_on,
 					note: v.note ?? ''
 				})),
+				ownerships: ownerships.map(ownership),
 				organizations: organizations.map(organization)
 			});
 		},
 		() => /** @type {BookRows|null} */ (null),
-		/** @type {BookRows|null} */ ({ categories: [], assets: [], valuations: [], organizations: [] })
+		/** @type {BookRows|null} */ ({
+			categories: [],
+			assets: [],
+			valuations: [],
+			ownerships: [],
+			organizations: []
+		})
 	);
 }
 
@@ -551,5 +567,58 @@ export function addValuation(asset, cents, day, note = '') {
 		valued_on: `${day} 12:00:00.000Z`,
 		note: note.trim(),
 		owner: ownerId()
+	});
+}
+
+/** @param {Record<string, any>} r @returns {OwnershipRow} */
+function ownership(r) {
+	return {
+		id: r.id,
+		holder: r.holder_org
+			? { cls: 'organization', id: r.holder_org }
+			: { cls: 'asset', id: r.holder_asset },
+		held: r.held_org ? { cls: 'organization', id: r.held_org } : { cls: 'asset', id: r.held_asset },
+		role: r.role,
+		// Only an owner holds a share. Zero units on anyone else is the
+		// number field's way of saying none.
+		units: r.role === 'Owner' ? (r.units ?? 0) : null,
+		since: r.since || r.created || ''
+	};
+}
+
+/**
+ * @param {{ cls: 'organization'|'asset', id: string }} holder
+ * @param {{ cls: 'organization'|'asset', id: string }} held
+ * @param {'Owner'|'Manager'|'Guarantor'} role
+ * @param {number|null} units  the share, for an owner
+ * @param {string} day  YYYY-MM-DD it began
+ * @returns {Promise<string>} the new link's id
+ */
+export async function createOwnership(holder, held, role, units, day) {
+	const row = await pb.collection('ownerships').create({
+		holder_org: holder.cls === 'organization' ? holder.id : null,
+		holder_asset: holder.cls === 'asset' ? holder.id : null,
+		held_org: held.cls === 'organization' ? held.id : null,
+		held_asset: held.cls === 'asset' ? held.id : null,
+		role,
+		units: role === 'Owner' ? (units ?? 0) : 0,
+		since: `${day} 12:00:00.000Z`,
+		owner: ownerId()
+	});
+	return row.id;
+}
+
+/**
+ * The two ends are fixed; a different holder is a different link.
+ * @param {string} id
+ * @param {'Owner'|'Manager'|'Guarantor'} role
+ * @param {number|null} units
+ * @param {string} day
+ */
+export function updateOwnership(id, role, units, day) {
+	return pb.collection('ownerships').update(id, {
+		role,
+		units: role === 'Owner' ? (units ?? 0) : 0,
+		since: `${day} 12:00:00.000Z`
 	});
 }

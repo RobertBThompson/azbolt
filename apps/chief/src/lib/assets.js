@@ -630,7 +630,8 @@ export function categorySummary() {
  * @typedef {{
  *   id: string, owner: Node, owned: Node, role: OwnerType,
  *   units: number|null, startValue: number|null, currentValue: number|null,
- *   disposable: number|null, since: string, claims: number
+ *   disposable: number|null, since: string, claims: number,
+ *   day?: string
  * }} Link
  */
 
@@ -1856,16 +1857,16 @@ function fill(next, which) {
 }
 
 /**
- * Open an account's own book. Anything not kept yet — ownership,
- * liabilities — is empty rather than borrowed from the samples.
+ * Open an account's own book. Anything not kept yet — liabilities,
+ * cash — is empty rather than borrowed from the samples.
  * @param {{
- *   assets: Record<string, Asset>, orgs: Record<string, any>,
+ *   assets: Record<string, Asset>, links: Link[], orgs: Record<string, any>,
  *   categories: { id: string, name: string }[],
  *   events: { asset: string, type: string, detail: string, age: number }[]
  * }} own
  */
 export function openOwnBook(own) {
-	fill({ ...own, links: [], liabilities: {} }, 'own');
+	fill({ ...own, liabilities: {} }, 'own');
 }
 
 export function openSampleBook() {

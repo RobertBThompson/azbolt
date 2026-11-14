@@ -7,7 +7,7 @@
  * so; it never falls back to the samples, which would look like
  * somebody's real figures.
  */
-import { openOwnBook, openSampleBook } from './assets.js';
+import { controllingOrgs, openOwnBook, openSampleBook, SHARE_UNITS } from './assets.js';
 import { pb, readBook } from './pb.js';
 
 const DAY = 86_400_000;
@@ -47,6 +47,15 @@ const daysSince = (stamp) =>
 const dollarsOf = (cents) =>
 	(cents / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 
+/** @param {string} stamp */
+const monthOf = (stamp) =>
+	stamp
+		? new Date(stamp.replace(' ', 'T')).toLocaleDateString('en-US', {
+				month: 'long',
+				year: 'numeric'
+			})
+		: '';
+
 /** @param {import('./pb.js').BookRows} rows */
 function shape(rows) {
 	/** @type {Record<string, import('./pb.js').ValuationRow[]>} */
@@ -73,7 +82,8 @@ function shape(rows) {
 			liquidity: r.liquidity || 'Not liquid',
 			inventory: r.inventory || 'Not inventory',
 			notes: r.notes ?? '',
-			spheres: Array.isArray(r.spheres) ? r.spheres : [],
+			// Filled in below, from whoever owns it.
+			spheres: [],
 			claims: [],
 			endeavors: [],
 			storage: r.storage ?? '',
@@ -98,5 +108,36 @@ function shape(rows) {
 		orgs[o.id] = { ...o, members: [], rights: [], stewardship: [], controlledBy: null };
 	}
 
-	return { assets, orgs, categories: rows.categories, events };
+	/** @type {import('./assets.js').Link[]} */
+	const links = [];
+	for (const o of rows.ownerships) {
+		// A link to something since removed says nothing, so it is left out.
+		const there = (/** @type {typeof o.holder} */ n) =>
+			n.cls === 'asset' ? !!assets[n.id] : !!orgs[n.id];
+		if (!there(o.holder) || !there(o.held)) continue;
+		const a = o.held.cls === 'asset' ? assets[o.held.id] : null;
+		const share = o.units === null || !a ? null : o.units / (a.units ?? SHARE_UNITS);
+		const worth = a?.value == null || share === null ? null : Math.round(a.value * share);
+		links.push({
+			id: o.id,
+			owner: o.holder,
+			owned: o.held,
+			role: o.role,
+			units: o.units,
+			startValue: null,
+			currentValue: o.role === 'Owner' ? worth : null,
+			disposable: a?.liquidity === 'Liquid' && o.role === 'Owner' ? worth : null,
+			since: monthOf(o.since),
+			day: o.since.slice(0, 10),
+			claims: 0
+		});
+	}
+
+	/* An asset is in the spheres of the organizations it ends up with.
+	   It names none itself, so there is one place to change them. */
+	for (const [id, a] of Object.entries(assets)) {
+		a.spheres = [...new Set(controllingOrgs(id, links).flatMap((org) => orgs[org]?.spheres ?? []))];
+	}
+
+	return { assets, links, orgs, categories: rows.categories, events };
 }

@@ -2,14 +2,15 @@
 	/**
 	 * F2 Capture — Sphere It.
 	 *
-	 * The second of a jot's three stages. Everything here is optional and
-	 * nothing blocks: a jot that leaves with no sphere is still a jot, and
-	 * stays in the queue rather than being lost or nagged about.
+	 * The second of a jot's three stages, and one choice: which
+	 * organization this belongs to. That is what puts it in a sphere.
+	 * A jot names no sphere itself — the organization is in spheres, and
+	 * the jot is wherever its organization is. So a sphere renamed, or
+	 * an organization moved between spheres, is changed in one place and
+	 * every jot under it follows.
 	 *
-	 * Order matters. Sphere first, because it narrows everything under it
-	 * — once a jot belongs to Azbolt, the people and assets worth
-	 * offering are Azbolt's. People and assets then attach inside that
-	 * narrowing rather than from the whole directory.
+	 * Your own organization leads the list, because most of what a
+	 * person jots is their own business.
 	 *
 	 * Task It is offered at the end as a choice, not a step. Most jots
 	 * are a record of something, not a commitment to do it, and promoting
@@ -19,50 +20,41 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Blank, Btn, Note, Row, SectionHead } from '$lib/kit';
-	import { placeable } from '$lib/spheres.svelte.js';
-	import { PEOPLE, ORGS } from '$lib/data.js';
-	import { jotOf, place } from '$lib/jots.svelte.js';
-	import { activeAssets } from '$lib/assets.js';
+	import { Blank, Btn, Note, SectionHead, SourceNote, SphereTags, TypeBadge } from '$lib/kit';
+	import { jotOf, kept, place } from '$lib/jots.svelte.js';
 
-	const id = $derived($page.params.id ?? '');
-	const jot = $derived(/** @type {NonNullable<ReturnType<typeof jotOf>>} */ (jotOf(id)));
+	let { data } = $props();
 
-	/**
-	 * A jot is in All life until it is told otherwise. That is a real
-	 * placement, not an empty one, so there is nothing to clear and
-	 * nothing to warn about.
-	 */
-	let sphere = $state('all');
-	/** @type {string[]} */
-	let who = $state([]);
-	/** @type {string[]} */
-	let assets = $state([]);
+	const id = $page.params.id ?? '';
+	/* Read once. Sphering the jot takes it out of the queue a moment
+	   before this screen is left, and the words must not vanish — or
+	   fail — in that moment. */
+	const found = /** @type {NonNullable<ReturnType<typeof jotOf>>} */ (jotOf(id));
+	const jot = { text: found.text, thrown: found.thrown };
+	const orgs = $derived(data.orgs.data);
+
+	/** Yours until told otherwise. */
+	let org = $state('');
+	$effect(() => {
+		if (!org) org = orgs.find((o) => o.self)?.id ?? '';
+	});
+	const chosen = $derived(orgs.find((o) => o.id === org) ?? null);
 
 	let busy = $state(false);
 	let fault = $state('');
 
-	/* All life is stored as no sphere at all: the default is a real
-	   answer, and a row in the table for "everywhere" would be a second
-	   way to say the same thing. */
 	async function keep() {
+		if (!org) return;
 		busy = true;
 		fault = '';
 		try {
-			await place(id, sphere === 'all' ? '' : sphere);
+			await place(id, org);
 			goto('/');
 		} catch (/** @type {any} */ err) {
 			fault = err?.message || 'The server did not answer.';
 			busy = false;
 		}
 	}
-
-	/** @param {string[]} list @param {string} key */
-	function toggle(list, key) {
-		return list.includes(key) ? list.filter((k) => k !== key) : [...list, key];
-	}
-
-	const attached = $derived(who.length + assets.length);
 </script>
 
 <svelte:head><title>Sphere it · Chief</title></svelte:head>
@@ -73,79 +65,49 @@
 		<span class="said">Your words, kept exactly · thrown {jot.thrown}</span>
 	</blockquote>
 
-	<SectionHead label="Select sphere" t="warm" />
-	<div class="grid">
-		{#each placeable() as [key, sph] (key)}
+	<SectionHead label="Which organization is it for" t="warm" />
+	<div class="orgs">
+		{#each orgs as o (o.id)}
 			<button
 				type="button"
 				class="pick"
-				class:on={sphere === key}
-				aria-pressed={sphere === key}
-				onclick={() => (sphere = key)}
+				class:on={org === o.id}
+				aria-pressed={org === o.id}
+				onclick={() => (org = o.id)}
 			>
-				<span class="swatch" style="background:{sph.swatch}"></span>
-				<span class="nm">{sph.name}</span>
+				<span class="top">
+					<TypeBadge code={o.code} showName={false} />
+					<span class="nm">{o.name}</span>
+					{#if o.self}<span class="you">You</span>{/if}
+				</span>
+				{#if o.spheres.length}<SphereTags keys={o.spheres} size="sm" />{/if}
 			</button>
 		{/each}
 	</div>
-
-	<SectionHead label="Any people or organizations" t="cool" />
-	<div class="grid">
-		{#each Object.entries(PEOPLE) as [key, p] (key)}
-			<button
-				type="button"
-				class="pick"
-				class:on={who.includes(key)}
-				aria-pressed={who.includes(key)}
-				onclick={() => (who = toggle(who, key))}
-			>
-				<span class="nm">{p.name}</span>
-			</button>
-		{/each}
-		{#each Object.entries(ORGS) as [key, o] (key)}
-			<button
-				type="button"
-				class="pick"
-				class:on={who.includes(key)}
-				aria-pressed={who.includes(key)}
-				onclick={() => (who = toggle(who, key))}
-			>
-				<span class="nm">{o.name}</span>
-			</button>
-		{/each}
-	</div>
-
-	<SectionHead label="Any assets" t="cool" />
-	<div class="grid">
-		{#each activeAssets() as a (a.id)}
-			<button
-				type="button"
-				class="pick"
-				class:on={assets.includes(a.id)}
-				aria-pressed={assets.includes(a.id)}
-				onclick={() => (assets = toggle(assets, a.id))}
-			>
-				<span class="nm">{a.name}</span>
-			</button>
-		{/each}
-	</div>
+	{#if data.orgs.source !== 'live'}
+		<SourceNote source={data.orgs.source} error={data.orgs.error} />
+	{/if}
 
 	<div class="done">
+		{#if chosen && chosen.spheres.length === 0}
+			<Blank>
+				{chosen.name} is in no sphere yet, so this will show under All life only. Put the organization
+				in a sphere from its own page and this follows it there.
+			</Blank>
+		{/if}
 		{#if fault}<Blank>{fault}</Blank>{/if}
-		<Btn
-			t="warm"
-			label={busy ? 'Saving…' : sphere === 'all' ? 'Keep it in all life' : 'Sphere it'}
-			onclick={keep}
-			disabled={busy}
-		/>
+		<Btn t="warm" label={busy ? 'Saving…' : 'Sphere it'} onclick={keep} disabled={busy || !org} />
 		<Btn primary={false} href="/" label="Back to your jots" />
 		<Btn primary={false} href="/work/tasks/new" label="Task it" />
 	</div>
 
 	<Note>
-		{attached === 0
-			? 'Nothing attached yet. All life is a real answer, not a blank — a jot can stay there.'
-			: `${attached} attached. Everything here is optional and can change later.`}
+		{#if kept()}
+			A jot goes under an organization, and the organization is what sits in a sphere. Change the
+			organization's spheres and everything filed under it moves with it.
+		{:else}
+			You are not signed in, so this is not kept: the jot leaves the list for this visit only.
+		{/if}
 	</Note>
 </Screen>
 
@@ -174,18 +136,20 @@
 		color: var(--ink-3);
 		font-weight: 600;
 	}
-	.grid {
+	.orgs {
 		display: flex;
-		flex-wrap: wrap;
+		flex-direction: column;
 		gap: 9px;
 	}
 	.pick {
 		display: flex;
-		align-items: center;
+		flex-direction: column;
+		align-items: stretch;
 		gap: 7px;
 		min-height: var(--tap-min);
-		padding: 0 16px;
-		border-radius: 999px;
+		padding: 11px 16px;
+		text-align: left;
+		border-radius: var(--r-md);
 		border: 1px solid var(--glass-line);
 		background: var(--glass);
 		font-family: inherit;
@@ -210,17 +174,22 @@
 			0 0 0 3px color-mix(in srgb, var(--tone-clay) 18%, transparent),
 			0 8px 16px -8px color-mix(in srgb, var(--tone-clay) 70%, transparent);
 	}
-	.swatch {
-		width: 12px;
-		height: 12px;
-		border-radius: 50%;
-		flex: none;
-		box-shadow:
-			inset 0 1px 1px rgba(255, 255, 255, 0.55),
-			0 1px 3px rgba(30, 20, 90, 0.35);
+	.top {
+		display: flex;
+		align-items: center;
+		gap: 8px;
 	}
 	.nm {
-		white-space: nowrap;
+		font-family: var(--font-display);
+		font-size: 17px;
+	}
+	.you {
+		margin-left: auto;
+		font-family: var(--font-label);
+		font-size: 13px;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		color: var(--ink-3);
 	}
 	.done {
 		display: flex;
