@@ -13,6 +13,7 @@ import {
 	SHARE_UNITS,
 	attention,
 	cashLines,
+	cashTotals,
 	dollars,
 	effectiveValue,
 	money,
@@ -20,6 +21,7 @@ import {
 	netWorthOf,
 	nextDue,
 	overSoldAssets,
+	ownTransactions,
 	runway,
 	sharePercent,
 	short,
@@ -27,6 +29,7 @@ import {
 	staleAfter,
 	sumValue,
 	valueSummary,
+	txAmount,
 	worthByOrganization
 } from './assets.js';
 
@@ -307,4 +310,78 @@ test('a bank balance goes stale long before a house does', () => {
 	});
 	assert.ok(attention('cash', b).some((w) => w.startsWith('Valued')));
 	assert.deepEqual(attention('house', b), []);
+});
+
+/* ── An account's own cash ──────────────────────────────────────────── */
+
+/** @param {Partial<import('./assets.js').Tx>} over @returns {import('./assets.js').Tx} */
+const entry = (over) => ({
+	id: 'e1',
+	label: 'Rent',
+	org: 'me',
+	type: 'Actual Expense',
+	category: 'Mortgages, leases',
+	amount: 120000,
+	frequency: 'Once',
+	date: new Date(2026, 0, 31),
+	...over
+});
+
+test('a one-off entry is listed once, as recorded', () => {
+	const out = ownTransactions([entry({})], new Date(2026, 5, 15));
+	assert.equal(out.length, 1);
+	assert.equal(out[0].type, 'Actual Expense');
+});
+
+test('a repeating entry is counted once: later dates are owed or projected, never paid', () => {
+	const now = new Date(2026, 3, 10);
+	const out = ownTransactions([entry({ frequency: 'Monthly' })], now);
+	const paid = out.filter((t) => t.type === 'Actual Expense');
+	assert.equal(paid.length, 1, 'only the entry that was recorded has moved');
+	assert.equal(cashTotals(out).out, 120000);
+	// February and March have come and are owed; April's is still ahead.
+	assert.deepEqual(
+		out.filter((t) => t.type === 'Payable').map((t) => t.date.getMonth()),
+		[2, 1]
+	);
+	assert.deepEqual(
+		out.filter((t) => t.type === 'Projected Expense').map((t) => t.date.getMonth()),
+		[3]
+	);
+});
+
+test('decision 15: a line begun on the 31st falls on the last day of a short month', () => {
+	const out = ownTransactions([entry({ frequency: 'Monthly' })], new Date(2026, 3, 10));
+	const feb = out.find((t) => t.date.getMonth() === 1);
+	assert.equal(feb?.date.getDate(), 28);
+	const mar = out.find((t) => t.date.getMonth() === 2);
+	assert.equal(mar?.date.getDate(), 31, 'and goes back to the 31st after it');
+});
+
+test('decision 15: a quarterly line keeps its own quarter, not the calendar’s', () => {
+	const out = ownTransactions(
+		[entry({ frequency: 'Quarterly', date: new Date(2026, 1, 10) })],
+		new Date(2026, 10, 20)
+	);
+	assert.deepEqual(
+		out.map((t) => t.date.getMonth()).sort((a, b) => a - b),
+		[1, 4, 7, 10]
+	);
+});
+
+test('money expected in is receivable once its day has come', () => {
+	const out = ownTransactions(
+		[entry({ type: 'Cash In', frequency: 'Monthly', date: new Date(2026, 0, 5) })],
+		new Date(2026, 1, 20)
+	);
+	assert.deepEqual(
+		out.map((t) => t.type),
+		['Cash Projected', 'Cash Receivable', 'Cash In']
+	);
+	assert.equal(cashTotals(out).in, 120000);
+});
+
+test('a line shows its amount in dollars, not in the cents it is kept in', () => {
+	assert.equal(txAmount(entry({ amount: 120000 })), '−$1,200');
+	assert.equal(txAmount(entry({ amount: 50050, type: 'Cash In' })), '+$500.50');
 });

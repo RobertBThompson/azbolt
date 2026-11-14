@@ -56,6 +56,9 @@ const monthOf = (stamp) =>
 			})
 		: '';
 
+/** @param {string} [stamp] the day of the month in a stored date */
+const dayOf = (stamp) => Number(String(stamp ?? '').slice(8, 10)) || 0;
+
 /** @param {import('./pb.js').BookRows} rows */
 function shape(rows) {
 	/** @type {Record<string, import('./pb.js').ValuationRow[]>} */
@@ -139,5 +142,46 @@ function shape(rows) {
 		a.spheres = [...new Set(controllingOrgs(id, links).flatMap((org) => orgs[org]?.spheres ?? []))];
 	}
 
-	return { assets, links, orgs, categories: rows.categories, events };
+	/** @type {Record<string, import('./assets.js').Liability>} */
+	const liabilities = {};
+	for (const r of rows.liabilities) {
+		// A debt whose borrower has been removed has nobody to count against.
+		if (!orgs[r.borrower]) continue;
+		liabilities[r.id] = {
+			name: r.name,
+			type: r.type || 'Other',
+			lender: r.lender && orgs[r.lender] ? r.lender : null,
+			asset: r.asset && assets[r.asset] ? r.asset : null,
+			borrower: r.borrower,
+			startAmount: r.start_amount ?? 0,
+			balance: r.balance ?? 0,
+			rate: r.rate ?? 0,
+			payment: r.payment ?? 0,
+			frequency: r.frequency || 'Monthly',
+			months: r.months ?? 0,
+			started: monthOf(r.started ?? ''),
+			day: String(r.started ?? '').slice(0, 10),
+			dueDay: r.due_day || dayOf(r.started) || 1,
+			notes: r.notes ?? ''
+		};
+	}
+
+	/** @type {import('./assets.js').Tx[]} */
+	const cash = [];
+	for (const r of rows.cash) {
+		const [y, m, d] = String(r.date).slice(0, 10).split('-').map(Number);
+		cash.push({
+			id: r.id,
+			label: r.label,
+			org: r.organization,
+			type: r.type,
+			category: r.category ?? '',
+			amount: r.amount ?? 0,
+			frequency: r.frequency || 'Once',
+			// The day as it was entered, on the wall clock here.
+			date: new Date(y, m - 1, d)
+		});
+	}
+
+	return { assets, links, liabilities, cash, orgs, categories: rows.categories, events };
 }

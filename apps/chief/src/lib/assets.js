@@ -1028,7 +1028,7 @@ export function ownershipTree() {
  *   name: string, type: string, lender: string|null, asset: string|null,
  *   borrower: string, startAmount: number, balance: number, rate: number,
  *   payment: number, frequency: 'Monthly'|'Quarterly'|'Yearly', months: number,
- *   started: string, dueDay: number, notes: string
+ *   started: string, dueDay: number, notes: string, day?: string
  * }} Liability
  */
 
@@ -1507,9 +1507,7 @@ const ONE_OFF = RAW_ONE_OFF.map((o) => ({ ...o, amount: dollars(o.amount) }));
  * @returns {Tx[]}
  */
 export function transactions(now = new Date()) {
-	/* Cash is not kept yet. An account's own book has none, rather than
-	   the samples' figures beside its real assets. */
-	if (open !== 'sample') return [];
+	if (open !== 'sample') return ownTransactions(OWN_CASH, now);
 	const today = startOfDay(now);
 	const horizon = new Date(today.getTime() + 35 * DAY);
 	/** @type {Tx[]} */
@@ -1569,6 +1567,67 @@ export function transactions(now = new Date()) {
 	return out.sort((a, b) => b.date.getTime() - a.date.getTime());
 }
 
+/**
+ * An account's own cash entries, as they were recorded.
+ * @type {Tx[]}
+ */
+const OWN_CASH = [];
+
+/**
+ * Recorded entries, plus the later dates of the ones that repeat.
+ *
+ * What was recorded is listed as it was recorded. A repeating entry
+ * also gives a line for each later date, counted from its own date
+ * (decision 15: a line that began on the 31st falls on the last day
+ * of a shorter month, and a quarterly one keeps its own quarter, not
+ * the calendar's). Those later lines are expected, never moved: one
+ * whose day has come is owed — Payable, or Cash Receivable — and one
+ * still ahead is projected. Nothing is counted as paid because a
+ * calendar said it should have been (decision 9).
+ *
+ * @param {Tx[]} entries
+ * @param {Date} [now]
+ * @returns {Tx[]}
+ */
+export function ownTransactions(entries, now = new Date()) {
+	const today = startOfDay(now);
+	const horizon = new Date(today.getTime() + 35 * DAY);
+	/** @type {Tx[]} */
+	const out = [];
+	for (const e of entries) {
+		out.push(e);
+		const step =
+			e.frequency === 'Monthly'
+				? 1
+				: e.frequency === 'Quarterly'
+					? 3
+					: e.frequency === 'Yearly'
+						? 12
+						: 0;
+		if (!step) continue;
+		const inward = direction(e.type) === 'in';
+		const first = new Date(e.date.getFullYear(), e.date.getMonth(), 1);
+		for (let n = 1; n <= 600; n++) {
+			const date = onDay(first, n * step, e.date.getDate());
+			if (date > horizon) break;
+			const come = date <= today;
+			out.push({
+				...e,
+				id: `${e.id}@${date.getFullYear()}-${date.getMonth() + 1}`,
+				type: inward
+					? come
+						? 'Cash Receivable'
+						: 'Cash Projected'
+					: come
+						? 'Payable'
+						: 'Projected Expense',
+				date
+			});
+		}
+	}
+	return out.sort((a, b) => b.date.getTime() - a.date.getTime());
+}
+
 /** @typedef {'month'|'quarter'|'year'} Period */
 
 /**
@@ -1611,8 +1670,7 @@ export function cashTotals(list) {
 export const counted = (t) => COUNTED.includes(t.type);
 
 /** @param {Tx} t */
-export const txAmount = (t) =>
-	`${direction(t.type) === 'in' ? '+' : '−'}$${Math.round(t.amount).toLocaleString('en-US')}`;
+export const txAmount = (t) => `${direction(t.type) === 'in' ? '+' : '−'}${money(t.amount)}`;
 
 /**
  * The same entries, regrouped: by month or by cash type, each group
@@ -1842,11 +1900,13 @@ function refill(into, from) {
  *   assets: Record<string, Asset>, links: Link[],
  *   liabilities: Record<string, Liability>, orgs: Record<string, any>,
  *   categories: { id: string, name: string }[],
- *   events: { asset: string, type: string, detail: string, age: number }[]
+ *   events: { asset: string, type: string, detail: string, age: number }[],
+ *   cash?: Tx[]
  * }} next
  * @param {'sample'|'own'} which
  */
 function fill(next, which) {
+	OWN_CASH.splice(0, OWN_CASH.length, ...(next.cash ?? []));
 	refill(ASSETS, next.assets);
 	refill(LIABILITIES, next.liabilities);
 	refill(ORGS, next.orgs);
@@ -1857,16 +1917,17 @@ function fill(next, which) {
 }
 
 /**
- * Open an account's own book. Anything not kept yet — liabilities,
- * cash — is empty rather than borrowed from the samples.
+ * Open an account's own book. Nothing in it is borrowed from the
+ * samples: what the account has not recorded is simply not there.
  * @param {{
  *   assets: Record<string, Asset>, links: Link[], orgs: Record<string, any>,
+ *   liabilities: Record<string, Liability>, cash: Tx[],
  *   categories: { id: string, name: string }[],
  *   events: { asset: string, type: string, detail: string, age: number }[]
  * }} own
  */
 export function openOwnBook(own) {
-	fill({ ...own, liabilities: {} }, 'own');
+	fill(own, 'own');
 }
 
 export function openSampleBook() {

@@ -73,6 +73,37 @@ const EXPECTED = {
 		'since',
 		'archived',
 		'owner'
+	],
+	liabilities: [
+		'name',
+		'type',
+		'borrower',
+		'lender',
+		'asset',
+		'start_amount',
+		'balance',
+		'payment',
+		'currency',
+		'rate',
+		'frequency',
+		'months',
+		'due_day',
+		'started',
+		'notes',
+		'archived',
+		'owner'
+	],
+	cash_entries: [
+		'label',
+		'organization',
+		'type',
+		'category',
+		'amount',
+		'currency',
+		'frequency',
+		'date',
+		'archived',
+		'owner'
 	]
 };
 

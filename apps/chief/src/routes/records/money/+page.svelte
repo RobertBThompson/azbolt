@@ -40,6 +40,8 @@
 		cashLines,
 		cashTotals,
 		counted,
+		ownBook,
+		transactions,
 		dayLabel,
 		groupCash,
 		money,
@@ -69,7 +71,11 @@
 	const totals = $derived(cashTotals(list));
 	const lines = $derived(cashLines(list));
 	const groups = $derived(groupCash(list, sort === 'type' ? 'type' : 'period'));
-	const left = runway();
+	/* Decision 14: runway is an organization's own. Yours, in your own
+	   book; the samples have no "you" and show every one together. */
+	const mine = Object.entries(ORGS).find(([, o]) => o.self)?.[0] ?? null;
+	const left = runway(new Date(), mine);
+	const none = ownBook() && cashFor('year').length === 0 && transactions().length === 0;
 </script>
 
 <svelte:head><title>Cash flow · Chief</title></svelte:head>
@@ -77,7 +83,7 @@
 <Screen back="/records" nav={false}>
 	<LensSwitch label="Money view" items={MONEY_LENSES} at="/records/money" />
 
-	{#if view === 'empty'}
+	{#if view === 'empty' || none}
 		<Hero
 			t="warm"
 			title="No cash recorded yet"
@@ -113,7 +119,7 @@
 			{#if left.months !== null}
 				<Banner
 					t="warm"
-					title="About {left.months.toFixed(1)} months of runway"
+					title="About {left.months.toFixed(1)} months of runway{mine ? ' for you' : ''}"
 					meta="{money(left.liquid)} liquid, against {money(
 						left.monthly
 					)} going out a month over the last three."

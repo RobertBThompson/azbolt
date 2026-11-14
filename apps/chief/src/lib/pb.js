@@ -453,6 +453,8 @@ const STARTING_CATEGORIES = [
  *   assets: Record<string, any>[],
  *   valuations: ValuationRow[],
  *   ownerships: OwnershipRow[],
+ *   liabilities: Record<string, any>[],
+ *   cash: Record<string, any>[],
  *   organizations: OrgRow[]
  * }} BookRows
  */
@@ -465,13 +467,17 @@ export function readBook() {
 	return readOr(
 		async () => {
 			await selfOrganization();
-			const [categories, assets, valuations, ownerships, organizations] = await Promise.all([
-				ownCategories(),
-				pb.collection('assets').getFullList({ sort: 'name', filter: 'archived = null' }),
-				pb.collection('valuations').getFullList({ sort: 'valued_on' }),
-				pb.collection('ownerships').getFullList({ sort: 'created', filter: 'archived = null' }),
-				pb.collection('organizations').getFullList({ sort: 'name', filter: 'archived = null' })
-			]);
+			const live = { filter: 'archived = null' };
+			const [categories, assets, valuations, ownerships, liabilities, cash, organizations] =
+				await Promise.all([
+					ownCategories(),
+					pb.collection('assets').getFullList({ sort: 'name', filter: 'archived = null' }),
+					pb.collection('valuations').getFullList({ sort: 'valued_on' }),
+					pb.collection('ownerships').getFullList({ sort: 'created', filter: 'archived = null' }),
+					pb.collection('liabilities').getFullList({ sort: 'name', ...live }),
+					pb.collection('cash_entries').getFullList({ sort: '-date', ...live }),
+					pb.collection('organizations').getFullList({ sort: 'name', filter: 'archived = null' })
+				]);
 			return /** @type {BookRows} */ ({
 				categories,
 				assets,
@@ -484,6 +490,8 @@ export function readBook() {
 					note: v.note ?? ''
 				})),
 				ownerships: ownerships.map(ownership),
+				liabilities,
+				cash,
 				organizations: organizations.map(organization)
 			});
 		},
@@ -493,6 +501,8 @@ export function readBook() {
 			assets: [],
 			valuations: [],
 			ownerships: [],
+			liabilities: [],
+			cash: [],
 			organizations: []
 		})
 	);
@@ -620,5 +630,77 @@ export function updateOwnership(id, role, units, day) {
 		role,
 		units: role === 'Owner' ? (units ?? 0) : 0,
 		since: `${day} 12:00:00.000Z`
+	});
+}
+
+/**
+ * @typedef {{
+ *   name: string, type: string, borrower: string, lender: string, asset: string,
+ *   balance: number|null, startAmount: number|null, payment: number|null,
+ *   rate: number|null, frequency: string, months: number|null,
+ *   dueDay: number|null, started: string, notes?: string
+ * }} LiabilityFields  amounts in cents; `started` is YYYY-MM-DD or ''
+ */
+
+/** @param {Partial<LiabilityFields>} f */
+function liabilityBody(f) {
+	/** @type {Record<string, any>} */
+	const body = {};
+	if (f.name !== undefined) body.name = f.name.trim();
+	if (f.type !== undefined) body.type = f.type;
+	if (f.borrower !== undefined) body.borrower = f.borrower;
+	if (f.lender !== undefined) body.lender = f.lender || null;
+	if (f.asset !== undefined) body.asset = f.asset || null;
+	if (f.balance !== undefined) body.balance = f.balance ?? 0;
+	if (f.startAmount !== undefined) body.start_amount = f.startAmount ?? 0;
+	if (f.payment !== undefined) body.payment = f.payment ?? 0;
+	if (f.rate !== undefined) body.rate = f.rate ?? 0;
+	if (f.frequency !== undefined) body.frequency = f.frequency || 'Monthly';
+	if (f.months !== undefined) body.months = f.months ?? 0;
+	if (f.dueDay !== undefined) body.due_day = f.dueDay ?? 0;
+	if (f.started !== undefined) body.started = f.started ? `${f.started} 12:00:00.000Z` : null;
+	if (f.notes !== undefined) body.notes = f.notes.trim();
+	return body;
+}
+
+/**
+ * @param {Partial<LiabilityFields> & { name: string, borrower: string }} fields
+ * @returns {Promise<string>} the new liability's id
+ */
+export async function createLiability(fields) {
+	const row = await pb.collection('liabilities').create({
+		frequency: 'Monthly',
+		...liabilityBody(fields),
+		currency: 'USD',
+		owner: ownerId()
+	});
+	return row.id;
+}
+
+/**
+ * @param {string} id
+ * @param {Partial<LiabilityFields>} fields
+ */
+export function updateLiability(id, fields) {
+	return pb.collection('liabilities').update(id, liabilityBody(fields));
+}
+
+/**
+ * One dated fact about money. The amount is whole cents and positive;
+ * which way it went is in the type.
+ * @param {{ label: string, organization: string, type: string, category: string,
+ *           amount: number, frequency: string, day: string }} e
+ */
+export function createCashEntry(e) {
+	return pb.collection('cash_entries').create({
+		label: e.label.trim(),
+		organization: e.organization,
+		type: e.type,
+		category: e.category,
+		amount: e.amount,
+		currency: 'USD',
+		frequency: e.frequency,
+		date: `${e.day} 12:00:00.000Z`,
+		owner: ownerId()
 	});
 }
