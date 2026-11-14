@@ -50,7 +50,11 @@ migrate(
 					maxSelect: 1,
 					cascadeDelete: true,
 					collectionId: users.id
-				}
+				},
+				// A collection made here has only the fields it is given, and
+				// the index below needs this one to exist.
+				{ name: 'created', type: 'autodate', onCreate: true },
+				{ name: 'updated', type: 'autodate', onCreate: true, onUpdate: true }
 			],
 			indexes: ['CREATE INDEX idx_jots_owner_created ON jots (owner, created)']
 		});

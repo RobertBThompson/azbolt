@@ -15,7 +15,7 @@
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Alert, Banner, Btn, Field, Note, Seg } from '$lib/kit';
 	import { session } from '$lib/session.svelte.js';
-	import { backendUp } from '$lib/pb.js';
+	import { backendUp, requestPasswordReset } from '$lib/pb.js';
 
 	/** 0 = sign in, 1 = create account. Seg speaks in indexes. */
 	let mode = $state(0);
@@ -30,12 +30,30 @@
 
 	const reachable = backendUp();
 
+	let resetSent = $state(false);
+	let resetFault = $state('');
+
+	/* The server answers the same whether or not it knows the address,
+	   and can only send if it has been given a mail server — so the
+	   message promises a link only "if". */
+	async function forgot() {
+		resetSent = false;
+		resetFault = '';
+		try {
+			await requestPasswordReset(email.trim());
+			resetSent = true;
+		} catch (/** @type {any} */ err) {
+			resetFault = err?.message || 'The server did not answer.';
+		}
+	}
+
 	async function submit() {
 		if (!ready) return;
 		const ok = creating
 			? await session.signUp(email.trim(), password, name.trim())
 			: await session.signIn(email.trim(), password);
-		if (ok) goto('/people');
+		// Home, where a new account finds its own empty, explained screens.
+		if (ok) goto('/');
 	}
 </script>
 
@@ -70,8 +88,9 @@
 			<Alert title="Could not save" meta={session.error} />
 		{/if}
 
-		<Note>Your Directory reads your own records. Everything else is still design data.</Note>
-		<Btn t="cool" href="/people" label="Open Directory" />
+		<Note>Everything you add is kept under this account and nobody else's.</Note>
+		<Btn t="cool" href="/" label="Go to Home" />
+		<Btn primary={false} href="/settings/account" label="Account, export and delete" />
 		<Btn primary={false} label="Sign out" onclick={() => session.signOut()} />
 	{:else}
 		{#await reachable then up}
@@ -128,6 +147,21 @@
 				label={session.busy ? 'Working…' : creating ? 'Create account' : 'Sign in'}
 			/>
 		</form>
+
+		{#if !creating}
+			<Btn
+				primary={false}
+				label="Forgot password"
+				onclick={forgot}
+				disabled={email.trim() === ''}
+			/>
+			{#if resetSent}
+				<Note>
+					If that address has an account and this server can send mail, a reset link is on its way.
+				</Note>
+			{/if}
+			{#if resetFault}<Alert title="Could not ask for a reset" meta={resetFault} />{/if}
+		{/if}
 
 		<Note>
 			Records are scoped to the account that created them, so nothing you add here is visible to

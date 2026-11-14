@@ -49,6 +49,34 @@ The first says whether the collections match what the client expects.
 The second signs in as two accounts and tries to read each other's
 records, including by guessed id, and fails loudly if either succeeds.
 
+### A whole account
+
+```
+node infra/pocketbase/check-account.mjs http://127.0.0.1:8092
+```
+
+Writes one record in every collection as a throwaway account, checks a
+second account can see none of it, then deletes the first the way the
+app's "Delete account and data" does and looks for anything left
+behind. Run it after any new migration: it is the quickest way to find
+out that a migration did not apply or that the app and the server
+disagree about a field.
+
+## Before someone else uses it
+
+Three things are set on the server, not in the app, and are still open
+while Chief is being tested:
+
+- **Sign-up is open.** Anyone who can reach the server can make an
+  account. To close it, open `users` in the admin page, API Rules, and
+  clear the Create rule (leave it locked). Accounts are then made by
+  you, in the admin page.
+- **Password reset needs mail.** "Forgot password" asks the server to
+  send a link. It can only do that once Settings → Mail settings has an
+  SMTP server.
+- **The admin page is public.** `/_/` should be reachable only from
+  your own address. In Caddy, wrap it in a `remote_ip` matcher.
+
 ## Backups
 
 ```bash

@@ -853,3 +853,107 @@ export function taskJot(id, organization) {
 		.collection('jots')
 		.update(id, { organization: organization || null, sphered: new Date().toISOString() });
 }
+
+/* ── The whole account ──────────────────────────────────────────────── */
+
+/**
+ * Every collection an account's records live in, children before the
+ * records they point at. Deleting in this order never leaves a record
+ * pointing at something already gone.
+ */
+const OWNED = [
+	'tasks',
+	'endeavors',
+	'cash_entries',
+	'liabilities',
+	'ownerships',
+	'asset_events',
+	'valuations',
+	'assets',
+	'asset_categories',
+	'jots',
+	'people',
+	'organizations',
+	'spheres'
+];
+
+/**
+ * Everything the account holds, as it is stored — archived records
+ * included, since a copy that left out what was removed from view
+ * would not be a copy.
+ *
+ * A collection this server does not have yet is reported as missing
+ * rather than failing the whole export.
+ */
+export async function exportAccount() {
+	const user = pb.authStore.record;
+	/** @type {Record<string, Record<string, any>[]>} */
+	const collections = {};
+	/** @type {string[]} */
+	const missing = [];
+	for (const name of [...OWNED].reverse()) {
+		try {
+			collections[name] = await pb.collection(name).getFullList({ sort: 'created' });
+		} catch (/** @type {any} */ err) {
+			if (err?.status !== 404) throw err;
+			missing.push(name);
+		}
+	}
+	return {
+		app: 'Chief',
+		format: 1,
+		exported_at: new Date().toISOString(),
+		account: { id: user?.id ?? '', name: user?.name ?? '', email: user?.email ?? '' },
+		note: 'Money is in whole cents. Shares are units out of the asset’s own units (10,000 unless it says otherwise).',
+		missing,
+		collections
+	};
+}
+
+/**
+ * Remove the account and everything it holds, for good.
+ *
+ * The records go first, in an order that never strands one, and the
+ * account itself last — so if this stops partway the account still
+ * exists and can sign in, see what is left, and run it again.
+ *
+ * @param {(done: number, total: number) => void} [progress]
+ */
+export async function deleteAccount(progress) {
+	const id = ownerId();
+	/** @type {[string, string][]} */
+	const all = [];
+	for (const name of OWNED) {
+		try {
+			const rows = await pb.collection(name).getFullList({ fields: 'id' });
+			for (const r of rows) all.push([name, r.id]);
+		} catch (/** @type {any} */ err) {
+			if (err?.status !== 404) throw err;
+		}
+	}
+	let done = 0;
+	for (const [name, row] of all) {
+		await pb.collection(name).delete(row);
+		progress?.(++done, all.length);
+	}
+	await pb.collection('users').delete(id);
+	pb.authStore.clear();
+}
+
+/**
+ * @param {string} current
+ * @param {string} next
+ */
+export async function changePassword(current, next) {
+	const user = pb.authStore.record;
+	await pb
+		.collection('users')
+		.update(ownerId(), { oldPassword: current, password: next, passwordConfirm: next });
+	// Changing the password ends every session, this one included.
+	await pb.collection('users').authWithPassword(user?.email ?? '', next);
+}
+
+/** Ask the server to email a reset link. It answers the same whether or not the address is known. */
+export function requestPasswordReset(/** @type {string} */ email) {
+	return pb.collection('users').requestPasswordReset(email);
+}

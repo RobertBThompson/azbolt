@@ -19,7 +19,7 @@
 	<Row
 		href="/settings/account/data/export"
 		title="Export a copy"
-		meta="Choose branches and file types"
+		meta="One file with everything you hold"
 		trailing="›"
 	/>
 	<Row
