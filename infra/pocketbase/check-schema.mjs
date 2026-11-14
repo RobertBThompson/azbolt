@@ -16,8 +16,18 @@ import { stdin, stdout, argv, env, exit } from 'node:process';
 
 /** What each collection must have for the client to work. */
 const EXPECTED = {
-	spheres: ['name', 'blurb', 'hue', 'retired', 'owner'],
-	organizations: ['name', 'code', 'charter', 'blurb', 'spheres', 'controlled_by', 'owner'],
+	spheres: ['name', 'blurb', 'hue', 'retired', 'archived', 'owner'],
+	organizations: [
+		'name',
+		'code',
+		'charter',
+		'blurb',
+		'spheres',
+		'controlled_by',
+		'is_self',
+		'archived',
+		'owner'
+	],
 	people: [
 		'first_name',
 		'last_name',
@@ -28,8 +38,10 @@ const EXPECTED = {
 		'notes',
 		'organization',
 		'spheres',
+		'archived',
 		'owner'
-	]
+	],
+	jots: ['text', 'sphere', 'sphered', 'people', 'archived', 'owner']
 };
 
 /** Every collection holding a person's records is owner-scoped, all five ways. */

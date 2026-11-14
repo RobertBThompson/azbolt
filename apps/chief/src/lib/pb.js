@@ -80,7 +80,31 @@ function ownerId() {
 /** @param {Record<string, any>} p */
 const fullName = (p) => [p.first_name, p.last_name].filter(Boolean).join(' ');
 
-/** F1 Directory — D1. Leads with the next interaction, not the job title. */
+/* ── Directory ──────────────────────────────────────────────────────── */
+
+/**
+ * @typedef {{ id: string, first_name: string, last_name: string, name: string,
+ *             role: string, relationship: string, email: string, phone: string,
+ *             notes: string, spheres: string[] }} PersonRow
+ */
+
+/** @param {Record<string, any>} r @returns {PersonRow} */
+function person(r) {
+	return {
+		id: r.id,
+		first_name: r.first_name ?? '',
+		last_name: r.last_name ?? '',
+		name: fullName(r),
+		role: r.role ?? '',
+		relationship: r.relationship ?? '',
+		email: r.email ?? '',
+		phone: r.phone ?? '',
+		notes: r.notes ?? '',
+		spheres: Array.isArray(r.spheres) ? r.spheres : []
+	};
+}
+
+/** F1 Directory — D1. */
 export function listPeople() {
 	return readOr(
 		async () => {
@@ -91,9 +115,6 @@ export function listPeople() {
 				id: r.id,
 				name: fullName(r),
 				meta: [r.role, r.relationship].filter(Boolean).join(' · '),
-				// Stored as JSON because spheres are not a collection: a
-				// Chief can invent one for a single contact, and a relation
-				// would demand a record before the thought is finished.
 				spheres: Array.isArray(r.spheres) ? r.spheres : []
 			}));
 		},
@@ -109,47 +130,169 @@ export function listPeople() {
 }
 
 /**
+ * One person, or null when this account has no such record. A missing
+ * record and a failed read are different answers, so only a 404 is
+ * turned into null; anything else is thrown for the screen to report.
+ * @param {string} id
+ * @returns {Promise<PersonRow|null>}
+ */
+export async function getPerson(id) {
+	if (!(await signedInLive())) return null;
+	return orNull(async () => person(await pb.collection('people').getOne(id)));
+}
+
+/**
+ * @param {{ first_name: string, last_name?: string, role?: string,
+ *           relationship?: string, email?: string, phone?: string, notes?: string }} fields
+ * @returns {Promise<PersonRow>}
+ */
+export async function createPerson(fields) {
+	return person(await pb.collection('people').create({ ...fields, owner: ownerId() }));
+}
+
+/**
+ * @param {string} id
+ * @param {Partial<Omit<PersonRow, 'id'|'name'>>} fields
+ * @returns {Promise<PersonRow>}
+ */
+export async function updatePerson(id, fields) {
+	return person(await pb.collection('people').update(id, fields));
+}
+
+/**
+ * @typedef {{ id: string, name: string, code: string, charter: string,
+ *             blurb: string, spheres: string[], self: boolean }} OrgRow
+ */
+
+/** @param {Record<string, any>} r @returns {OrgRow} */
+function organization(r) {
+	return {
+		id: r.id,
+		name: r.name ?? '',
+		code: r.code ?? '',
+		charter: r.charter ?? '',
+		blurb: r.blurb ?? '',
+		spheres: Array.isArray(r.spheres) ? r.spheres : [],
+		self: r.is_self === true
+	};
+}
+
+/**
  * F1 Directory — D4 Organizations.
  *
  * An organization is a person or a grouping of people, and need not
  * include the Chief: "Wife" and "Chief and Wife" are both organizations.
  * It is not a sphere. A sphere is an area of a life — Family, Business,
  * Church — and lives in spheres.js, not here.
+ *
+ * The Chief's own organization leads the list. It is made here, the
+ * first time the list is read, so an account never has to be told to
+ * create itself.
  */
 export function listOrganizations() {
 	return readOr(
 		async () => {
+			await selfOrganization();
 			const rows = await pb
 				.collection('organizations')
 				.getFullList({ sort: 'name', filter: 'archived = null' });
-			return rows.map((r) => ({ id: r.id, name: r.name, meta: r.blurb, kind: r.code }));
+			const list = rows.map(organization);
+			return [...list.filter((o) => o.self), ...list.filter((o) => !o.self)];
 		},
 		() =>
 			Object.entries(ORGS).map(([id, o]) => ({
 				id,
 				name: o.name,
-				meta: o.blurb,
-				kind: o.code
+				code: o.code,
+				charter: o.charter,
+				blurb: o.blurb,
+				spheres: o.spheres,
+				self: false
 			})),
 		[]
 	);
 }
 
 /**
- * @param {{ first_name: string, last_name?: string, role?: string,
- *           relationship?: string, organization?: string, notes?: string }} fields
+ * @param {string} id
+ * @returns {Promise<OrgRow|null>}
  */
-export function createPerson(fields) {
-	return pb.collection('people').create({ ...fields, owner: ownerId() });
+export async function getOrganization(id) {
+	if (!(await signedInLive())) return null;
+	return orNull(async () => organization(await pb.collection('organizations').getOne(id)));
 }
 
 /**
  * `code` is one of the nine organization types, not a free label:
  * C, B, CO, CC, DO, DB, P, DN, CN.
  * @param {{ name: string, code: string, blurb?: string, charter?: string }} fields
+ * @returns {Promise<OrgRow>}
  */
-export function createOrganization(fields) {
-	return pb.collection('organizations').create({ ...fields, owner: ownerId() });
+export async function createOrganization(fields) {
+	return organization(await pb.collection('organizations').create({ ...fields, owner: ownerId() }));
+}
+
+/**
+ * @param {string} id
+ * @param {{ name?: string, code?: string, blurb?: string, charter?: string, spheres?: string[] }} fields
+ * @returns {Promise<OrgRow>}
+ */
+export async function updateOrganization(id, fields) {
+	return organization(await pb.collection('organizations').update(id, fields));
+}
+
+/**
+ * The Chief's own organization: type C, one per account.
+ *
+ * No person owns anything, the Chief included. What the Chief holds is
+ * held by this record, so every figure that says "yours" is a figure
+ * about it. Made on first need rather than at sign-up, because an
+ * account opened before this existed must end up with one too.
+ * @returns {Promise<OrgRow>}
+ */
+export async function selfOrganization() {
+	const mine = () =>
+		pb.collection('organizations').getFirstListItem('is_self = true && archived = null');
+	try {
+		return organization(await mine());
+	} catch (/** @type {any} */ err) {
+		if (err?.status !== 404) throw err;
+	}
+	const user = pb.authStore.record;
+	const name = user?.name || String(user?.email ?? '').split('@')[0] || 'Me';
+	const make = (/** @type {string} */ n) =>
+		pb.collection('organizations').create({ name: n, code: 'C', is_self: true, owner: ownerId() });
+	try {
+		return organization(await make(name));
+	} catch {
+		// Either another tab made it a moment ago, or an organization
+		// already carries this name. Look again before trying a name
+		// that cannot collide.
+		try {
+			return organization(await mine());
+		} catch {
+			return organization(await make(`${name} (me)`));
+		}
+	}
+}
+
+/** A live backend with somebody signed in: the only state with records to fetch. */
+async function signedInLive() {
+	return (await backendUp()) && pb.authStore.isValid;
+}
+
+/**
+ * @template T
+ * @param {() => Promise<T>} read
+ * @returns {Promise<T|null>}
+ */
+async function orNull(read) {
+	try {
+		return await read();
+	} catch (/** @type {any} */ err) {
+		if (err?.status === 404) return null;
+		throw err;
+	}
 }
 
 /* ── Spheres ────────────────────────────────────────────────────────── */

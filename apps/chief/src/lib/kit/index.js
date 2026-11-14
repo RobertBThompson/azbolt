@@ -26,6 +26,7 @@ export { default as Seg } from './Seg.svelte';
 export { default as Select } from './Select.svelte';
 export { default as SourceNote } from './SourceNote.svelte';
 export { default as TypeBadge } from './TypeBadge.svelte';
+export { default as SpherePick } from './SpherePick.svelte';
 export { default as SphereTags } from './SphereTags.svelte';
 export { default as Stats } from './Stats.svelte';
 export { default as Tabs } from './Tabs.svelte';

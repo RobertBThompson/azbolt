@@ -35,7 +35,10 @@ export async function load() {
  * @returns {[string, Sphere][]}
  */
 export function placeable() {
-	const all = /** @type {[string, Sphere]} */ (['all', { ...SPHERES.all, id: 'all', custom: false }]);
+	const all = /** @type {[string, Sphere]} */ ([
+		'all',
+		{ ...SPHERES.all, id: 'all', custom: false }
+	]);
 	if (!kept()) {
 		return /** @type {[string, Sphere][]} */ (
 			Object.entries(SPHERES).map(([id, s]) => [id, { ...s, id, custom: false }])
