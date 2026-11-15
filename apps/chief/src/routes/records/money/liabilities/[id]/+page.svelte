@@ -6,7 +6,7 @@
 	 * and an organization before it is a row of terms.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { PageHead, Stats, Row, Facts, SectionHead, Alert, Btn } from '$lib/kit';
+	import { PageHead, Stats, Row, Facts, SectionHead, Alert, Btn, Blank } from '$lib/kit';
 	import { ORGS } from '$lib/assets.js';
 	import { page } from '$app/stores';
 	import {
@@ -16,12 +16,15 @@
 		liabilityGaps,
 		money,
 		nextDue,
-		short
+		ownBook,
+		short,
+		transactions
 	} from '$lib/assets.js';
 
 	const id = $derived($page.params.id ?? '');
 	const l = $derived(LIABILITIES[id]);
 	const gaps = $derived(liabilityGaps(l));
+	const payments = $derived(transactions().filter((t) => t.liability === id));
 
 	const terms = $derived([
 		{ label: 'Loan type', value: l.type },
@@ -90,5 +93,16 @@
 	<SectionHead label="Terms" t="warm" />
 	<Facts items={terms} />
 
-	<Btn t="warm" href="/records/money/liabilities/{id}/edit" label="Edit liability" />
+	{#if ownBook()}
+		<SectionHead label="Payments" t="warm" count={payments.length} />
+		{#each payments as p (p.id)}
+			<Row t="warm" title={money(p.amount)} meta="Paid" trailing={dayLabel(p.date)} />
+		{:else}
+			<Blank>No payment recorded.</Blank>
+		{/each}
+		<Btn t="warm" href="/records/money/liabilities/{id}/pay" label="Record a payment" />
+		<Btn primary={false} href="/records/money/liabilities/{id}/edit" label="Edit liability" />
+	{:else}
+		<Btn t="warm" href="/records/money/liabilities/{id}/edit" label="Edit liability" />
+	{/if}
 </Screen>

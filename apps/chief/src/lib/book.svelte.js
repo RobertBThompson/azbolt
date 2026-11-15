@@ -194,7 +194,10 @@ function shape(rows) {
 			amount: r.amount ?? 0,
 			frequency: r.frequency || 'Once',
 			// The day as it was entered, on the wall clock here.
-			date: new Date(y, m - 1, d)
+			date: new Date(y, m - 1, d),
+			settles: r.settles || '',
+			period: r.period || '',
+			liability: r.liability || ''
 		});
 	}
 

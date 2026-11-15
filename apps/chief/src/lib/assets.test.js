@@ -13,6 +13,7 @@ import {
 	SHARE_UNITS,
 	attention,
 	cashLines,
+	cashPosition,
 	cashTotals,
 	dollars,
 	effectiveValue,
@@ -384,4 +385,40 @@ test('money expected in is receivable once its day has come', () => {
 test('a line shows its amount in dollars, not in the cents it is kept in', () => {
 	assert.equal(txAmount(entry({ amount: 120000 })), '−$1,200');
 	assert.equal(txAmount(entry({ amount: 50050, type: 'Cash In' })), '+$500.50');
+});
+
+test('a settled month stops showing as owed, and counts once as paid', () => {
+	const now = new Date(2026, 3, 10);
+	const rent = entry({ frequency: 'Monthly' });
+	const paid = entry({
+		id: 'e2',
+		frequency: 'Once',
+		date: new Date(2026, 2, 2),
+		settles: 'e1',
+		period: '2026-03'
+	});
+	const out = ownTransactions([rent, paid], now);
+	assert.deepEqual(
+		out.filter((t) => t.type === 'Payable').map((t) => t.period),
+		['2026-02'],
+		'March is settled; February is still owed'
+	);
+	assert.equal(cashTotals(out).out, 240000, 'January and March, once each');
+});
+
+test('decision 9: moved, owed and profit are three different figures', () => {
+	const list = [
+		entry({ type: 'Cash In', amount: 100000 }),
+		entry({ type: 'Cash Receivable', amount: 50000 }),
+		entry({ type: 'Cash Projected', amount: 999900 }),
+		entry({ type: 'Actual Expense', amount: 30000 }),
+		entry({ type: 'Payable', amount: 20000 }),
+		entry({ type: 'Accrued Expense', amount: 5000 }),
+		entry({ type: 'Projected Expense', amount: 999900 })
+	];
+	const p = cashPosition(list);
+	assert.equal(p.moved.net, 70000, 'cash is out only when paid');
+	assert.equal(p.owedIn, 50000);
+	assert.equal(p.owedOut, 25000);
+	assert.equal(p.profit, 95000, 'earned 1,500 less incurred 550; projections in neither');
 });

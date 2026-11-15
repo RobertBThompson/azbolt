@@ -30,6 +30,7 @@
 		Hero,
 		Alert,
 		Blank,
+		Facts,
 		SourceNote
 	} from '$lib/kit';
 	import { ORGS } from '$lib/assets.js';
@@ -38,6 +39,7 @@
 	import {
 		cashFor,
 		cashLines,
+		cashPosition,
 		cashTotals,
 		counted,
 		ownBook,
@@ -70,6 +72,9 @@
 	const list = $derived(cashFor(/** @type {'month'|'quarter'|'year'} */ (period)));
 	const totals = $derived(cashTotals(list));
 	const lines = $derived(cashLines(list));
+	const position = $derived(cashPosition(list));
+	/** Owed lines can be settled; a projection has not come due. */
+	const OWED = ['Payable', 'Cash Receivable', 'Accrued Expense'];
 	const groups = $derived(groupCash(list, sort === 'type' ? 'type' : 'period'));
 	/* Decision 14: runway is an organization's own. Yours, in your own
 	   book; the samples have no "you" and show every one together. */
@@ -111,6 +116,15 @@
 				[short(totals.in), 'Cash in'],
 				[short(totals.out), 'Cash out'],
 				[signed(totals.net), 'Net']
+			]}
+		/>
+		<!-- Decision 9: what moved is above; what is owed and what was
+		     earned are different questions and get their own figures. -->
+		<Facts
+			items={[
+				{ label: 'Owed to you', value: money(position.owedIn) },
+				{ label: 'You owe', value: money(position.owedOut) },
+				{ label: 'Profit', value: signed(position.profit) }
 			]}
 		/>
 		<Tabs items={['Overview', 'Transactions']} active={tab} onpick={(i) => (tab = i)} />
@@ -159,6 +173,9 @@
 				{#each g.items as t (t.id)}
 					<Row
 						t={counted(t) ? 'warm' : 'neutral'}
+						href={ownBook() && OWED.includes(t.type) && t.date <= new Date()
+							? `/records/money/settle/${encodeURIComponent(t.id)}`
+							: undefined}
 						title={t.label}
 						meta="{dayLabel(t.date)} · {sort === 'type' ? t.category : t.type} · {ORGS[t.org]
 							?.name ?? t.org}"
@@ -172,8 +189,10 @@
 
 		<Btn t="warm" href="/records/money/amount" label="Add transaction" />
 		<Note>
-			Net is cash in minus cash out, counting only what has actually moved. It is not profit.
-			Receivable, projected, accrued and payable entries are listed, not counted.
+			Net is cash in minus cash out, counting only what has actually moved. Profit also counts what
+			is owed either way, because it was earned or incurred even though the money has not changed
+			hands. Projections are in neither.
+			{#if ownBook()}Tap an owed line under Transactions once it has been paid or received.{/if}
 		</Note>
 		<SourceNote source={book.source} error={book.error} />
 	{/if}

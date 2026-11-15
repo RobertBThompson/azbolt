@@ -694,7 +694,8 @@ export function updateLiability(id, fields) {
  * One dated fact about money. The amount is whole cents and positive;
  * which way it went is in the type.
  * @param {{ label: string, organization: string, type: string, category: string,
- *           amount: number, frequency: string, day: string }} e
+ *           amount: number, frequency: string, day: string,
+ *           settles?: string, period?: string, liability?: string }} e
  */
 export function createCashEntry(e) {
 	return pb.collection('cash_entries').create({
@@ -706,8 +707,24 @@ export function createCashEntry(e) {
 		currency: 'USD',
 		frequency: e.frequency,
 		date: `${e.day} 12:00:00.000Z`,
+		settles: e.settles || null,
+		period: e.period ?? '',
+		liability: e.liability || null,
 		owner: ownerId()
 	});
+}
+
+/**
+ * An expected one-off that has now happened: the same entry, moved.
+ * @param {string} id
+ * @param {string} type  Cash In or Actual Expense
+ * @param {number} cents
+ * @param {string} day
+ */
+export function settleCashEntry(id, type, cents, day) {
+	return pb
+		.collection('cash_entries')
+		.update(id, { type, amount: cents, date: `${day} 12:00:00.000Z` });
 }
 
 /**

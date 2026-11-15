@@ -1398,8 +1398,11 @@ export const direction = (type) => (INWARD.includes(type) ? 'in' : 'out');
 /**
  * @typedef {{
  *   id: string, label: string, org: string, type: string, category: string,
- *   amount: number, frequency: string, date: Date
- * }} Tx
+ *   amount: number, frequency: string, date: Date,
+ *   settles?: string, period?: string, of?: string, liability?: string
+ * }} Tx  `settles`/`period`: the repeating line and month this entry
+ *        paid. `of`: on a worked-out line, the recorded entry it is a
+ *        later date of.
  */
 
 /** Lines that repeat. `day` is the day of the month they land on. */
@@ -1567,6 +1570,30 @@ export function transactions(now = new Date()) {
 	return out.sort((a, b) => b.date.getTime() - a.date.getTime());
 }
 
+/** The month a date falls in, as YYYY-MM. @param {Date} d */
+export const periodOf = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+/**
+ * Decision 9, in three parts. What has moved; what is owed either way
+ * and has not moved; and profit, which counts what was earned and
+ * what was incurred whether or not the money has changed hands yet.
+ * Projections are in none of them: a forecast is not a fact.
+ * @param {Tx[]} list
+ */
+export function cashPosition(list) {
+	const sum = (/** @type {string[]} */ types) =>
+		list.filter((t) => types.includes(t.type)).reduce((n, t) => n + t.amount, 0);
+	const moved = cashTotals(list);
+	const owedIn = sum(['Cash Receivable']);
+	const owedOut = sum(['Payable', 'Accrued Expense']);
+	return {
+		moved,
+		owedIn,
+		owedOut,
+		profit: moved.in + owedIn - (moved.out + owedOut)
+	};
+}
+
 /**
  * An account's own cash entries, as they were recorded.
  * @type {Tx[]}
@@ -1610,10 +1637,16 @@ export function ownTransactions(entries, now = new Date()) {
 		for (let n = 1; n <= 600; n++) {
 			const date = onDay(first, n * step, e.date.getDate());
 			if (date > horizon) break;
+			const period = periodOf(date);
+			// Already recorded as having happened: the entry that settled
+			// it is in the list in its own right.
+			if (entries.some((x) => x.settles === e.id && x.period === period)) continue;
 			const come = date <= today;
 			out.push({
 				...e,
-				id: `${e.id}@${date.getFullYear()}-${date.getMonth() + 1}`,
+				id: `${e.id}@${period}`,
+				of: e.id,
+				period,
 				type: inward
 					? come
 						? 'Cash Receivable'

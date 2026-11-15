@@ -125,6 +125,9 @@ const EXPECTED = {
 		'currency',
 		'frequency',
 		'date',
+		'settles',
+		'period',
+		'liability',
 		'archived',
 		'owner'
 	]
