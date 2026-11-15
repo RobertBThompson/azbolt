@@ -10,8 +10,9 @@
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
 	import LensSwitch from '$lib/shell/LensSwitch.svelte';
-	import { Tabs, Row, Btn, Blank, SourceNote } from '$lib/kit';
-	import { TASK_STATES, inOrder, isLate, taskLine } from '$lib/work.js';
+	import { Tabs, Row, Btn, Blank, FocusNote, SourceNote } from '$lib/kit';
+	import { inFocus, outOfView } from '$lib/spheres.svelte.js';
+	import { TASK_STATES, inOrder, isLate, spheresOf, taskLine } from '$lib/work.js';
 	import { work, kept, load } from '$lib/work.svelte.js';
 
 	const LENSES = [
@@ -21,10 +22,22 @@
 
 	let active = $state(0);
 	const when = $derived(TASK_STATES[active]);
-	const list = $derived(inOrder(work.tasks.filter((t) => t.state === when)));
+	/* A task is in the spheres of its endeavor's organization, and
+	   nowhere else. */
+	/** @param {import('$lib/work.js').Task} t */
+	const taskSpheres = (t) =>
+		spheresOf(
+			work.endeavors.find((e) => e.id === t.endeavor),
+			work.orgs
+		);
+	const inState = $derived(inOrder(work.tasks.filter((t) => t.state === when)));
+	const list = $derived(inFocus(inState, taskSpheres));
 	const tabs = $derived(
 		TASK_STATES.map((s) => {
-			const n = work.tasks.filter((t) => t.state === s).length;
+			const n = inFocus(
+				work.tasks.filter((t) => t.state === s),
+				taskSpheres
+			).length;
 			return s === 'Done' || !n ? s : `${s} ${n}`;
 		})
 	);
@@ -42,13 +55,19 @@
 <Screen>
 	<LensSwitch label="Action view" items={LENSES} at="/work" />
 	<Tabs items={tabs} {active} onpick={(i) => (active = i)} />
-	{#each list as t (t.id)}
+	<FocusNote
+		what="tasks here"
+		quiet={list.filter((x) => x.quiet).length}
+		hidden={outOfView(inState, taskSpheres)}
+	/>
+	{#each list as { item: t, quiet } (t.id)}
 		<Row
 			t={isLate(t) ? 'alert' : 'cool'}
 			href="/work/tasks/{t.id}"
 			title={t.name}
 			meta={taskLine(t, work.endeavors)}
 			trailing="›"
+			{quiet}
 		/>
 	{:else}
 		{#if work.source !== 'error'}

@@ -6,9 +6,22 @@
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
 	import LensSwitch from '$lib/shell/LensSwitch.svelte';
-	import { Hero, Banner, Tabs, Row, Seg, Alert, Btn, Note, Blank, SourceNote } from '$lib/kit';
+	import {
+		Hero,
+		Banner,
+		Tabs,
+		Row,
+		Seg,
+		Alert,
+		Btn,
+		Note,
+		Blank,
+		FocusNote,
+		SourceNote
+	} from '$lib/kit';
 	import { page } from '$app/stores';
-	import { ENDEAVOR_STAGES, nextOn, progressOf } from '$lib/work.js';
+	import { ENDEAVOR_STAGES, nextOn, progressOf, spheresOf } from '$lib/work.js';
+	import { inFocus, outOfView } from '$lib/spheres.svelte.js';
 	import { work, kept, load, orgOf } from '$lib/work.svelte.js';
 
 	const LENSES = [
@@ -20,7 +33,10 @@
 	let keep = $state(0);
 	const view = $derived($page.url.searchParams.get('state') ?? 'default');
 	const stage = $derived(ENDEAVOR_STAGES[active]);
-	const list = $derived(work.endeavors.filter((e) => e.stage === stage));
+	/** @param {import('$lib/work.js').Endeavor} e */
+	const ofEndeavor = (e) => spheresOf(e, work.orgs);
+	const inStage = $derived(work.endeavors.filter((e) => e.stage === stage));
+	const list = $derived(inFocus(inStage, ofEndeavor));
 	const none = $derived(kept() && work.endeavors.length === 0);
 
 	/**
@@ -83,8 +99,20 @@
 		<Note>Nothing is overwritten until you choose. Both versions stay in placement history.</Note>
 	{:else}
 		<Tabs items={ENDEAVOR_STAGES} {active} onpick={(i) => (active = i)} />
-		{#each list as e (e.id)}
-			<Row t="cool" href="/work/endeavors/{e.id}" title={e.name} meta={line(e)} trailing="›" />
+		<FocusNote
+			what="endeavors here"
+			quiet={list.filter((x) => x.quiet).length}
+			hidden={outOfView(inStage, ofEndeavor)}
+		/>
+		{#each list as { item: e, quiet } (e.id)}
+			<Row
+				t="cool"
+				href="/work/endeavors/{e.id}"
+				title={e.name}
+				meta={line(e)}
+				trailing="›"
+				{quiet}
+			/>
 		{:else}
 			{#if work.source !== 'error'}
 				<Blank>

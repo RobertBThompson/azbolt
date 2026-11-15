@@ -9,7 +9,16 @@
  * Retired, never deleted. A sphere that held a decade of jots should
  * stop being offered without taking them with it.
  */
-import { listSpheres, renameSphere, retireSphere, writeSphere } from './pb.js';
+import {
+	listOverlaps,
+	listSpheres,
+	renameSphere,
+	retireSphere,
+	writeOverlap,
+	writeSphere
+} from './pb.js';
+import { SAMPLE_OVERLAPS, pairKey, strength, throughFocus, focusTotal } from './focus.js';
+import { setSphere, shell } from './state.svelte.js';
 import { SPHERES, derivedSphere } from './spheres.js';
 
 /** @typedef {{ id: string, name: string, swatch: string, custom: boolean }} Sphere */
@@ -20,13 +29,101 @@ export const spheres = $state({ list: [], source: 'fixture', error: '', loaded: 
 /** Whether a sphere made here will outlive the session. */
 export const kept = () => spheres.source === 'live';
 
-export async function load() {
+/**
+ * How each pair of spheres overlaps, and the record behind each pair
+ * that does. The stand-ins come with a few so the samples show the
+ * idea; a Chief's own start with none.
+ * @type {{ map: import('./focus.js').Overlaps, ids: Record<string, string>, error: string }}
+ */
+export const overlaps = $state({ map: { ...SAMPLE_OVERLAPS }, ids: {}, error: '' });
+
+/** @type {Promise<void>|null} A read in flight, shared by everyone who asks during it. */
+let reading = null;
+
+export function load() {
+	reading ??= read().finally(() => (reading = null));
+	return reading;
+}
+
+async function read() {
 	const { data, source, error } = await listSpheres();
 	spheres.list = data;
 	spheres.source = source;
 	spheres.error = error ?? '';
+	if (source === 'live') {
+		try {
+			const read = await listOverlaps();
+			overlaps.map = read.overlaps;
+			overlaps.ids = read.ids;
+			overlaps.error = '';
+		} catch (/** @type {any} */ err) {
+			// Without them every sphere stands alone, which hides more than
+			// it should. Say so rather than look like a choice.
+			overlaps.map = {};
+			overlaps.ids = {};
+			overlaps.error = err?.message || 'The server did not answer.';
+		}
+	} else {
+		overlaps.map = source === 'error' ? {} : { ...SAMPLE_OVERLAPS };
+		overlaps.ids = {};
+		overlaps.error = '';
+	}
+	/* A focus on a sphere that is no longer there would hide everything.
+	   The stand-in keys mean nothing in an account's own list, and the
+	   other way round. */
+	if (shell.sphere !== 'all' && !placeable().some(([k]) => k === shell.sphere)) {
+		setSphere('all');
+	}
 	spheres.loaded = true;
 }
+
+/**
+ * @param {string} a @param {string} b
+ * @param {number} share  50, 25, or 0 for none
+ */
+export async function setOverlap(a, b, share) {
+	const key = pairKey(a, b);
+	const id = await writeOverlap(a, b, share, overlaps.ids[key] ?? '');
+	const map = { ...overlaps.map };
+	const ids = { ...overlaps.ids };
+	if (share) {
+		map[key] = share;
+		ids[key] = id;
+	} else {
+		delete map[key];
+		delete ids[key];
+	}
+	overlaps.map = map;
+	overlaps.ids = ids;
+}
+
+/** Whether a sphere is being looked through, rather than All life. */
+export const focused = () => shell.sphere !== 'all';
+
+/**
+ * How strongly a record stands in the current focus: 100, 50, 25 or 0.
+ * @param {string[]} keys  the spheres the record is in
+ */
+export const strengthOf = (keys) => strength(keys, shell.sphere, overlaps.map);
+
+/**
+ * A list as it reads through the current focus.
+ * @template T
+ * @param {T[]} items
+ * @param {(item: T) => string[]} spheresOf
+ */
+export const inFocus = (items, spheresOf) =>
+	throughFocus(items, spheresOf, shell.sphere, overlaps.map);
+
+/**
+ * A total as it reads through the current focus.
+ * @template T
+ * @param {T[]} items
+ * @param {(item: T) => string[]} spheresOf
+ * @param {(item: T) => number} valueOf
+ */
+export const totalInFocus = (items, spheresOf, valueOf) =>
+	focusTotal(items, spheresOf, valueOf, shell.sphere, overlaps.map);
 
 /**
  * Every sphere that can be chosen, All life first — it is the default
@@ -89,3 +186,11 @@ export async function retire(id) {
 	await retireSphere(id);
 	spheres.list = spheres.list.filter((s) => s.id !== id);
 }
+
+/**
+ * How many of a list the current focus puts out of view.
+ * @template T
+ * @param {T[]} items
+ * @param {(item: T) => string[]} spheresOf
+ */
+export const outOfView = (items, spheresOf) => items.length - inFocus(items, spheresOf).length;

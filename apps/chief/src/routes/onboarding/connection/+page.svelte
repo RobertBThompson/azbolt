@@ -6,9 +6,6 @@
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Prog, Banner, Field, Btn } from '$lib/kit';
-	import { setSphere } from '$lib/state.svelte.js';
-
-	setSphere('business');
 </script>
 
 <svelte:head><title>One connection · Chief</title></svelte:head>

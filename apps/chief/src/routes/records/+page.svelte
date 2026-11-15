@@ -30,6 +30,8 @@
 		inSentence,
 		needingAttention,
 		ORGS,
+		effectiveValue,
+		money,
 		netWorth,
 		netWorthOf,
 		ownBook,
@@ -40,11 +42,24 @@
 		upcomingPayment,
 		valueSummary
 	} from '$lib/assets.js';
+	import { focused, sphereOf, totalInFocus } from '$lib/spheres.svelte.js';
+	import { shell } from '$lib/state.svelte.js';
 
 	/* Decision 2 and 3: a figure belongs to an organization, and yours
 	   is your own organization's. The samples have no "you", so they
 	   show the total across the tops of every chain instead. */
 	const mine = Object.entries(ORGS).find(([, o]) => o.self)?.[0] ?? null;
+
+	/* Decision 10: through a sphere, asset value leads with what is in
+	   it and gives the related beside. What is owed and what you are
+	   worth are an organization's, whole, whatever is in focus. */
+	const inSphere = $derived(
+		totalInFocus(
+			activeAssets(),
+			(a) => a.spheres,
+			(a) => effectiveValue(a) ?? 0
+		)
+	);
 
 	const count = activeAssets().length;
 	const categories = categorySummary().used.length;
@@ -75,7 +90,10 @@
 <Screen>
 	<Stats
 		items={[
-			[short(assetValue()), 'Asset value'],
+			[
+				short(focused() ? inSphere.focused : assetValue()),
+				focused() ? 'In this sphere' : 'Asset value'
+			],
 			[short(owedTotal()), 'Liabilities'],
 			[short(mine ? netWorthOf(mine) : netWorth()), mine ? 'Your net worth' : 'Net worth']
 		]}
@@ -85,6 +103,11 @@
 		from them, and whose they are.
 	-->
 	<Blank>
+		{#if focused()}
+			Looking through {sphereOf(shell.sphere).name}: {money(inSphere.focused)} of assets are in it{inSphere.related
+				? `, and ${money(inSphere.related)} more in related spheres`
+				: ''}. Liabilities and net worth are not split by sphere.
+		{/if}
 		{#if unvalued || loose}
 			{[
 				unvalued ? `${unvalued} ${unvalued === 1 ? 'asset has' : 'assets have'} no value yet` : '',

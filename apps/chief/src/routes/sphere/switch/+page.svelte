@@ -11,14 +11,18 @@
 	 * and two Chiefs will not share them.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Banner, Blank, Btn, Field, Note, SourceNote } from '$lib/kit';
+	import { Banner, Blank, Btn, Field, Note, SectionHead, SourceNote } from '$lib/kit';
+	import { overlap } from '$lib/focus.js';
 	import {
 		addSphere,
 		kept,
 		load,
+		overlaps,
 		placeable,
 		rename,
 		retire,
+		setOverlap,
+		sphereOf,
 		spheres
 	} from '$lib/spheres.svelte.js';
 	import { shell, setSphere } from '$lib/state.svelte.js';
@@ -66,6 +70,27 @@
 		}
 	}
 
+	/** None, a quarter, a half — in the order the choice is offered. */
+	const SHARES = /** @type {[number, string][]} */ ([
+		[0, 'None'],
+		[25, '25%'],
+		[50, '50%']
+	]);
+
+	/** Every pair of spheres once, All life left out: it is all of them. */
+	const pairs = $derived.by(() => {
+		const keys = placeable()
+			.map(([k]) => k)
+			.filter((k) => k !== 'all');
+		/** @type {[string, string][]} */
+		const out = [];
+		for (let i = 0; i < keys.length; i++)
+			for (let j = i + 1; j < keys.length; j++) out.push([keys[i], keys[j]]);
+		return out;
+	});
+	/** @param {string} a @param {string} b */
+	const shareOf = (a, b) => overlap(a, b, overlaps.map);
+
 	const add = () =>
 		run(async () => {
 			await addSphere(adding);
@@ -83,8 +108,8 @@
 
 <Screen back="/sphere" nav={false}>
 	<Banner
-		title="You are writing into"
-		meta="Records you create land in the sphere you pick here."
+		title="Look through a sphere"
+		meta="What is in it stands forward, what is in a sphere it overlaps is set back, and the rest is out of view. All life shows everything alike."
 	/>
 
 	{#if spheres.source === 'error'}
@@ -140,13 +165,110 @@
 	{/if}
 	{#if fault}<Blank>{fault}</Blank>{/if}
 
+	{#if pairs.length}
+		<SectionHead label="How they overlap" count={pairs.filter(([a, b]) => shareOf(a, b)).length} />
+		{#if overlaps.error}
+			<SourceNote source="error" error={overlaps.error} onretry={load} />
+		{/if}
+		{#each pairs as [a, b] (a + b)}
+			<div class="pair">
+				<span class="names">
+					<span class="sw" style="background:{sphereOf(a).swatch}"></span>
+					{sphereOf(a).name}
+					<span class="amp">and</span>
+					<span class="sw" style="background:{sphereOf(b).swatch}"></span>
+					{sphereOf(b).name}
+				</span>
+				<span
+					class="choice"
+					role="group"
+					aria-label="How much {sphereOf(a).name} and {sphereOf(b).name} overlap"
+				>
+					{#each SHARES as [share, word] (share)}
+						<button
+							type="button"
+							class:on={shareOf(a, b) === share}
+							aria-pressed={shareOf(a, b) === share}
+							disabled={busy || !kept()}
+							onclick={() => run(() => setOverlap(a, b, share))}
+						>
+							{word}
+						</button>
+					{/each}
+				</span>
+			</div>
+		{/each}
+		{#if !kept()}
+			<Blank>These overlaps belong to the stand-ins. Yours are yours to set once you sign in.</Blank
+			>
+		{/if}
+	{/if}
+
 	<Note>
 		Spheres overlap and compete for the same hours — that is the point of naming them, not a problem
-		to fix. Nothing is hidden either way: All life still shows all of it.
+		to fix. Say how much each pair overlaps: by half, by a quarter, or not at all. Only people and
+		organizations are placed in a sphere; everything else is wherever its organization is.
 	</Note>
 </Screen>
 
 <style>
+	.pair {
+		display: flex;
+		flex-direction: column;
+		gap: 9px;
+		padding: 12px 14px;
+		border: 1px solid var(--glass-line);
+		border-radius: var(--r-sm);
+		background: var(--glass);
+		box-shadow: var(--glass-shadow);
+	}
+	.names {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 6px;
+		font-family: var(--font-label);
+		font-size: 13px;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		color: var(--ink);
+	}
+	.names .sw {
+		width: 10px;
+		height: 10px;
+	}
+	.amp {
+		font-family: var(--font-body, inherit);
+		font-weight: 400;
+		letter-spacing: 0;
+		color: var(--ink-3);
+	}
+	.choice {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 6px;
+	}
+	.choice button {
+		min-height: var(--tap-min);
+		border: 1px solid var(--glass-line);
+		border-radius: 999px;
+		background: var(--card);
+		font-family: var(--font-display);
+		font-size: 15px;
+		font-weight: 600;
+		color: var(--ink-3);
+		cursor: pointer;
+	}
+	.choice button.on {
+		background: var(--ink);
+		border-color: var(--ink);
+		color: #fff;
+	}
+	.choice button:disabled {
+		cursor: default;
+		opacity: 0.75;
+	}
+
 	.opt-row {
 		display: flex;
 		align-items: stretch;
@@ -172,6 +294,8 @@
 	}
 	.edit,
 	.add {
+		/* The label sits on a pale pane here, not on the dark field. */
+		--label-ink: var(--ink-3);
 		display: grid;
 		gap: 10px;
 		padding: 14px 16px;

@@ -27,6 +27,7 @@ const NOON = '2026-01-15 12:00:00.000Z';
 /* The app's own order for deleting: children before what they point at.
    Keep in step with OWNED in apps/chief/src/lib/pb.js. */
 const OWNED = [
+	'sphere_overlaps',
 	'tasks',
 	'endeavors',
 	'cash_entries',
@@ -146,6 +147,15 @@ async function write(coll, body) {
 }
 
 const sphere = await write('spheres', { name: `Check ${stamp}`, hue: '' });
+const sphere2 = await call('/api/collections/spheres/records', {
+	method: 'POST',
+	token: A.token,
+	body: JSON.stringify({ name: `Check other ${stamp}`, hue: '', owner: A.id })
+});
+if (sphere && sphere2.ok) {
+	const [a, b] = [sphere, sphere2.body.id].sort();
+	await write('sphere_overlaps', { a, b, share: '50' });
+} else bad('second sphere: could not make one to overlap');
 const org = await write('organizations', {
 	name: `Check me ${stamp}`,
 	code: 'C',

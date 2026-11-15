@@ -18,7 +18,8 @@
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
 	import LensSwitch from '$lib/shell/LensSwitch.svelte';
-	import { Alert, Btn, Field, Row, SourceNote, SphereTags, TypeBadge } from '$lib/kit';
+	import { Alert, Btn, Field, FocusNote, Row, SourceNote, SphereTags, TypeBadge } from '$lib/kit';
+	import { focused, inFocus, outOfView } from '$lib/spheres.svelte.js';
 	import { ORGS } from '$lib/data.js';
 	import { listOrganizations } from '$lib/pb.js';
 	import { orgType, perspective } from '$lib/orgtypes.js';
@@ -38,11 +39,13 @@
 	/** @param {import('$lib/pb.js').OrgRow[]} all */
 	function visible(all) {
 		const q = query.trim().toLowerCase();
-		return all.filter((o) => {
+		const found = all.filter((o) => {
 			if (code !== 'all' && o.code !== code) return false;
 			if (!q) return true;
 			return `${o.name} ${o.blurb} ${o.charter}`.toLowerCase().includes(q);
 		});
+		// Decision 10: set back or out of view by the sphere in focus.
+		return inFocus(found, (o) => o.spheres);
 	}
 
 	/**
@@ -77,13 +80,18 @@
 			</div>
 		{/if}
 
+		<FocusNote
+			what="organizations"
+			quiet={shown.filter((x) => x.quiet).length}
+			hidden={outOfView(data, (o) => o.spheres)}
+		/>
 		{#if source !== 'error' && shown.length === 0}
-			<p class="none">No organizations of that type.</p>
+			<p class="none">{focused() ? 'None in view.' : 'No organizations of that type.'}</p>
 		{:else}
 			<div class="grid">
-				{#each shown as o (o.id)}
+				{#each shown as { item: o, quiet } (o.id)}
 					{@const sample = ORGS[o.id]}
-					<a class="org edged" href="/organizations/{o.id}">
+					<a class="org edged" class:quiet href="/organizations/{o.id}">
 						<span class="top">
 							<TypeBadge code={o.code} showName={false} />
 							<span class="nm">{o.name}</span>
@@ -116,6 +124,16 @@
 </Screen>
 
 <style>
+	/* Related to the sphere in focus, not in it. */
+	.org.quiet {
+		background: var(--glass-dim);
+		box-shadow: none;
+		--edge: 0px;
+	}
+	.org.quiet .nm {
+		font-weight: 500;
+	}
+
 	.filter {
 		display: flex;
 		gap: 8px;

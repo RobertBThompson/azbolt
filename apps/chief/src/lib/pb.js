@@ -29,6 +29,12 @@ import { PEOPLE, ORGS } from './data.js';
  */
 export const pb = createPocketBase('', 'azbolt.chief.pb');
 
+/* The SDK cancels a request when an identical one starts before it
+   finishes, and the cancelled one fails. Two screens asking for the
+   same list at once is ordinary here — a layout and the page under it
+   — and one of them must not be told the server is down. */
+pb.autoCancellation(false);
+
 /** @typedef {'live'|'anon'|'fixture'|'error'} Source */
 
 /** @type {boolean|null} */
@@ -879,6 +885,7 @@ export function taskJot(id, organization) {
  * pointing at something already gone.
  */
 const OWNED = [
+	'sphere_overlaps',
 	'tasks',
 	'endeavors',
 	'cash_entries',
@@ -973,4 +980,50 @@ export async function changePassword(current, next) {
 /** Ask the server to email a reset link. It answers the same whether or not the address is known. */
 export function requestPasswordReset(/** @type {string} */ email) {
 	return pb.collection('users').requestPasswordReset(email);
+}
+
+/* ── How spheres overlap ────────────────────────────────────────────── */
+
+/**
+ * Every pair of spheres that overlaps, keyed for lookup. Read with the
+ * spheres themselves; a pair that is not here does not overlap.
+ * @returns {Promise<{ overlaps: Record<string, number>, ids: Record<string, string> }>}
+ */
+export async function listOverlaps() {
+	const rows = await pb.collection('sphere_overlaps').getFullList();
+	/** @type {Record<string, number>} */
+	const overlaps = {};
+	/** @type {Record<string, string>} */
+	const ids = {};
+	for (const r of rows) {
+		const key = r.a < r.b ? `${r.a}|${r.b}` : `${r.b}|${r.a}`;
+		overlaps[key] = Number(r.share);
+		ids[key] = r.id;
+	}
+	return { overlaps, ids };
+}
+
+/**
+ * Say how much two spheres overlap: 50, 25, or 0 for not at all. None
+ * is the absence of a record, so setting it removes one — this is a
+ * setting, not a record with a history.
+ * @param {string} a @param {string} b
+ * @param {number} share
+ * @param {string} [existing]  the pair's record id, when it has one
+ * @returns {Promise<string>} the pair's record id, or '' for none
+ */
+export async function writeOverlap(a, b, share, existing = '') {
+	const [lo, hi] = a < b ? [a, b] : [b, a];
+	if (!share) {
+		if (existing) await pb.collection('sphere_overlaps').delete(existing);
+		return '';
+	}
+	if (existing) {
+		await pb.collection('sphere_overlaps').update(existing, { share: String(share) });
+		return existing;
+	}
+	const row = await pb
+		.collection('sphere_overlaps')
+		.create({ a: lo, b: hi, share: String(share), owner: ownerId() });
+	return row.id;
 }

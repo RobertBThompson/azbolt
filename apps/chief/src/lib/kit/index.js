@@ -11,6 +11,7 @@ export { default as Chips } from './Chips.svelte';
 export { default as EmptyLive } from './EmptyLive.svelte';
 export { default as Expander } from './Expander.svelte';
 export { default as Facts } from './Facts.svelte';
+export { default as FocusNote } from './FocusNote.svelte';
 export { default as Field } from './Field.svelte';
 export { default as Filter } from './Filter.svelte';
 export { default as Hero } from './Hero.svelte';

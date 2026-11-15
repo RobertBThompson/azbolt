@@ -25,6 +25,8 @@
 		ownerLine,
 		sumValue
 	} from '$lib/assets.js';
+	import { focused, inFocus, outOfView, totalInFocus } from '$lib/spheres.svelte.js';
+	import { FocusNote } from '$lib/kit';
 
 	const cat = $derived($page.params.category ?? 'all');
 	const all = $derived(cat === 'all');
@@ -35,7 +37,7 @@
 	let q = $state('');
 	let show = $state($page.url.searchParams.get('show') === 'attention' ? 2 : 0);
 
-	const list = $derived(
+	const matching = $derived(
 		inCat.filter((a) => {
 			if (show === 1 && !isVerified(a)) return false;
 			if (show === 2 && !attention(a.id).length) return false;
@@ -46,6 +48,15 @@
 				.toLowerCase();
 			return hay.includes(needle);
 		})
+	);
+	/* Decision 10. An asset is in the spheres of whoever owns it. */
+	const list = $derived(inFocus(matching, (a) => a.spheres));
+	const total = $derived(
+		totalInFocus(
+			inCat,
+			(a) => a.spheres,
+			(a) => effectiveValue(a) ?? 0
+		)
 	);
 
 	/** @param {(typeof inCat)[number]} a */
@@ -60,8 +71,15 @@
 
 <Screen back="/records/assets" search nav={false}>
 	<PageHead
-		eyebrow="{inCat.length} {inCat.length === 1 ? 'asset' : 'assets'} · {money(sumValue(inCat))}"
+		eyebrow={focused()
+			? `${money(total.focused)} in focus${total.related ? ` · ${money(total.related)} related` : ''}`
+			: `${inCat.length} ${inCat.length === 1 ? 'asset' : 'assets'} · ${money(sumValue(inCat))}`}
 		title={all ? 'All assets' : categoryName(cat)}
+	/>
+	<FocusNote
+		what="assets here"
+		quiet={list.filter((x) => x.quiet).length}
+		hidden={outOfView(matching, (a) => a.spheres)}
 	/>
 	<Field label="Search assets" placeholder="Name, organization, sphere, claim" bind:value={q} />
 	<Tabs items={['All', 'Verified', 'Needs attention']} active={show} onpick={(i) => (show = i)} />
@@ -73,13 +91,14 @@
 		/>
 	{/if}
 
-	{#each list as a (a.id)}
+	{#each list as { item: a, quiet } (a.id)}
 		<Row
 			t="warm"
 			href="/records/assets/{a.id}"
 			title={a.name}
 			meta={meta(a)}
 			trailing={attention(a.id).length ? '⚠' : '›'}
+			{quiet}
 		/>
 	{:else}
 		<Blank>

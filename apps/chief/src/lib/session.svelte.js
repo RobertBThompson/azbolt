@@ -1,5 +1,6 @@
 import { pb } from './pb.js';
 import { rememberSphereFor } from './state.svelte.js';
+import { load as loadSpheres } from './spheres.svelte.js';
 
 /**
  * Chief's session, mirrored out of the PocketBase auth store into runes.
@@ -28,6 +29,8 @@ class Session {
 			   account, so signing in as someone else does not leave you
 			   in theirs. */
 			rememberSphereFor(this.user?.id ?? null);
+			/* A different account has different spheres and overlaps. */
+			loadSpheres();
 		});
 	}
 

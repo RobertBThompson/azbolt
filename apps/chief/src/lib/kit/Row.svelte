@@ -6,7 +6,7 @@
 	/* `icon` swaps the bead for a colourful icon tile — decoration only,
 	   for hub rows that open a whole section. `hue` picks the tile's fill:
 	   wine, blue, night, pop, green, clay or taupe. */
-	/** @type {{ title: string, meta?: string, trailing?: string, t?: string, href?: string|null, dot?: boolean, icon?: string, hue?: string }} */
+	/** @type {{ title: string, meta?: string, trailing?: string, t?: string, href?: string|null, dot?: boolean, icon?: string, hue?: string, quiet?: boolean }} */
 	let {
 		title,
 		meta = '',
@@ -15,7 +15,8 @@
 		href = null,
 		dot = true,
 		icon = '',
-		hue = 'wine'
+		hue = 'wine',
+		quiet = false
 	} = $props();
 	import Icon from './Icon.svelte';
 	import { tone } from './tone.js';
@@ -32,6 +33,7 @@
 	{href}
 	class="row"
 	class:link={!!href}
+	class:quiet
 	style="--t-ink:{c.ink}"
 >
 	{#if icon}
@@ -45,6 +47,19 @@
 </svelte:element>
 
 <style>
+	/* Related to the sphere in focus, not in it: still here, set back.
+	   Text stays at full contrast — only the pane recedes. */
+	.row.quiet {
+		min-height: 50px;
+		background: var(--glass-dim, rgba(255, 255, 255, 0.72));
+		box-shadow: none;
+		margin-inline: 10px;
+	}
+	.row.quiet .t {
+		font-size: 15px;
+		font-weight: 500;
+	}
+
 	/* A row is a pane like any other. It reads --pane-line and
 	   --pane-shadow so a container that is itself glass can ask its rows
 	   to sit flatter than they do on the open field. */

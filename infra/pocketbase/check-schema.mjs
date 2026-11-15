@@ -116,6 +116,7 @@ const EXPECTED = {
 		'archived',
 		'owner'
 	],
+	sphere_overlaps: ['a', 'b', 'share', 'owner'],
 	cash_entries: [
 		'label',
 		'organization',
