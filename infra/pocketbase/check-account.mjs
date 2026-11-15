@@ -28,6 +28,7 @@ const NOON = '2026-01-15 12:00:00.000Z';
    Keep in step with OWNED in apps/chief/src/lib/pb.js. */
 const OWNED = [
 	'sphere_overlaps',
+	'claims',
 	'tasks',
 	'endeavors',
 	'cash_entries',
@@ -205,6 +206,54 @@ await write('asset_events', {
 	currency: 'USD',
 	happened_on: NOON
 });
+const claim = await write('claims', {
+	asset,
+	kind: 'Agreement',
+	title: 'Check claim',
+	source: '',
+	storage: 'paper',
+	location: 'A drawer',
+	hash: '',
+	size: 0,
+	file_name: ''
+});
+
+/* A file kept on the server opens for its owner with a pass, and for
+   nobody without one. */
+if (claim) {
+	const form = new FormData();
+	form.append('file', new Blob(['chief check file']), 'check.txt');
+	form.append('storage', 'server');
+	const up = await fetch(`${base}/api/collections/claims/records/${claim}`, {
+		method: 'PATCH',
+		headers: { Authorization: A.token },
+		body: form
+	});
+	const rec = up.ok ? await up.json() : null;
+	if (!rec?.file) bad(`claims: the file was not stored (${up.status})`);
+	else {
+		ok('claims: a file is stored');
+		const bare = await fetch(`${base}/api/files/claims/${claim}/${rec.file}`);
+		bare.ok
+			? bad('claims: the file opens with no pass at all')
+			: ok('claims: the file is refused without a pass');
+		const pass = await call('/api/files/token', { method: 'POST', token: A.token });
+		const mine = await fetch(
+			`${base}/api/files/claims/${claim}/${rec.file}?token=${pass.body?.token}`
+		);
+		mine.ok && (await mine.text()) === 'chief check file'
+			? ok('claims: its owner reads back exactly what was stored')
+			: bad(`claims: its owner could not read it back (${mine.status})`);
+		const theirs = await call('/api/files/token', { method: 'POST', token: B.token });
+		const other = await fetch(
+			`${base}/api/files/claims/${claim}/${rec.file}?token=${theirs.body?.token}`
+		);
+		other.ok
+			? bad("claims: B opened A's file with B's own pass")
+			: ok("claims: B's pass does not open A's file");
+	}
+}
+
 await write('ownerships', {
 	holder_org: org,
 	held_asset: asset,

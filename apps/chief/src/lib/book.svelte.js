@@ -105,6 +105,28 @@ function shape(rows) {
 		}
 	}
 
+	for (const c of rows.claims) {
+		const a = assets[c.asset];
+		if (!a) continue;
+		a.claims.push({
+			id: c.id,
+			kind: c.kind,
+			title: c.title,
+			detail: [c.title, c.source].filter(Boolean).join(' · '),
+			source: c.source ?? '',
+			storage: c.storage,
+			location: c.location ?? '',
+			fileName: c.file_name ?? '',
+			stored: c.file ?? '',
+			size: c.size ?? 0,
+			hash: c.hash ?? '',
+			checked: String(c.checked_on ?? '').slice(0, 10),
+			// Checked is the only thing that makes a claim count: a file
+			// compared with its fingerprint, or paper the Chief has seen.
+			verified: !!c.checked_on
+		});
+	}
+
 	/** @type {typeof events} */
 	const happened = [];
 	// Latest first, so that of two things on one day the one recorded

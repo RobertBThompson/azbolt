@@ -117,6 +117,21 @@ const EXPECTED = {
 		'owner'
 	],
 	sphere_overlaps: ['a', 'b', 'share', 'owner'],
+	claims: [
+		'asset',
+		'kind',
+		'title',
+		'source',
+		'storage',
+		'location',
+		'file',
+		'file_name',
+		'size',
+		'hash',
+		'checked_on',
+		'archived',
+		'owner'
+	],
 	cash_entries: [
 		'label',
 		'organization',

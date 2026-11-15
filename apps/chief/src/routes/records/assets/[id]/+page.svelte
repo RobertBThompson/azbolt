@@ -138,7 +138,7 @@
 	{/if}
 
 	<SectionHead label="Claims & files" t="warm" count={a.claims.length} />
-	{#each a.claims as c (c.kind)}
+	{#each a.claims as c, i (i)}
 		<Row
 			t="warm"
 			href="/records/assets/{id}/proof"

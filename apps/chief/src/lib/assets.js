@@ -190,7 +190,16 @@ export const categoryName = (id) =>
 /**
  * @typedef {'Ownership token'|'Title / provenance'|'Agreement'|'Statement'|
  *           'Storage record'|'Insurance'|'Movement authorization'} ClaimKind
- * @typedef {{ kind: ClaimKind, detail: string, verified: boolean }} Claim
+ * @typedef {'server'|'elsewhere'|'paper'|'token'} ClaimStorage
+ * @typedef {{
+ *   kind: ClaimKind, detail: string, verified: boolean,
+ *   id?: string, title?: string, source?: string,
+ *   storage?: ClaimStorage, location?: string,
+ *   fileName?: string, stored?: string, size?: number, hash?: string,
+ *   checked?: string
+ * }} Claim  The first three are all the samples have. An account's own
+ *           claim also says where the file is kept and carries its
+ *           fingerprint; `checked` is the last day it was compared.
  *
  * @typedef {{
  *   name: string, category: string, blurb: string,
@@ -216,6 +225,31 @@ export const categoryName = (id) =>
  * half is 5,000, and the smallest share Chief can record is 1.
  */
 export const SHARE_UNITS = 10_000;
+
+/** The seven things a claim can be, in the order they are offered. */
+export const CLAIM_KINDS = /** @type {ClaimKind[]} */ ([
+	'Title / provenance',
+	'Agreement',
+	'Statement',
+	'Insurance',
+	'Storage record',
+	'Movement authorization',
+	'Ownership token'
+]);
+
+/**
+ * Where a claim's file is kept, in words. A token is in the schema and
+ * not offered yet.
+ */
+export const CLAIM_STORAGE = {
+	server: 'On the Chief server',
+	elsewhere: 'Somewhere else',
+	paper: 'On paper',
+	token: 'As a token'
+};
+
+/** @param {string} id @param {string} claimId */
+export const claimOf = (id, claimId) => ASSETS[id]?.claims.find((c) => c.id === claimId) ?? null;
 
 /** Claims that speak to who holds the thing, as opposed to where it is. */
 const OWNERSHIP_CLAIMS = ['Ownership token', 'Title / provenance', 'Agreement', 'Statement'];

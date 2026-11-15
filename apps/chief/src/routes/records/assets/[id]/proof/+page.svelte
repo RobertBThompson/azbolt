@@ -3,7 +3,8 @@
 	 * Assets — claims and files.
 	 * What is on file to show the asset is what it is said to be, held
 	 * where it is said to be, by whom. A tick is a claim that has been
-	 * checked; a dash is one that has not, and says so.
+	 * checked — its file compared with its fingerprint, or the paper
+	 * looked at; a dash is one that has not, and says so.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
 	import { PageHead, Row, Btn, Blank } from '$lib/kit';
@@ -21,12 +22,12 @@
 	<PageHead
 		eyebrow={a.name}
 		title="Claims & files"
-		meta="{verified} of {a.claims.length} verified"
+		meta="{verified} of {a.claims.length} checked"
 	/>
-	{#each a.claims as c (c.kind)}
+	{#each a.claims as c, i (i)}
 		<Row
 			t="warm"
-			href="/records/assets/{id}/proof/record"
+			href={c.id ? `/records/assets/${id}/proof/${c.id}` : `/records/assets/${id}/proof/record`}
 			title={c.kind}
 			meta={c.detail}
 			trailing={c.verified ? '✓' : '—'}

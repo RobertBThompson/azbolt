@@ -463,6 +463,7 @@ const STARTING_CATEGORIES = [
  *   liabilities: Record<string, any>[],
  *   cash: Record<string, any>[],
  *   events: Record<string, any>[],
+ *   claims: Record<string, any>[],
  *   organizations: OrgRow[]
  * }} BookRows
  */
@@ -476,17 +477,27 @@ export function readBook() {
 		async () => {
 			await selfOrganization();
 			const live = { filter: 'archived = null' };
-			const [categories, assets, valuations, ownerships, liabilities, cash, events, organizations] =
-				await Promise.all([
-					ownCategories(),
-					pb.collection('assets').getFullList({ sort: 'name', filter: 'archived = null' }),
-					pb.collection('valuations').getFullList({ sort: 'valued_on' }),
-					pb.collection('ownerships').getFullList({ sort: 'created', filter: 'archived = null' }),
-					pb.collection('liabilities').getFullList({ sort: 'name', ...live }),
-					pb.collection('cash_entries').getFullList({ sort: '-date', ...live }),
-					pb.collection('asset_events').getFullList({ sort: 'happened_on,created', ...live }),
-					pb.collection('organizations').getFullList({ sort: 'name', filter: 'archived = null' })
-				]);
+			const [
+				categories,
+				assets,
+				valuations,
+				ownerships,
+				liabilities,
+				cash,
+				events,
+				claims,
+				organizations
+			] = await Promise.all([
+				ownCategories(),
+				pb.collection('assets').getFullList({ sort: 'name', filter: 'archived = null' }),
+				pb.collection('valuations').getFullList({ sort: 'valued_on' }),
+				pb.collection('ownerships').getFullList({ sort: 'created', filter: 'archived = null' }),
+				pb.collection('liabilities').getFullList({ sort: 'name', ...live }),
+				pb.collection('cash_entries').getFullList({ sort: '-date', ...live }),
+				pb.collection('asset_events').getFullList({ sort: 'happened_on,created', ...live }),
+				pb.collection('claims').getFullList({ sort: 'created', ...live }),
+				pb.collection('organizations').getFullList({ sort: 'name', filter: 'archived = null' })
+			]);
 			return /** @type {BookRows} */ ({
 				categories,
 				assets,
@@ -502,6 +513,7 @@ export function readBook() {
 				liabilities,
 				cash,
 				events,
+				claims,
 				organizations: organizations.map(organization)
 			});
 		},
@@ -514,6 +526,7 @@ export function readBook() {
 			liabilities: [],
 			cash: [],
 			events: [],
+			claims: [],
 			organizations: []
 		})
 	);
@@ -886,6 +899,7 @@ export function taskJot(id, organization) {
  */
 const OWNED = [
 	'sphere_overlaps',
+	'claims',
 	'tasks',
 	'endeavors',
 	'cash_entries',
@@ -1026,4 +1040,79 @@ export async function writeOverlap(a, b, share, existing = '') {
 		.collection('sphere_overlaps')
 		.create({ a: lo, b: hi, share: String(share), owner: ownerId() });
 	return row.id;
+}
+
+/* ── Claims ─────────────────────────────────────────────────────────── */
+
+/**
+ * Put a claim on file. When the file is to be kept here it is sent
+ * with the record; otherwise only its fingerprint is.
+ *
+ * @param {{
+ *   asset: string, kind: string, title: string, source: string,
+ *   storage: 'server'|'elsewhere'|'paper', location: string,
+ *   hash: string, size: number, fileName: string,
+ *   file?: File|null, checked?: string
+ * }} c  `checked`: YYYY-MM-DD when the file was fingerprinted just now
+ * @returns {Promise<string>} the claim's id
+ */
+export async function createClaim(c) {
+	const body = new FormData();
+	const put = (/** @type {string} */ k, /** @type {string} */ v) => body.append(k, v);
+	put('asset', c.asset);
+	put('kind', c.kind);
+	put('title', c.title.trim());
+	put('source', c.source.trim());
+	put('storage', c.storage);
+	put('location', c.location.trim());
+	put('hash', c.hash);
+	put('size', String(c.size));
+	put('file_name', c.fileName);
+	if (c.checked) put('checked_on', `${c.checked} 12:00:00.000Z`);
+	put('owner', ownerId());
+	if (c.storage === 'server' && c.file) body.append('file', c.file);
+	const row = await pb.collection('claims').create(body);
+	return row.id;
+}
+
+/**
+ * Record that a claim was checked today — its file matched its
+ * fingerprint, or, for paper, the Chief looked at it.
+ * @param {string} id
+ * @param {string} day  YYYY-MM-DD
+ */
+export function markClaimChecked(id, day) {
+	return pb.collection('claims').update(id, { checked_on: `${day} 12:00:00.000Z` });
+}
+
+/**
+ * A claim whose file no longer matches its fingerprint is not checked,
+ * whatever it was before. It stops counting until it matches again.
+ * @param {string} id
+ */
+export function markClaimFailed(id) {
+	return pb.collection('claims').update(id, { checked_on: null });
+}
+
+/**
+ * The bytes of a claim's file as the server holds them now. Files are
+ * protected, so this asks for a short-lived pass first; the link is
+ * never one that works on its own.
+ * @param {string} id
+ * @param {string} stored  the stored file name
+ * @returns {Promise<ArrayBuffer>}
+ */
+export async function claimFile(id, stored) {
+	const url = await claimFileUrl(id, stored);
+	const res = await fetch(url);
+	if (!res.ok) throw new Error(`The file could not be read (${res.status}).`);
+	return res.arrayBuffer();
+}
+
+/** @param {string} id @param {string} stored */
+export async function claimFileUrl(id, stored) {
+	const token = await pb.files.getToken();
+	return pb.files.getURL({ id, collectionName: 'claims', collectionId: 'claims' }, stored, {
+		token
+	});
 }
