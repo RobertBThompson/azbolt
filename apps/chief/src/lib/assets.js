@@ -174,8 +174,26 @@ const CATEGORY_NAMES = [
 	'Department'
 ];
 
-/** @type {{ id: string, name: string }[]} */
-export const ASSET_CATEGORIES = CATEGORY_NAMES.map((name) => ({ id: slug(name), name }));
+/**
+ * `kind: 'money'` marks the one category the Money section is built
+ * on. An account has exactly one of its own, fixed. The samples have
+ * no such category and treat their two account categories as money.
+ * @typedef {{ id: string, name: string, kind?: string }} Category
+ */
+
+/** @type {Category[]} */
+export const ASSET_CATEGORIES = CATEGORY_NAMES.map((name) => ({
+	id: slug(name),
+	name,
+	...(name === 'Cash account' || name === 'Savings account' ? { kind: 'money' } : {})
+}));
+
+/** Whether a category is money: bank accounts, cash, wallets. @param {string} id */
+export const isMoneyCategory = (id) =>
+	ASSET_CATEGORIES.some((c) => c.id === id && c.kind === 'money');
+
+/** The fixed Money category of the open book, if it has one. */
+export const moneyCategory = () => ASSET_CATEGORIES.find((c) => c.kind === 'money') ?? null;
 
 /**
  * An asset can be saved before it is filed anywhere, so no category is
@@ -1433,10 +1451,12 @@ export const direction = (type) => (INWARD.includes(type) ? 'in' : 'out');
  * @typedef {{
  *   id: string, label: string, org: string, type: string, category: string,
  *   amount: number, frequency: string, date: Date,
- *   settles?: string, period?: string, of?: string, liability?: string
+ *   settles?: string, period?: string, of?: string, liability?: string,
+ *   asset?: string, account?: string
  * }} Tx  `settles`/`period`: the repeating line and month this entry
  *        paid. `of`: on a worked-out line, the recorded entry it is a
- *        later date of.
+ *        later date of. `asset`: what the entry is about. `account`:
+ *        the money asset it moves through.
  */
 
 /** Lines that repeat. `day` is the day of the month they land on. */
@@ -1603,6 +1623,122 @@ export function transactions(now = new Date()) {
 	}
 	return out.sort((a, b) => b.date.getTime() - a.date.getTime());
 }
+
+/* ── Money is an asset ──────────────────────────────────────────────── */
+
+/**
+ * Every dated value of every asset in an account's own book, oldest
+ * first. A money asset's balance is its value, so this is where the
+ * history of a balance lives.
+ * @type {Record<string, { amount: number, date: Date }[]>}
+ */
+const VALUES = {};
+
+/** Bank accounts, cash and wallets still held. */
+export const moneyAssets = () => activeAssets().filter((a) => isMoneyCategory(a.category));
+
+/**
+ * What an asset was worth on a day: its latest value on or before it.
+ * @param {string} id
+ * @param {Date} on
+ * @param {Record<string, { amount: number, date: Date }[]>} [values]
+ * @returns {number|null}
+ */
+export function valueOn(id, on, values = VALUES) {
+	let found = null;
+	for (const v of values[id] ?? []) {
+		if (v.date <= on) found = v.amount;
+		else break;
+	}
+	return found;
+}
+
+/** @param {string} id */
+export const valuesOf = (id) => VALUES[id] ?? [];
+
+/**
+ * The bottom line, read off the balances.
+ *
+ * Chief does not keep every transaction. What it keeps is each money
+ * asset's balance as it was read, and the cash lines tied to things
+ * held or owed. So for a stretch of time there are three figures:
+ *
+ *   change     how much the balances moved, start to now
+ *   tracked    how much of that the tied cash lines account for
+ *   untracked  the rest — lunch, and everything else not worth a line
+ *
+ * An account with no reading before the stretch began is counted from
+ * its first reading, so opening an account is not mistaken for income.
+ * `known` is false until some account has two readings to compare.
+ *
+ * @param {string[]} ids   the money assets
+ * @param {Date} from      start of the stretch
+ * @param {Date} now
+ * @param {number} tracked net of cash lines that moved in the stretch
+ * @param {Record<string, { amount: number, date: Date }[]>} [values]
+ */
+export function bottomLine(ids, from, now, tracked, values = VALUES) {
+	let start = 0;
+	let end = 0;
+	let known = false;
+	for (const id of ids) {
+		const readings = (values[id] ?? []).filter((v) => v.date <= now);
+		if (!readings.length) continue;
+		const last = readings[readings.length - 1].amount;
+		const before = valueOn(id, from, values);
+		const first = before ?? readings[0].amount;
+		if (before !== null ? readings[readings.length - 1].date > from : readings.length > 1) {
+			known = true;
+		}
+		start += first;
+		end += last;
+	}
+	const change = end - start;
+	return { start, end, change, tracked, untracked: change - tracked, known };
+}
+
+/**
+ * Runway, read off the balances: what is in the money assets now,
+ * against how fast they have been falling.
+ *
+ * The fall is measured over up to the last three months, from the
+ * earliest reading in that window, so it includes everything that was
+ * never entered. Balances that held or grew give no months: there is
+ * nothing running out. Less than two weeks between readings is too
+ * short to call a trend.
+ *
+ * @param {string[]} ids  the money assets
+ * @param {Date} [now]
+ * @param {Record<string, { amount: number, date: Date }[]>} [values]
+ * @returns {{ liquid: number, monthly: number|null, months: number|null, days: number }}
+ */
+export function runwayFromBalances(ids, now = new Date(), values = VALUES) {
+	const back = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+	let liquid = 0;
+	let was = 0;
+	let earliest = now;
+	for (const id of ids) {
+		const readings = (values[id] ?? []).filter((v) => v.date <= now);
+		if (!readings.length) continue;
+		liquid += readings[readings.length - 1].amount;
+		// The balance three months back, or the first one after that.
+		const then = [...readings].reverse().find((v) => v.date <= back) ?? readings[0];
+		const from = then.date < back ? back : then.date;
+		was += then.amount;
+		if (from < earliest) earliest = from;
+	}
+	const days = Math.round((startOfDay(now).getTime() - startOfDay(earliest).getTime()) / DAY);
+	if (days < 14) return { liquid, monthly: null, months: null, days };
+	const monthly = Math.round(((was - liquid) / days) * 30.44);
+	if (monthly <= 0) return { liquid, monthly, months: null, days };
+	return { liquid, monthly, months: liquid / monthly, days };
+}
+
+/** Cash lines that are about an asset. @param {string} assetId */
+export const cashAbout = (assetId) => transactions().filter((t) => t.asset === assetId);
+
+/** Cash lines that move through a money asset. @param {string} assetId */
+export const cashThrough = (assetId) => transactions().filter((t) => t.account === assetId);
 
 /** The month a date falls in, as YYYY-MM. @param {Date} d */
 export const periodOf = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
@@ -1970,14 +2106,16 @@ function refill(into, from) {
  * @param {{
  *   assets: Record<string, Asset>, links: Link[],
  *   liabilities: Record<string, Liability>, orgs: Record<string, any>,
- *   categories: { id: string, name: string }[],
+ *   categories: Category[],
  *   events: { asset: string, type: string, detail: string, age: number }[],
- *   cash?: Tx[]
+ *   cash?: Tx[],
+ *   values?: Record<string, { amount: number, date: Date }[]>
  * }} next
  * @param {'sample'|'own'} which
  */
 function fill(next, which) {
 	OWN_CASH.splice(0, OWN_CASH.length, ...(next.cash ?? []));
+	refill(VALUES, next.values ?? {});
 	refill(ASSETS, next.assets);
 	refill(LIABILITIES, next.liabilities);
 	refill(ORGS, next.orgs);
@@ -1993,7 +2131,8 @@ function fill(next, which) {
  * @param {{
  *   assets: Record<string, Asset>, links: Link[], orgs: Record<string, any>,
  *   liabilities: Record<string, Liability>, cash: Tx[],
- *   categories: { id: string, name: string }[],
+ *   values: Record<string, { amount: number, date: Date }[]>,
+ *   categories: Category[],
  *   events: { asset: string, type: string, detail: string, age: number }[]
  * }} own
  */

@@ -221,9 +221,21 @@ function shape(rows) {
 			date: new Date(y, m - 1, d),
 			settles: r.settles || '',
 			period: r.period || '',
-			liability: r.liability || ''
+			liability: r.liability || '',
+			asset: r.asset && assets[r.asset] ? r.asset : '',
+			account: r.account && assets[r.account] ? r.account : ''
 		});
 	}
 
-	return { assets, links, liabilities, cash, orgs, categories: rows.categories, events };
+	/** @type {Record<string, { amount: number, date: Date }[]>} */
+	const values = {};
+	for (const [id, history] of Object.entries(byAsset)) {
+		if (!assets[id]) continue;
+		values[id] = history.map((v) => {
+			const [y, m, d] = String(v.valued_on).slice(0, 10).split('-').map(Number);
+			return { amount: v.amount, date: new Date(y, m - 1, d) };
+		});
+	}
+
+	return { assets, links, liabilities, cash, values, orgs, categories: rows.categories, events };
 }

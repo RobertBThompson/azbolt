@@ -42,7 +42,7 @@ const EXPECTED = {
 		'owner'
 	],
 	jots: ['text', 'organization', 'sphered', 'people', 'archived', 'owner'],
-	asset_categories: ['name', 'archived', 'owner'],
+	asset_categories: ['name', 'kind', 'archived', 'owner'],
 	assets: [
 		'name',
 		'category',
@@ -144,6 +144,8 @@ const EXPECTED = {
 		'settles',
 		'period',
 		'liability',
+		'asset',
+		'account',
 		'archived',
 		'owner'
 	]

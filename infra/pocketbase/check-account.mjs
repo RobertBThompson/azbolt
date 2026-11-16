@@ -190,6 +190,29 @@ await write('people', {
 });
 const jot = await write('jots', { text: 'A check jot', organization: org, sphered: NOON });
 const category = await write('asset_categories', { name: `Check ${stamp}` });
+/* The fixed Money category: made once, and neither renamed nor deleted. */
+{
+	const m = await call('/api/collections/asset_categories/records', {
+		method: 'POST',
+		token: A.token,
+		body: JSON.stringify({ name: 'Money', kind: 'money', owner: A.id })
+	});
+	if (!m.ok) bad(`asset_categories: could not make the Money category (${m.status})`);
+	else {
+		ok('asset_categories: Money category made');
+		const rename = await call(`/api/collections/asset_categories/records/${m.body.id}`, {
+			method: 'PATCH',
+			token: A.token,
+			body: JSON.stringify({ name: 'Renamed' })
+		});
+		rename.ok ? bad('asset_categories: Money was renamed') : ok('asset_categories: Money cannot be renamed');
+		const gone = await call(`/api/collections/asset_categories/records/${m.body.id}`, {
+			method: 'DELETE',
+			token: A.token
+		});
+		gone.ok ? bad('asset_categories: Money was deleted') : ok('asset_categories: Money cannot be deleted');
+	}
+}
 const asset = await write('assets', {
 	name: 'Check asset',
 	category,
@@ -458,7 +481,7 @@ console.log('\nDeleting single records as A');
 
 console.log('\nDeleting A, the way the app does');
 for (const coll of OWNED) {
-	const list = await call(`/api/collections/${coll}/records?perPage=200&fields=id`, {
+	const list = await call(`/api/collections/${coll}/records?perPage=200`, {
 		token: A.token
 	});
 	if (!list.ok) {
@@ -467,6 +490,8 @@ for (const coll of OWNED) {
 	}
 	let failed = 0;
 	for (const r of list.body.items) {
+		// The fixed Money category goes with the account, not before it.
+		if (coll === 'asset_categories' && r.kind === 'money') continue;
 		const del = await call(`/api/collections/${coll}/records/${r.id}`, {
 			method: 'DELETE',
 			token: A.token

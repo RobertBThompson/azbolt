@@ -18,10 +18,14 @@
 		CASH_TYPES,
 		EXPENSE_CATEGORIES,
 		FREQUENCIES,
+		ASSETS,
+		LIABILITIES,
 		ORGS,
 		direction,
 		dollars,
+		isMoneyCategory,
 		money,
+		moneyAssets,
 		ownBook
 	} from '$lib/assets.js';
 	import { readAmount } from '$lib/amount.js';
@@ -43,6 +47,26 @@
 		.map(([id, o]) => ({ value: id, label: o.self ? `${o.name} · you` : o.name }));
 	/* Yours unless told otherwise; the samples have no "you". */
 	const me = Object.entries(ORGS).find(([, o]) => o.self)?.[0];
+
+	/* The money account it moves through, and what it is for: a loan or
+	   other debt, something held, or nothing — a bill going out or income
+	   coming in. Everyday spending is not entered at all; the balances
+	   already show it. */
+	const accounts = moneyAssets().map((a) => ({ value: a.id, label: a.name }));
+	const ties = [
+		{ value: '', label: inward ? 'Nothing — income' : 'Nothing — a bill' },
+		...Object.entries(ASSETS)
+			.filter(([, a]) => !isMoneyCategory(a.category))
+			.map(([id, a]) => ({ value: `asset:${id}`, label: a.name })),
+		...Object.entries(LIABILITIES).map(([id, l]) => ({
+			value: `liability:${id}`,
+			label: `${l.name} · owed`
+		}))
+	];
+	const asked = $page.url.searchParams.get('for') ?? '';
+
+	let account = $state(accounts[0]?.value ?? '');
+	let tie = $state(ties.some((t) => t.value === asked) ? asked : '');
 
 	let label = $state('');
 	let type = $state(types[0]);
@@ -82,7 +106,10 @@
 				category,
 				amount: dollars(amount),
 				frequency,
-				day: date
+				day: date,
+				account,
+				asset: tie.startsWith('asset:') ? tie.slice(6) : '',
+				liability: tie.startsWith('liability:') ? tie.slice(10) : ''
 			});
 			await reopenBook();
 			await goto('/records/money', { replaceState: true });
@@ -101,7 +128,20 @@
 	{:else}
 		<Banner t="warm" title={sentence} meta="{frequency} · {date}. Change any part below." />
 		{#if own}
-			<Field label="What it was" placeholder="For example: groceries" bind:value={label} required />
+			<Field
+				label="What it was"
+				placeholder={inward ? 'For example: paycheck' : 'For example: car payment'}
+				bind:value={label}
+				required
+			/>
+			<Select label="For" options={ties} bind:value={tie} />
+			{#if accounts.length}
+				<Select
+					label={inward ? 'Paid into' : 'Paid from'}
+					options={accounts}
+					bind:value={account}
+				/>
+			{/if}
 		{/if}
 		<Select label="Cash type" options={types} bind:value={type} />
 		<Select label="Organization" options={orgs} bind:value={org} />
@@ -113,7 +153,7 @@
 			{#if fault}<Alert title="Not saved" meta={fault} />{/if}
 			<Btn
 				t="warm"
-				label={busy ? 'Saving…' : 'Save transaction'}
+				label={busy ? 'Saving…' : 'Save payment'}
 				onclick={save}
 				disabled={!ready || busy}
 			/>

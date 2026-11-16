@@ -33,11 +33,18 @@
 	import { destroy, updateAsset } from '$lib/pb.js';
 	import {
 		ASSETS,
+		LIABILITIES,
 		attention,
+		cashAbout,
+		cashThrough,
+		direction,
+		isMoneyCategory,
+		valuesOf,
 		categoryName,
 		events,
 		money,
 		owedAgainst,
+		transactions,
 		ownBook,
 		ownerLine,
 		ownersOf,
@@ -52,6 +59,46 @@
 	const owners = $derived(ownersOf({ cls: 'asset', id }));
 	const owed = $derived(owedAgainst(id));
 	const history = $derived(events(id));
+
+	/* A money account's value is its balance. Under it: the lines that
+	   go through it. Any other asset shows the lines that are for it —
+	   its own and those on what is owed against it. */
+	const isMoney = $derived(isMoneyCategory(a.category));
+	const readings = $derived(valuesOf(id));
+	const moved = $derived(
+		readings.length > 1
+			? readings[readings.length - 1].amount - readings[readings.length - 2].amount
+			: null
+	);
+	const lines = $derived(
+		(isMoney
+			? cashThrough(id)
+			: [
+					...cashAbout(id),
+					...owed.flatMap((l) => transactions().filter((t) => t.liability === l.id && !t.asset))
+				]
+		).filter((t) => !t.of)
+	);
+	/** @param {import('$lib/assets.js').Tx} t */
+	const amountOf = (t) => `${direction(t.type) === 'in' ? '+' : '−'}${money(t.amount)}`;
+	/** @param {import('$lib/assets.js').Tx} t */
+	const lineMeta = (t) =>
+		[
+			t.frequency,
+			isMoney
+				? t.liability
+					? LIABILITIES[t.liability]?.name
+					: t.asset
+						? ASSETS[t.asset]?.name
+						: direction(t.type) === 'in'
+							? 'income'
+							: 'a bill'
+				: t.account
+					? `through ${ASSETS[t.account]?.name ?? 'an account'}`
+					: ''
+		]
+			.filter(Boolean)
+			.join(' · ');
 
 	const ownerHref = $derived(
 		owners.length === 1
@@ -124,10 +171,39 @@
 	<Row
 		t="warm"
 		href="/records/assets/{id}/valuation"
-		title="Value"
-		meta={valuedLine(a)}
+		title={isMoney ? 'Balance' : 'Value'}
+		meta={isMoney && moved !== null
+			? `${valuedLine(a).replace('reviewed', 'read')} · ${moved < 0 ? 'down' : 'up'} ${money(Math.abs(moved))} since the reading before`
+			: isMoney
+				? valuedLine(a).replace('reviewed', 'read')
+				: valuedLine(a)}
 		trailing={a.value === null ? '⚠' : '›'}
 	/>
+	{#if isMoney && ownBook() && !a.letGo}
+		<Btn t="warm" href="/records/assets/{id}/valuation?update" label="Update balance" />
+	{/if}
+
+	<SectionHead
+		label={isMoney ? 'Through this account' : 'Money tied to it'}
+		t="warm"
+		count={lines.length}
+	/>
+	{#each lines as t (t.id)}
+		<Row
+			t="warm"
+			href="/records/money/entry/{t.id}"
+			title={t.label}
+			meta={lineMeta(t)}
+			trailing={amountOf(t)}
+		/>
+	{:else}
+		<Blank>
+			{isMoney ? 'No payments say they go through this account.' : 'No payments are tied to it.'}
+		</Blank>
+	{/each}
+	{#if ownBook() && !a.letGo && !isMoney}
+		<Btn primary={false} href="/records/money/amount?for=asset:{id}" label="Add a payment for it" />
+	{/if}
 	{#if a.tangibility === 'Tangible'}
 		<Row
 			t="warm"

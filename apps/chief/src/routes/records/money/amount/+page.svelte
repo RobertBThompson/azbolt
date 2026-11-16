@@ -9,6 +9,10 @@
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Seg, Amt, Btn, Note } from '$lib/kit';
 	import { readAmount } from '$lib/amount.js';
+	import { page } from '$app/stores';
+
+	/* Carried through when the payment was started from an asset. */
+	const tied = $page.url.searchParams.get('for');
 
 	let dir = $state(0);
 	/* Empty, not a sample figure. A box that opens at $1,240.00 is one
@@ -16,7 +20,7 @@
 	let amount = $state('');
 	const read = $derived(readAmount(amount));
 	const next = $derived(
-		`/records/money/confirm?dir=${dir === 0 ? 'out' : 'in'}&amount=${read ?? ''}`
+		`/records/money/confirm?dir=${dir === 0 ? 'out' : 'in'}&amount=${read ?? ''}${tied ? `&for=${encodeURIComponent(tied)}` : ''}`
 	);
 </script>
 

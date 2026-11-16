@@ -441,12 +441,12 @@ export async function writeJot(text) {
  * once, the first time the book is read, and the Chief's to rename,
  * add to or retire from then on.
  */
+/* Bank accounts, cash and wallets are not here: they are all Money, the
+   fixed category made below. */
 const STARTING_CATEGORIES = [
 	'Real estate',
 	'Vehicle',
 	'Equipment',
-	'Cash account',
-	'Savings account',
 	'Investment',
 	'Stock',
 	'Copyright',
@@ -469,7 +469,7 @@ const STARTING_CATEGORIES = [
 ];
 
 /**
- * @typedef {{ id: string, name: string }} CategoryRow
+ * @typedef {{ id: string, name: string, kind?: string }} CategoryRow
  * @typedef {{ id: string, asset: string, amount: number, currency: string,
  *             valued_on: string, note: string }} ValuationRow
  * @typedef {{ id: string, holder: { cls: 'organization'|'asset', id: string },
@@ -569,7 +569,26 @@ async function ownCategories() {
 		}
 		rows = await list();
 	}
-	return rows.filter((r) => !r.archived).map((r) => ({ id: r.id, name: r.name }));
+	/* Money is the one category every account has. Made here for an
+	   account opened before it existed; an ordinary category already
+	   called Money becomes it instead of clashing with it. */
+	if (!rows.some((r) => r.kind === 'money')) {
+		const named = rows.find((r) => r.name.toLowerCase() === 'money');
+		try {
+			if (named) await pb.collection('asset_categories').update(named.id, { kind: 'money' });
+			else
+				await pb
+					.collection('asset_categories')
+					.create({ name: 'Money', kind: 'money', owner: ownerId() });
+			rows = await list();
+		} catch {
+			/* A server that has not had the migration yet: no Money category, and the app says so. */
+		}
+	}
+	return rows
+		.filter((r) => !r.archived)
+		.map((r) => ({ id: r.id, name: r.name, ...(r.kind ? { kind: String(r.kind) } : {}) }))
+		.sort((a, b) => Number(b.kind === 'money') - Number(a.kind === 'money'));
 }
 
 /** @param {string} id @param {string} name */
@@ -586,13 +605,15 @@ export async function createCategory(name) {
 }
 
 /**
- * @param {{ name: string, category?: string }} fields
+ * @param {{ name: string, category?: string, money?: boolean }} fields
  * @returns {Promise<string>} the new asset's id
  */
 export async function createAsset(fields) {
 	const row = await pb.collection('assets').create({
 		name: fields.name.trim(),
 		category: fields.category || null,
+		// Money can be spent as it stands, which is what liquid means.
+		...(fields.money ? { liquidity: 'Liquid', tangibility: 'Intangible' } : {}),
 		quantity: 1,
 		units: 10_000,
 		valuation: 'whole',
@@ -740,7 +761,8 @@ export function updateLiability(id, fields) {
  * which way it went is in the type.
  * @param {{ label: string, organization: string, type: string, category: string,
  *           amount: number, frequency: string, day: string,
- *           settles?: string, period?: string, liability?: string }} e
+ *           settles?: string, period?: string, liability?: string,
+ *           asset?: string, account?: string }} e
  */
 export function createCashEntry(e) {
 	return pb.collection('cash_entries').create({
@@ -755,6 +777,8 @@ export function createCashEntry(e) {
 		settles: e.settles || null,
 		period: e.period ?? '',
 		liability: e.liability || null,
+		asset: e.asset || null,
+		account: e.account || null,
 		owner: ownerId()
 	});
 }
@@ -763,7 +787,8 @@ export function createCashEntry(e) {
  * Correct a recorded entry.
  * @param {string} id
  * @param {{ label: string, organization: string, type: string, category: string,
- *           amount: number, frequency: string, day: string }} e
+ *           amount: number, frequency: string, day: string,
+ *           liability?: string, asset?: string, account?: string }} e
  */
 export function updateCashEntry(id, e) {
 	return pb.collection('cash_entries').update(id, {
@@ -773,7 +798,10 @@ export function updateCashEntry(id, e) {
 		category: e.category,
 		amount: e.amount,
 		frequency: e.frequency,
-		date: `${e.day} 12:00:00.000Z`
+		date: `${e.day} 12:00:00.000Z`,
+		liability: e.liability || null,
+		asset: e.asset || null,
+		account: e.account || null
 	});
 }
 
@@ -1007,8 +1035,13 @@ export async function deleteAccount(progress) {
 	const all = [];
 	for (const name of OWNED) {
 		try {
-			const rows = await pb.collection(name).getFullList({ fields: 'id' });
-			for (const r of rows) all.push([name, r.id]);
+			const rows = await pb.collection(name).getFullList();
+			for (const r of rows) {
+				// The fixed Money category cannot be deleted on its own. It goes
+				// with the account, at the last step.
+				if (name === 'asset_categories' && r.kind === 'money') continue;
+				all.push([name, r.id]);
+			}
 		} catch (/** @type {any} */ err) {
 			if (err?.status !== 404) throw err;
 		}

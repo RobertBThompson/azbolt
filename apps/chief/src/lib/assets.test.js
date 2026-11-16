@@ -12,6 +12,7 @@ import assert from 'node:assert/strict';
 import {
 	SHARE_UNITS,
 	attention,
+	bottomLine,
 	cashLines,
 	cashPosition,
 	cashTotals,
@@ -24,6 +25,7 @@ import {
 	overSoldAssets,
 	ownTransactions,
 	runway,
+	runwayFromBalances,
 	sharePercent,
 	short,
 	signed,
@@ -31,6 +33,7 @@ import {
 	sumValue,
 	valueSummary,
 	txAmount,
+	valueOn,
 	worthByOrganization
 } from './assets.js';
 
@@ -421,4 +424,86 @@ test('decision 9: moved, owed and profit are three different figures', () => {
 	assert.equal(p.owedIn, 50000);
 	assert.equal(p.owedOut, 25000);
 	assert.equal(p.profit, 95000, 'earned 1,500 less incurred 550; projections in neither');
+});
+
+/* ── Money is an asset: the bottom line from balances ───────────────── */
+
+const reading = (
+	/** @type {number} */ m,
+	/** @type {number} */ d,
+	/** @type {number} */ amount
+) => ({
+	amount,
+	date: new Date(2026, m, d)
+});
+
+test('a balance on a day is its latest reading on or before it', () => {
+	const values = { bank: [reading(8, 1, 500000), reading(9, 1, 420000), reading(10, 1, 450000)] };
+	assert.equal(valueOn('bank', new Date(2026, 9, 15), values), 420000);
+	assert.equal(valueOn('bank', new Date(2026, 7, 1), values), null, 'no reading yet');
+	assert.equal(valueOn('none', new Date(2026, 9, 15), values), null);
+});
+
+test('the bottom line is how the balances moved, split into tracked and the rest', () => {
+	const values = {
+		bank: [reading(9, 28, 500000), reading(10, 14, 380000)],
+		wallet: [reading(9, 1, 100000), reading(10, 10, 110000)]
+	};
+	// The month so far: balances went 6,000 → 4,900. The car payment (−400) is tracked.
+	const b = bottomLine(
+		['bank', 'wallet'],
+		new Date(2026, 10, 1),
+		new Date(2026, 10, 16),
+		-40000,
+		values
+	);
+	assert.equal(b.start, 600000);
+	assert.equal(b.end, 490000);
+	assert.equal(b.change, -110000);
+	assert.equal(b.untracked, -70000, 'lunch and everything else, never entered');
+	assert.equal(b.known, true);
+});
+
+test('an account opened inside the stretch is not mistaken for income', () => {
+	const values = { fresh: [reading(10, 5, 250000), reading(10, 12, 240000)] };
+	const b = bottomLine(['fresh'], new Date(2026, 10, 1), new Date(2026, 10, 16), 0, values);
+	assert.equal(b.change, -10000, 'counted from its first reading, not from zero');
+	assert.equal(b.known, true);
+});
+
+test('one reading is a balance, not yet a bottom line', () => {
+	const values = { bank: [reading(10, 5, 250000)] };
+	const b = bottomLine(['bank'], new Date(2026, 10, 1), new Date(2026, 10, 16), 0, values);
+	assert.equal(b.end, 250000);
+	assert.equal(b.change, 0);
+	assert.equal(b.known, false);
+});
+
+test('runway comes from the balances and how fast they fall', () => {
+	const now = new Date(2026, 10, 16);
+	// 9,000 two months ago, 6,000 now: falling about 1,500 a month.
+	const values = { bank: [reading(8, 16, 900000), reading(10, 16, 600000)] };
+	const r = runwayFromBalances(['bank'], now, values);
+	assert.equal(r.liquid, 600000);
+	assert.ok(r.monthly !== null && Math.abs(r.monthly - 150000) < 2000, String(r.monthly));
+	assert.ok(r.months !== null && Math.abs(r.months - 4) < 0.1, String(r.months));
+});
+
+test('balances that hold or grow are not running out', () => {
+	const now = new Date(2026, 10, 16);
+	const r = runwayFromBalances(['bank'], now, {
+		bank: [reading(8, 16, 500000), reading(10, 16, 650000)]
+	});
+	assert.equal(r.months, null);
+	assert.ok((r.monthly ?? 0) < 0);
+});
+
+test('a few days between readings is not a trend', () => {
+	const now = new Date(2026, 10, 16);
+	const r = runwayFromBalances(['bank'], now, {
+		bank: [reading(10, 10, 500000), reading(10, 16, 300000)]
+	});
+	assert.equal(r.liquid, 300000);
+	assert.equal(r.months, null);
+	assert.equal(r.monthly, null);
 });

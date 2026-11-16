@@ -17,10 +17,14 @@
 		CASH_TYPES,
 		EXPENSE_CATEGORIES,
 		FREQUENCIES,
+		ASSETS,
+		LIABILITIES,
 		ORGS,
 		direction,
 		dollars,
+		isMoneyCategory,
 		money,
+		moneyAssets,
 		ownBook,
 		transactions
 	} from '$lib/assets.js';
@@ -44,6 +48,20 @@
 	}));
 	const two = (/** @type {number} */ n) => String(n).padStart(2, '0');
 
+	const accounts = moneyAssets().map((a) => ({ value: a.id, label: a.name }));
+	const ties = [
+		{ value: '', label: inward ? 'Nothing — income' : 'Nothing — a bill' },
+		...Object.entries(ASSETS)
+			.filter(([, a]) => !isMoneyCategory(a.category))
+			.map(([id, a]) => ({ value: `asset:${id}`, label: a.name })),
+		...Object.entries(LIABILITIES).map(([id, l]) => ({
+			value: `liability:${id}`,
+			label: `${l.name} · owed`
+		}))
+	];
+
+	let account = $state(e.account ?? '');
+	let tie = $state(e.liability ? `liability:${e.liability}` : e.asset ? `asset:${e.asset}` : '');
 	let label = $state(e.label);
 	let amount = $state(String(e.amount / 100));
 	let type = $state(e.type);
@@ -82,7 +100,10 @@
 				category,
 				amount: dollars(read),
 				frequency,
-				day
+				day,
+				account,
+				asset: tie.startsWith('asset:') ? tie.slice(6) : '',
+				liability: tie.startsWith('liability:') ? tie.slice(10) : ''
 			});
 			await reopenBook();
 			await goto('/records/money', { replaceState: true });
@@ -100,6 +121,14 @@
 	{#if ownBook()}
 		<Field label="What it was" bind:value={label} required />
 		<Field label="Amount" type="money" bind:value={amount} required />
+		<Select label="For" options={ties} bind:value={tie} />
+		{#if accounts.length}
+			<Select
+				label={inward ? 'Paid into' : 'Paid from'}
+				options={[{ value: '', label: 'Not said' }, ...accounts]}
+				bind:value={account}
+			/>
+		{/if}
 		<Select label="Cash type" options={types} bind:value={type} />
 		<Select label="Organization" options={orgs} bind:value={org} />
 		<Select

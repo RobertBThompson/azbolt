@@ -10,7 +10,15 @@
 	import { PageHead, Stats, Row, Btn, Alert, Field, Note, Delete } from '$lib/kit';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { ASSETS, dollars, events, ownBook, short, staleAfter } from '$lib/assets.js';
+	import {
+		ASSETS,
+		dollars,
+		events,
+		isMoneyCategory,
+		ownBook,
+		short,
+		staleAfter
+	} from '$lib/assets.js';
 	import { readAmount } from '$lib/amount.js';
 	import { reopenBook } from '$lib/book.svelte.js';
 	import { addValuation, destroy } from '$lib/pb.js';
@@ -37,9 +45,12 @@
 		await reopenBook();
 		reads += 1;
 	}
+	/* A money account's value is its balance, read off the bank or the
+	   chain. Same record, its own words. */
+	const isMoney = $derived(isMoneyCategory(a.category));
 	const stale = $derived(a.valuedDaysAgo !== null && a.valuedDaysAgo > staleAfter(a.category));
 
-	let adding = $state(false);
+	let adding = $state($page.url.searchParams.has('update'));
 	let value = $state('');
 	let day = $state(today());
 	let note = $state('');
@@ -66,28 +77,47 @@
 	}
 </script>
 
-<svelte:head><title>Valuation · Chief</title></svelte:head>
+<svelte:head><title>{isMoney ? 'Balance' : 'Valuation'} · Chief</title></svelte:head>
 
 <Screen back="/records/assets/{id}" nav={false}>
-	<PageHead eyebrow={a.name} title="Valuation" />
+	<PageHead eyebrow={a.name} title={isMoney ? 'Balance' : 'Valuation'} />
 	{#if a.value === null}
-		<Alert title="No value recorded" meta="It is left out of net worth until it has one." />
+		<Alert
+			title={isMoney ? 'No balance read yet' : 'No value recorded'}
+			meta="It is left out of net worth until it has one."
+		/>
 	{:else if stale}
-		<Alert title="This figure is getting old" meta="Net worth is still counting it as it was." />
+		<Alert
+			title={isMoney ? 'This balance is getting old' : 'This figure is getting old'}
+			meta="Net worth is still counting it as it was."
+		/>
 	{/if}
 	<Stats
 		items={[
-			[a.value === null ? '—' : short(a.value), 'Value'],
-			[reviews[0]?.when ?? '—', 'Reviewed'],
-			[String(reviews.length), reviews.length === 1 ? 'Review' : 'Reviews']
+			[a.value === null ? '—' : short(a.value), isMoney ? 'Balance' : 'Value'],
+			[reviews[0]?.when ?? '—', isMoney ? 'Read' : 'Reviewed'],
+			[
+				String(reviews.length),
+				isMoney
+					? reviews.length === 1
+						? 'Reading'
+						: 'Readings'
+					: reviews.length === 1
+						? 'Review'
+						: 'Reviews'
+			]
 		]}
 	/>
 
 	{#if adding}
 		<form onsubmit={save}>
-			<Field label="What it is worth" type="money" bind:value required />
+			<Field label={isMoney ? 'Balance' : 'What it is worth'} type="money" bind:value required />
 			<Field label="As of" type="date" bind:value={day} required />
-			<Field label="Where the figure came from" placeholder="Optional" bind:value={note} />
+			<Field
+				label="Where the figure came from"
+				placeholder={isMoney ? 'Optional — for example: the bank app' : 'Optional'}
+				bind:value={note}
+			/>
 			{#if value.trim() !== '' && amount === null}
 				<Note>That is not an amount. Use figures, like 24,500.</Note>
 			{:else if day > today()}
@@ -97,14 +127,19 @@
 			<Btn
 				t="warm"
 				type="submit"
-				label={busy ? 'Saving…' : 'Save value'}
+				label={busy ? 'Saving…' : isMoney ? 'Save balance' : 'Save value'}
 				disabled={!ready || busy}
 			/>
 			<Btn primary={false} label="Cancel" onclick={() => (adding = false)} />
 		</form>
 	{:else}
 		{#each reviews as r, i (r.ref?.id ?? i)}
-			<Row t="warm" title={r.detail} meta="Re-valued" trailing={r.when} />
+			<Row
+				t="warm"
+				title={r.detail}
+				meta={isMoney ? 'Balance read' : 'Re-valued'}
+				trailing={r.when}
+			/>
 			{#if fixing && r.ref}
 				<Delete
 					what="this value"
@@ -121,13 +156,13 @@
 		{#if own}
 			<Btn
 				t="warm"
-				label={a.value === null ? 'Give it a value' : 'Update value'}
+				label={isMoney ? 'Update balance' : a.value === null ? 'Give it a value' : 'Update value'}
 				onclick={() => (adding = true)}
 			/>
 			{#if reviews.some((r) => r.ref)}
 				<Btn
 					primary={false}
-					label={fixing ? 'Done' : 'Delete a value'}
+					label={fixing ? 'Done' : isMoney ? 'Delete a reading' : 'Delete a value'}
 					onclick={() => (fixing = !fixing)}
 				/>
 			{/if}

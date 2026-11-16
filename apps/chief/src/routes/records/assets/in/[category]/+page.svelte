@@ -20,6 +20,7 @@
 		attention,
 		categoryName,
 		effectiveValue,
+		isMoneyCategory,
 		isVerified,
 		money,
 		ownerLine,
@@ -34,6 +35,8 @@
 
 	const cat = $derived($page.params.category ?? 'all');
 	const all = $derived(cat === 'all');
+	/* Money is fixed: it cannot be renamed or deleted, here or on the server. */
+	const isMoney = $derived(isMoneyCategory(cat));
 	const inCat = $derived(
 		activeAssets().filter((a) => all || (cat === 'none' ? !a.category : a.category === cat))
 	);
@@ -128,13 +131,22 @@
 		</Blank>
 	{/each}
 
-	<Btn t="warm" href="/records/assets/new{all ? '' : `?category=${cat}`}" label="Add asset" />
+	<Btn
+		t="warm"
+		href="/records/assets/new{all ? '' : `?category=${cat}`}"
+		label={isMoney ? 'Add an account' : 'Add asset'}
+	/>
 	{#if show === 2}
 		<Note>
 			Nothing is marked unverified automatically — Chief says what is stale and lets you decide.
 		</Note>
 	{/if}
-	{#if ownBook() && !all && cat !== 'none'}
+	{#if isMoney}
+		<Note>
+			Money is a fixed category: each account here is an asset whose value is its balance. It cannot
+			be renamed or deleted.
+		</Note>
+	{:else if ownBook() && !all && cat !== 'none'}
 		{#if renaming}
 			<Field label="Category name" bind:value={newName} />
 			{#if fault}<Alert title="Not saved" meta={fault} />{/if}
