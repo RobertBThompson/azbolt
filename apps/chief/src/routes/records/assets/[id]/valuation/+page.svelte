@@ -7,19 +7,36 @@
 	 * was believed a year ago stays on the record as what was believed.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { PageHead, Stats, Row, Btn, Alert, Field, Note } from '$lib/kit';
+	import { PageHead, Stats, Row, Btn, Alert, Field, Note, Delete } from '$lib/kit';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { ASSETS, dollars, events, ownBook, short, staleAfter } from '$lib/assets.js';
 	import { readAmount } from '$lib/amount.js';
 	import { reopenBook } from '$lib/book.svelte.js';
-	import { addValuation } from '$lib/pb.js';
+	import { addValuation, destroy } from '$lib/pb.js';
 	import { today } from '$lib/today.js';
 
 	const own = ownBook();
 	const id = $derived($page.params.id ?? '');
-	const a = $derived(ASSETS[id]);
-	const reviews = $derived(events(id).filter((e) => e.type === 'Re-valued'));
+	const a = $derived.by(() => {
+		void reads;
+		return ASSETS[id];
+	});
+	/* The book is replaced in place when it is read again; counting the
+	   reads is what makes this screen follow. */
+	let reads = $state(0);
+	let fixing = $state(false);
+	const reviews = $derived.by(() => {
+		void reads;
+		return events(id).filter((e) => e.type === 'Re-valued');
+	});
+
+	/** @param {{ collection: string, id: string }} ref */
+	async function removeValue(ref) {
+		await destroy(ref.collection, ref.id);
+		await reopenBook();
+		reads += 1;
+	}
 	const stale = $derived(a.valuedDaysAgo !== null && a.valuedDaysAgo > staleAfter(a.category));
 
 	let adding = $state(false);
@@ -86,8 +103,20 @@
 			<Btn primary={false} label="Cancel" onclick={() => (adding = false)} />
 		</form>
 	{:else}
-		{#each reviews as r, i (i)}
+		{#each reviews as r, i (r.ref?.id ?? i)}
 			<Row t="warm" title={r.detail} meta="Re-valued" trailing={r.when} />
+			{#if fixing && r.ref}
+				<Delete
+					what="this value"
+					warn={i === 0 && reviews.length > 1
+						? 'The value before it becomes the current one.'
+						: i === 0
+							? 'The asset is left with no value, and out of the totals until it has one.'
+							: 'It is an earlier value; the current one does not change.'}
+					label="Delete the value above"
+					ondelete={() => removeValue(/** @type {NonNullable<typeof r.ref>} */ (r.ref))}
+				/>
+			{/if}
 		{/each}
 		{#if own}
 			<Btn
@@ -95,6 +124,13 @@
 				label={a.value === null ? 'Give it a value' : 'Update value'}
 				onclick={() => (adding = true)}
 			/>
+			{#if reviews.some((r) => r.ref)}
+				<Btn
+					primary={false}
+					label={fixing ? 'Done' : 'Delete a value'}
+					onclick={() => (fixing = !fixing)}
+				/>
+			{/if}
 		{:else}
 			<Btn t="warm" label="Update valuation" soon />
 		{/if}

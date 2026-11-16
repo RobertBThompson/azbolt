@@ -99,7 +99,13 @@
 	{#if ownBook()}
 		<SectionHead label="Payments" t="warm" count={payments.length} />
 		{#each payments as p (p.id)}
-			<Row t="warm" title={money(p.amount)} meta="Paid" trailing={dayLabel(p.date)} />
+			<Row
+				t="warm"
+				href="/records/money/entry/{p.id}"
+				title={money(p.amount)}
+				meta="Paid · {dayLabel(p.date)}"
+				trailing="›"
+			/>
 		{:else}
 			<Blank>No payment recorded.</Blank>
 		{/each}

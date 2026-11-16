@@ -12,13 +12,27 @@
 	 * you say you have looked at it.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Alert, Banner, Facts, Row, Btn, Note, Delete } from '$lib/kit';
+	import { Alert, Banner, Facts, Row, Btn, Note, Delete, Field, Select } from '$lib/kit';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { ASSETS, CLAIM_STORAGE, claimOf, dayLabel, inSentence } from '$lib/assets.js';
+	import {
+		ASSETS,
+		CLAIM_KINDS,
+		CLAIM_STORAGE,
+		claimOf,
+		dayLabel,
+		inSentence
+	} from '$lib/assets.js';
 	import { reopenBook } from '$lib/book.svelte.js';
 	import { fileSize, fingerprint } from '$lib/hash.js';
-	import { destroy, claimFile, claimFileUrl, markClaimChecked, markClaimFailed } from '$lib/pb.js';
+	import {
+		destroy,
+		claimFile,
+		claimFileUrl,
+		markClaimChecked,
+		markClaimFailed,
+		updateClaim
+	} from '$lib/pb.js';
 	import { dateOf } from '$lib/work.js';
 	import { today } from '$lib/today.js';
 
@@ -28,6 +42,19 @@
 	const c = /** @type {import('$lib/assets.js').Claim} */ (claimOf(id, $page.params.claim ?? ''));
 
 	let checked = $state(c.checked ?? '');
+	let editing = $state(false);
+	let kind = $state(/** @type {string} */ (c.kind));
+	let title = $state(c.title ?? '');
+	let source = $state(c.source ?? '');
+	let location = $state(c.location ?? '');
+
+	const save = () =>
+		run(async () => {
+			await updateClaim(c.id ?? '', { kind, title, source, location });
+			await reopenBook();
+			// A fresh screen, so what was saved is what is shown.
+			await goto(`/records/assets/${id}/proof`, { replaceState: true });
+		});
 	let busy = $state(false);
 	let fault = $state('');
 	let verdict = $state(/** @type {''|'same'|'changed'} */ (''));
@@ -99,61 +126,84 @@
 <svelte:head><title>{c.title} · Chief</title></svelte:head>
 
 <Screen back="/records/assets/{id}/proof" nav={false}>
-	<Banner t="warm" title={c.title ?? c.kind} meta="{c.kind} · {standing}" />
-	<Row t="warm" title="Source" meta={c.source || 'Not given'} />
-	<Row t="warm" href="/records/assets/{id}" title="Supports" meta={a.name} trailing="↗" />
-	<Row t="warm" title="Kept" meta={c.storage === 'server' ? place : `${place} · ${c.location}`} />
-	{#if c.hash}
-		<Facts
-			items={[
-				{ label: 'File', value: c.fileName || '—' },
-				{ label: 'Size', value: c.size ? fileSize(c.size) : '—' }
-			]}
-		/>
-		<div class="print">
-			<span class="lb">Fingerprint · SHA-256</span>
-			<code>{c.hash}</code>
-		</div>
-	{/if}
-
-	{#if verdict === 'same'}
-		<Banner
-			t="warm"
-			title="It is the same file"
-			meta="Its fingerprint matches the one on record."
-		/>
-	{:else if verdict === 'changed'}
-		<Alert
-			title="That is not the same file"
-			meta="Its fingerprint is {found.slice(0, 8)}…{found.slice(
-				-8
-			)}, not the one on record. It was changed, or it is a different file. This proof no longer counts as checked."
-		/>
-	{/if}
-	{#if fault}<Alert title="Could not check" meta={fault} />{/if}
-
-	{#if c.storage === 'server' && c.stored}
+	{#if editing}
+		<Select label="It is a" options={CLAIM_KINDS} bind:value={kind} />
+		<Field label="Title" bind:value={title} required />
+		<Field label="Source" placeholder="Issuer, person or URL" bind:value={source} />
+		{#if c.storage !== 'server'}
+			<Field
+				label={c.storage === 'paper' ? 'Where the paper is' : 'Where it is'}
+				bind:value={location}
+			/>
+		{/if}
+		{#if fault}<Alert title="Not saved" meta={fault} />{/if}
 		<Btn
 			t="warm"
-			label={busy ? 'Checking…' : 'Check the file'}
-			onclick={checkStored}
-			disabled={busy}
+			label={busy ? 'Saving…' : 'Save changes'}
+			onclick={save}
+			disabled={busy || !title.trim()}
 		/>
-		<Btn primary={false} label="Open the file" onclick={open} disabled={busy} />
-	{:else if c.hash}
-		<label class="pick">
-			<span class="lb">Check a copy against the fingerprint</span>
-			<input type="file" onchange={checkChosen} disabled={busy} />
-		</label>
+		<Btn primary={false} label="Cancel" onclick={() => (editing = false)} />
+		<Note
+			>The file and its fingerprint are not changed here. A different file is a different proof.</Note
+		>
 	{:else}
-		<Btn
-			t="warm"
-			label={busy ? 'Saving…' : 'I have looked at it today'}
-			onclick={seen}
-			disabled={busy}
-		/>
-	{/if}
+		<Banner t="warm" title={c.title ?? c.kind} meta="{c.kind} · {standing}" />
+		<Row t="warm" title="Source" meta={c.source || 'Not given'} />
+		<Row t="warm" href="/records/assets/{id}" title="Supports" meta={a.name} trailing="↗" />
+		<Row t="warm" title="Kept" meta={c.storage === 'server' ? place : `${place} · ${c.location}`} />
+		{#if c.hash}
+			<Facts
+				items={[
+					{ label: 'File', value: c.fileName || '—' },
+					{ label: 'Size', value: c.size ? fileSize(c.size) : '—' }
+				]}
+			/>
+			<div class="print">
+				<span class="lb">Fingerprint · SHA-256</span>
+				<code>{c.hash}</code>
+			</div>
+		{/if}
 
+		{#if verdict === 'same'}
+			<Banner
+				t="warm"
+				title="It is the same file"
+				meta="Its fingerprint matches the one on record."
+			/>
+		{:else if verdict === 'changed'}
+			<Alert
+				title="That is not the same file"
+				meta="Its fingerprint is {found.slice(0, 8)}…{found.slice(
+					-8
+				)}, not the one on record. It was changed, or it is a different file. This proof no longer counts as checked."
+			/>
+		{/if}
+		{#if fault}<Alert title="Could not check" meta={fault} />{/if}
+
+		{#if c.storage === 'server' && c.stored}
+			<Btn
+				t="warm"
+				label={busy ? 'Checking…' : 'Check the file'}
+				onclick={checkStored}
+				disabled={busy}
+			/>
+			<Btn primary={false} label="Open the file" onclick={open} disabled={busy} />
+		{:else if c.hash}
+			<label class="pick">
+				<span class="lb">Check a copy against the fingerprint</span>
+				<input type="file" onchange={checkChosen} disabled={busy} />
+			</label>
+		{:else}
+			<Btn
+				t="warm"
+				label={busy ? 'Saving…' : 'I have looked at it today'}
+				onclick={seen}
+				disabled={busy}
+			/>
+		{/if}
+		<Btn primary={false} label="Edit" onclick={() => (editing = true)} disabled={busy} />
+	{/if}
 	<Delete
 		what="this proof"
 		warn={c.storage === 'server'

@@ -1120,6 +1120,21 @@ export async function createClaim(c) {
 }
 
 /**
+ * Correct what a claim says about itself. The file and its fingerprint
+ * are not changed here: a different file is a different proof.
+ * @param {string} id
+ * @param {{ kind: string, title: string, source: string, location: string }} c
+ */
+export function updateClaim(id, c) {
+	return pb.collection('claims').update(id, {
+		kind: c.kind,
+		title: c.title.trim(),
+		source: c.source.trim(),
+		location: c.location.trim()
+	});
+}
+
+/**
  * Record that a claim was checked today — its file matched its
  * fingerprint, or, for paper, the Chief looked at it.
  * @param {string} id

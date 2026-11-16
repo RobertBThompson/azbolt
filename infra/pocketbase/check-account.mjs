@@ -327,6 +327,133 @@ for (const coll of OWNED) {
 	}
 }
 
+/* ── 2b. Deleting one record, the way a person does ───────────────── */
+
+console.log('\nDeleting single records as A');
+{
+	const post = (coll, body) =>
+		call(`/api/collections/${coll}/records`, {
+			method: 'POST',
+			token: A.token,
+			body: JSON.stringify({ ...body, owner: A.id })
+		});
+	const del = (coll, id) =>
+		call(`/api/collections/${coll}/records/${id}`, { method: 'DELETE', token: A.token });
+	const count = async (coll, filter) =>
+		(
+			await call(`/api/collections/${coll}/records?filter=${encodeURIComponent(filter)}`, {
+				token: A.token
+			})
+		).body?.totalItems;
+
+	// An organization with an endeavor under it must be refused, then go once it is empty.
+	const x = await post('organizations', { name: `Check delete ${stamp}`, code: 'B' });
+	const xe = await post('endeavors', {
+		name: 'Under it',
+		outcome: '',
+		organization: x.body?.id,
+		stage: 'Active'
+	});
+	const refused = await del('organizations', x.body?.id);
+	refused.ok
+		? bad('organizations: deleted while an endeavor still belonged to it')
+		: refused.status === 400
+			? ok('organizations: refused while an endeavor belongs to it')
+			: bad(`organizations: refused with ${refused.status}, and the app expects 400`);
+	await del('endeavors', xe.body?.id);
+	(await del('organizations', x.body?.id)).ok
+		? ok('organizations: deleted once nothing is under it')
+		: bad('organizations: still refused with nothing under it');
+	const again = await post('organizations', { name: `Check delete ${stamp}`, code: 'B' });
+	again.ok
+		? ok('organizations: the name can be used again')
+		: bad('organizations: the name is still taken after deleting');
+	if (again.ok) await del('organizations', again.body.id);
+
+	// An asset takes its values, history, proofs and ownership links with it.
+	const y = await post('assets', {
+		name: 'Check delete asset',
+		quantity: 1,
+		units: 10000,
+		valuation: 'whole'
+	});
+	const yid = y.body?.id;
+	await post('valuations', { asset: yid, amount: 1, currency: 'USD', valued_on: NOON, note: '' });
+	await post('asset_events', {
+		asset: yid,
+		type: 'Upkeep',
+		detail: 'x',
+		amount: 0,
+		currency: 'USD',
+		happened_on: NOON
+	});
+	await post('claims', {
+		asset: yid,
+		kind: 'Agreement',
+		title: 'x',
+		storage: 'paper',
+		location: 'x'
+	});
+	await post('ownerships', {
+		holder_org: org,
+		held_asset: yid,
+		role: 'Owner',
+		units: 10000,
+		since: NOON
+	});
+	const gone = await del('assets', yid);
+	if (!gone.ok) bad(`assets: could not be deleted with records hanging off it (${gone.status})`);
+	else {
+		let left = 0;
+		for (const [coll, field] of [
+			['valuations', 'asset'],
+			['asset_events', 'asset'],
+			['claims', 'asset'],
+			['ownerships', 'held_asset']
+		])
+			left += (await count(coll, `${field} = "${yid}"`)) ?? 0;
+		left
+			? bad(`assets: ${left} records were left behind pointing at a deleted asset`)
+			: ok('assets: its values, history, proofs and links went with it');
+	}
+
+	// A sphere goes; the person who was in it stays.
+	const z = await post('spheres', { name: `Check delete sphere ${stamp}`, hue: '' });
+	const zp = await post('people', { first_name: 'In', last_name: 'Sphere', spheres: [z.body?.id] });
+	const sg = await del('spheres', z.body?.id);
+	const still = await call(`/api/collections/people/records/${zp.body?.id}`, { token: A.token });
+	sg.ok && still.ok && (still.body.spheres ?? []).length === 0
+		? ok('spheres: deleted; the person in it stays, in no sphere')
+		: bad(
+				`spheres: delete ${sg.status}, person ${still.status} ${JSON.stringify(still.body?.spheres)}`
+			);
+	if (still.ok) await del('people', zp.body.id);
+
+	// An endeavor goes; its task stays, unfiled. A jot goes; the task made from it stays.
+	const en = await post('endeavors', {
+		name: 'Check',
+		outcome: '',
+		organization: org,
+		stage: 'Active'
+	});
+	const jt = await post('jots', { text: 'Check' });
+	const tk = await post('tasks', {
+		name: 'Check',
+		state: 'Now',
+		endeavor: en.body?.id,
+		from_jot: jt.body?.id
+	});
+	const d1 = await del('endeavors', en.body?.id);
+	const d2 = await del('jots', jt.body?.id);
+	const t2 = await call(`/api/collections/tasks/records/${tk.body?.id}`, { token: A.token });
+	d1.ok && d2.ok && t2.ok && !t2.body.endeavor && !t2.body.from_jot
+		? ok('endeavors and jots: deleted; the task that pointed at them stays')
+		: bad(
+				`endeavors/jots: ${d1.status} ${d2.status}, task ${t2.status} ${t2.body?.endeavor}|${t2.body?.from_jot}`
+			);
+	if (t2.ok) await del('tasks', tk.body.id);
+}
+
 /* ── 3. A deletes everything, in the app's order ──────────────────── */
 
 console.log('\nDeleting A, the way the app does');
