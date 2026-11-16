@@ -32,7 +32,7 @@
 	import { readAmount } from '$lib/amount.js';
 	import { reopenBook } from '$lib/book.svelte.js';
 	import {
-		archive,
+		destroy,
 		createAssetEvent,
 		createOwnership,
 		updateAsset,
@@ -151,7 +151,7 @@
 						day
 					);
 				}
-				await archive('ownerships', giving.id);
+				await destroy('ownerships', giving.id);
 				await createAssetEvent(
 					id,
 					'Transferred',

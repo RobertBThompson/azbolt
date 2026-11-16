@@ -12,13 +12,13 @@
 	 * you say you have looked at it.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Alert, Banner, Facts, Row, Btn, Note } from '$lib/kit';
+	import { Alert, Banner, Facts, Row, Btn, Note, Delete } from '$lib/kit';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { ASSETS, CLAIM_STORAGE, claimOf, dayLabel, inSentence } from '$lib/assets.js';
 	import { reopenBook } from '$lib/book.svelte.js';
 	import { fileSize, fingerprint } from '$lib/hash.js';
-	import { archive, claimFile, claimFileUrl, markClaimChecked, markClaimFailed } from '$lib/pb.js';
+	import { destroy, claimFile, claimFileUrl, markClaimChecked, markClaimFailed } from '$lib/pb.js';
 	import { dateOf } from '$lib/work.js';
 	import { today } from '$lib/today.js';
 
@@ -32,7 +32,6 @@
 	let fault = $state('');
 	let verdict = $state(/** @type {''|'same'|'changed'} */ (''));
 	let found = $state('');
-	let confirming = $state(false);
 
 	const place = CLAIM_STORAGE[c.storage ?? 'paper'];
 	const standing = $derived(
@@ -95,13 +94,6 @@
 		run(async () => {
 			window.open(await claimFileUrl(c.id ?? '', c.stored ?? ''), '_blank', 'noopener');
 		});
-
-	const remove = () =>
-		run(async () => {
-			await archive('claims', c.id ?? '');
-			await reopenBook();
-			await goto(`/records/assets/${id}/proof`, { replaceState: true });
-		});
 </script>
 
 <svelte:head><title>{c.title} · Chief</title></svelte:head>
@@ -162,18 +154,18 @@
 		/>
 	{/if}
 
-	{#if confirming}
-		<Alert
-			title="Take this off file?"
-			meta="The asset stops counting it. {c.storage === 'server'
-				? 'The file stays on the server with the record.'
-				: 'The file or paper itself is not touched.'}"
-		/>
-		<Btn t="alert" label="Yes, take it off" onclick={remove} disabled={busy} />
-		<Btn primary={false} label="Keep it" onclick={() => (confirming = false)} />
-	{:else}
-		<Btn primary={false} label="Take it off file" onclick={() => (confirming = true)} />
-	{/if}
+	<Delete
+		what="this proof"
+		warn={c.storage === 'server'
+			? 'The record and the file kept on the server both go.'
+			: 'The record goes. The file or paper itself is not touched.'}
+		label="Delete this proof"
+		ondelete={async () => {
+			await destroy('claims', c.id ?? '');
+			await reopenBook();
+			await goto(`/records/assets/${id}/proof`, { replaceState: true });
+		}}
+	/>
 
 	<Note>
 		{#if c.hash}

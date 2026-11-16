@@ -107,6 +107,11 @@
 			onclick={save}
 			disabled={!ready || busy}
 		/>
+		<Btn
+			primary={false}
+			href="/records/money/entry/{line.of ?? line.id}"
+			label={line.of ? 'Change or delete the repeating entry' : 'Change or delete this entry'}
+		/>
 		<Note>
 			It moves from owed into {inward ? 'cash in' : 'cash out'}, on that day and for that amount.
 			{#if line.of}The line keeps repeating; only this month is settled.{/if}

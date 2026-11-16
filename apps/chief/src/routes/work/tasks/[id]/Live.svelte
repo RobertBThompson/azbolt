@@ -6,9 +6,9 @@
 	 * it done — a single tap away. Everything else is behind Edit.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Alert, Btn, Chips, PageHead, Row, SphereTags } from '$lib/kit';
+	import { Alert, Btn, Chips, PageHead, Row, SphereTags, Delete } from '$lib/kit';
 	import { goto } from '$app/navigation';
-	import { archive, updateTask } from '$lib/pb.js';
+	import { destroy, updateTask } from '$lib/pb.js';
 	import { isLate, spheresOf, taskLine } from '$lib/work.js';
 	import { work, load, taskOf, endeavorOf, orgOf } from '$lib/work.svelte.js';
 	import TaskFields from '$lib/work/TaskFields.svelte';
@@ -29,7 +29,6 @@
 	let fields = $state({ name: '', state: 'Now', endeavor: '', due: '', waiting: '', notes: '' });
 	let busy = $state(false);
 	let fault = $state('');
-	let confirming = $state(false);
 
 	const tags = $derived(
 		[
@@ -72,7 +71,6 @@
 		);
 	const done = () => run(() => updateTask(id, { state: 'Done', doneOn: today() }));
 	const reopen = () => run(() => updateTask(id, { state: 'Now', doneOn: '' }));
-	const remove = () => run(() => archive('tasks', id), '/work');
 </script>
 
 <svelte:head><title>{task.name} · Chief</title></svelte:head>
@@ -125,16 +123,15 @@
 			<Btn t="cool" label={busy ? 'Saving…' : 'Mark done'} onclick={done} disabled={busy} />
 		{/if}
 		<Btn primary={false} label="Edit" onclick={edit} />
-		{#if confirming}
-			<Alert
-				title="Remove this task?"
-				meta="For one entered by mistake. A finished task is marked done instead."
-			/>
-			<Btn t="alert" label="Yes, remove it" onclick={remove} disabled={busy} />
-			<Btn primary={false} label="Keep it" onclick={() => (confirming = false)} />
-		{:else}
-			<Btn primary={false} label="Remove" onclick={() => (confirming = true)} />
-		{/if}
+		<Delete
+			what="this task"
+			warn="A finished task is better marked done, which keeps it."
+			ondelete={async () => {
+				await destroy('tasks', id);
+				await load();
+				await goto('/work', { replaceState: true });
+			}}
+		/>
 	{/if}
 </Screen>
 

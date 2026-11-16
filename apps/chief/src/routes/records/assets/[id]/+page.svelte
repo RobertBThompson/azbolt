@@ -22,14 +22,15 @@
 		SectionHead,
 		Facts,
 		Btn,
-		Blank
+		Blank,
+		Delete
 	} from '$lib/kit';
 	import { ENDEAVORS } from '$lib/data.js';
 	import { ORGS } from '$lib/assets.js';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { reopenBook } from '$lib/book.svelte.js';
-	import { updateAsset } from '$lib/pb.js';
+	import { destroy, updateAsset } from '$lib/pb.js';
 	import {
 		ASSETS,
 		attention,
@@ -195,4 +196,16 @@
 		<Btn t="warm" href="/records/assets/{id}/record" label="Record what happened" />
 	{/if}
 	<Btn t="ai" primary={false} href="/" label="Jot an asset update" />
+	{#if ownBook()}
+		<Delete
+			what={a.name}
+			warn="Its values, history, proofs and ownership links go with it. If it was sold or given away, record that it was let go instead, and it keeps its history."
+			label="Delete this asset"
+			ondelete={async () => {
+				await destroy('assets', id);
+				await reopenBook();
+				await goto('/records/assets', { replaceState: true });
+			}}
+		/>
+	{/if}
 </Screen>

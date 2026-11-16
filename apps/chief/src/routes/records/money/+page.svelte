@@ -173,9 +173,13 @@
 				{#each g.items as t (t.id)}
 					<Row
 						t={counted(t) ? 'warm' : 'neutral'}
-						href={ownBook() && OWED.includes(t.type) && t.date <= new Date()
-							? `/records/money/settle/${encodeURIComponent(t.id)}`
-							: undefined}
+						href={!ownBook()
+							? undefined
+							: OWED.includes(t.type) && t.date <= new Date()
+								? `/records/money/settle/${encodeURIComponent(t.id)}`
+								: t.of
+									? `/records/money/entry/${t.of}`
+									: `/records/money/entry/${t.id}`}
 						title={t.label}
 						meta="{dayLabel(t.date)} · {sort === 'type' ? t.category : t.type} · {ORGS[t.org]
 							?.name ?? t.org}"
@@ -192,7 +196,8 @@
 			Net is cash in minus cash out, counting only what has actually moved. Profit also counts what
 			is owed either way, because it was earned or incurred even though the money has not changed
 			hands. Projections are in neither.
-			{#if ownBook()}Tap an owed line under Transactions once it has been paid or received.{/if}
+			{#if ownBook()}Under Transactions, tap an owed line once it has been paid or received, or any
+				other line to change or delete it.{/if}
 		</Note>
 		<SourceNote source={book.source} error={book.error} />
 	{/if}

@@ -9,8 +9,8 @@
 	 */
 	import { goto } from '$app/navigation';
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Alert, Btn, Field, Note, SectionHead, SpherePick, TypeBadge } from '$lib/kit';
-	import { archive, updateOrganization } from '$lib/pb.js';
+	import { Alert, Btn, Field, Note, SectionHead, SpherePick, TypeBadge, Delete } from '$lib/kit';
+	import { destroy, updateOrganization } from '$lib/pb.js';
 	import { orgType } from '$lib/orgtypes.js';
 	import TypePick from '../TypePick.svelte';
 
@@ -28,7 +28,6 @@
 	let charter = $state('');
 	let busy = $state(false);
 	let fault = $state('');
-	let confirming = $state(false);
 
 	function edit() {
 		name = org.name;
@@ -71,18 +70,6 @@
 		} catch (err) {
 			org = { ...org, spheres: before };
 			fault = why(err);
-		}
-	}
-
-	async function remove() {
-		busy = true;
-		fault = '';
-		try {
-			await archive('organizations', org.id);
-			await goto('/organizations');
-		} catch (err) {
-			fault = why(err);
-			busy = false;
 		}
 	}
 </script>
@@ -151,21 +138,14 @@
 
 		<Btn t="cool" label="Edit" onclick={edit} />
 		{#if !org.self}
-			{#if confirming}
-				<Alert
-					title="Remove {org.name}?"
-					meta="It leaves your lists. Records that name it keep the name."
-				/>
-				<Btn
-					t="alert"
-					label={busy ? 'Removing…' : 'Yes, remove it'}
-					onclick={remove}
-					disabled={busy}
-				/>
-				<Btn primary={false} label="Keep it" onclick={() => (confirming = false)} />
-			{:else}
-				<Btn primary={false} label="Remove" onclick={() => (confirming = true)} />
-			{/if}
+			<Delete
+				what={org.name}
+				warn="Its ownership links go with it."
+				ondelete={async () => {
+					await destroy('organizations', org.id);
+					await goto('/organizations', { replaceState: true });
+				}}
+			/>
 		{/if}
 	{/if}
 </Screen>

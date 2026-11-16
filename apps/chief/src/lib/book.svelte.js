@@ -67,7 +67,7 @@ function shape(rows) {
 
 	/** @type {Record<string, import('./assets.js').Asset>} */
 	const assets = {};
-	/** @type {{ asset: string, type: string, detail: string, age: number }[]} */
+	/** @type {{ asset: string, type: string, detail: string, age: number, ref?: { collection: string, id: string } }[]} */
 	const events = [];
 	for (const r of rows.assets) {
 		const history = byAsset[r.id] ?? [];
@@ -98,6 +98,7 @@ function shape(rows) {
 		for (const v of [...history].reverse()) {
 			events.push({
 				asset: r.id,
+				ref: { collection: 'valuations', id: v.id },
 				type: 'Re-valued',
 				detail: v.note ? `${dollarsOf(v.amount)} · ${v.note}` : dollarsOf(v.amount),
 				age: daysSince(v.valued_on)
@@ -135,6 +136,7 @@ function shape(rows) {
 		if (!assets[e.asset]) continue;
 		happened.push({
 			asset: e.asset,
+			ref: { collection: 'asset_events', id: e.id },
 			type: e.type,
 			detail: e.detail || '',
 			age: daysSince(e.happened_on)

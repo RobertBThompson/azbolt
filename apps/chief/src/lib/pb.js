@@ -67,14 +67,35 @@ async function readOr(live, fixture, empty) {
 	}
 }
 
+/** What still leans on a record of each kind, for the message when it cannot go. */
+const HELD_BY = {
+	organizations:
+		'It still has liabilities, cash entries or endeavors under it. Delete those, or move them to another organization, first.'
+};
+
 /**
- * Retire a record without destroying it. Old records still name it, so
- * a hard delete would leave them pointing at nothing.
+ * Delete a record for good.
+ *
+ * What hangs off it goes with it where that is the only sensible
+ * reading — an asset's values, history, proofs and ownership links.
+ * Where something else would be left pointing at nothing, the server
+ * refuses, and this says what is in the way instead of a status code.
  * @param {string} collection
  * @param {string} id
  */
-export function archive(collection, id) {
-	return pb.collection(collection).update(id, { archived: new Date().toISOString() });
+export async function destroy(collection, id) {
+	try {
+		await pb.collection(collection).delete(id);
+	} catch (/** @type {any} */ err) {
+		if (err?.status === 404) return; // already gone
+		if (err?.status === 400) {
+			throw new Error(
+				/** @type {Record<string, string>} */ (HELD_BY)[collection] ??
+					'Something else still depends on it. Delete that first.'
+			);
+		}
+		throw err;
+	}
 }
 
 /** The id every write hangs its `owner` relation on. */
@@ -339,12 +360,12 @@ export async function renameSphere(id, name) {
 }
 
 /**
- * Retired, not deleted: a sphere stops being offered without taking
- * the jots, people and assets that name it with it.
+ * Delete a sphere. People and organizations that were in it simply
+ * stop being in it; its overlaps go with it.
  * @param {string} id
  */
 export function retireSphere(id) {
-	return pb.collection('spheres').update(id, { retired: true });
+	return destroy('spheres', id);
 }
 
 /* ── Jots ───────────────────────────────────────────────────────────── */
@@ -551,6 +572,11 @@ async function ownCategories() {
 	return rows.filter((r) => !r.archived).map((r) => ({ id: r.id, name: r.name }));
 }
 
+/** @param {string} id @param {string} name */
+export function renameCategory(id, name) {
+	return pb.collection('asset_categories').update(id, { name: name.trim() });
+}
+
 /** @param {string} name @returns {Promise<CategoryRow>} */
 export async function createCategory(name) {
 	const row = await pb
@@ -730,6 +756,24 @@ export function createCashEntry(e) {
 		period: e.period ?? '',
 		liability: e.liability || null,
 		owner: ownerId()
+	});
+}
+
+/**
+ * Correct a recorded entry.
+ * @param {string} id
+ * @param {{ label: string, organization: string, type: string, category: string,
+ *           amount: number, frequency: string, day: string }} e
+ */
+export function updateCashEntry(id, e) {
+	return pb.collection('cash_entries').update(id, {
+		label: e.label.trim(),
+		organization: e.organization,
+		type: e.type,
+		category: e.category,
+		amount: e.amount,
+		frequency: e.frequency,
+		date: `${e.day} 12:00:00.000Z`
 	});
 }
 

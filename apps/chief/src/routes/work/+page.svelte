@@ -74,9 +74,13 @@
 			<Blank>{EMPTY[/** @type {keyof typeof EMPTY} */ (when)]}</Blank>
 		{/if}
 	{/each}
-	{#if !kept()}
-		<Row t="cool" href="/work/calendar" title="Day & week" meta="Calendar view" trailing="›" />
-	{/if}
+	<Row
+		t="cool"
+		href="/work/calendar"
+		title="By date"
+		meta={kept() ? 'Dated tasks and payments due' : 'Calendar view'}
+		trailing="›"
+	/>
 	<Btn t="cool" href="/work/tasks/new" label="New task" />
 	<SourceNote source={work.source} error={work.error} onretry={load} />
 </Screen>

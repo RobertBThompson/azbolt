@@ -20,10 +20,11 @@
 		Row,
 		SectionHead,
 		Select,
-		SphereTags
+		SphereTags,
+		Delete
 	} from '$lib/kit';
 	import { goto } from '$app/navigation';
-	import { archive, updateEndeavor } from '$lib/pb.js';
+	import { destroy, updateEndeavor } from '$lib/pb.js';
 	import {
 		ENDEAVOR_STAGES,
 		TASK_STATES,
@@ -62,7 +63,6 @@
 	let stage = $state('Active');
 	let busy = $state(false);
 	let fault = $state('');
-	let confirming = $state(false);
 
 	function edit() {
 		({ name, outcome, organization, stage } = e);
@@ -91,7 +91,6 @@
 			updateEndeavor(id, { name: name.trim(), outcome: outcome.trim(), organization, stage })
 		);
 	const finish = () => run(() => updateEndeavor(id, { stage: 'Done' }));
-	const remove = () => run(() => archive('endeavors', id), '/work/endeavors');
 </script>
 
 <svelte:head><title>{e.name} · Chief</title></svelte:head>
@@ -167,16 +166,15 @@
 			<Btn primary={false} label="It is true now — mark it done" onclick={finish} disabled={busy} />
 		{/if}
 		<Btn primary={false} label="Edit" onclick={edit} />
-		{#if confirming}
-			<Alert
-				title="Remove {e.name}?"
-				meta="Its tasks are kept and stop belonging to an endeavor."
-			/>
-			<Btn t="alert" label="Yes, remove it" onclick={remove} disabled={busy} />
-			<Btn primary={false} label="Keep it" onclick={() => (confirming = false)} />
-		{:else}
-			<Btn primary={false} label="Remove" onclick={() => (confirming = true)} />
-		{/if}
+		<Delete
+			what={e.name}
+			warn="Its tasks are kept and stop belonging to an endeavor."
+			ondelete={async () => {
+				await destroy('endeavors', id);
+				await load();
+				await goto('/work/endeavors', { replaceState: true });
+			}}
+		/>
 	{/if}
 </Screen>
 

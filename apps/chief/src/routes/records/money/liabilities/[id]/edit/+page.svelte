@@ -11,13 +11,13 @@
 	 * down, so it never blocks.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Alert, PageHead, Tabs, Field, Select, Btn, Note } from '$lib/kit';
+	import { Alert, PageHead, Tabs, Field, Select, Btn, Note, Delete } from '$lib/kit';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { LIABILITIES, LOAN_TYPES, ORGS, activeAssets, dollars, ownBook } from '$lib/assets.js';
 	import { readAmount } from '$lib/amount.js';
 	import { reopenBook } from '$lib/book.svelte.js';
-	import { archive, updateLiability } from '$lib/pb.js';
+	import { destroy, updateLiability } from '$lib/pb.js';
 	import { today } from '$lib/today.js';
 
 	const own = ownBook();
@@ -46,7 +46,6 @@
 
 	let busy = $state(false);
 	let fault = $state('');
-	let confirming = $state(false);
 
 	/**
 	 * An empty box is "not known", which is allowed. Anything typed has
@@ -116,19 +115,6 @@
 			busy = false;
 		}
 	}
-
-	async function remove() {
-		busy = true;
-		fault = '';
-		try {
-			await archive('liabilities', id);
-			await reopenBook();
-			await goto('/records/money/liabilities', { replaceState: true });
-		} catch (/** @type {any} */ err) {
-			fault = err?.message || 'The server did not answer.';
-			busy = false;
-		}
-	}
 </script>
 
 <svelte:head><title>Edit liability · Chief</title></svelte:head>
@@ -174,16 +160,16 @@
 			onclick={save}
 			disabled={!ready || busy}
 		/>
-		{#if confirming}
-			<Alert
-				title="Remove {l.name}?"
-				meta="For a debt entered by mistake or paid off. It stops counting against net worth; its record is kept."
-			/>
-			<Btn t="alert" label="Yes, remove it" onclick={remove} disabled={busy} />
-			<Btn primary={false} label="Keep it" onclick={() => (confirming = false)} />
-		{:else}
-			<Btn primary={false} label="Remove this liability" onclick={() => (confirming = true)} />
-		{/if}
+		<Delete
+			what={l.name}
+			warn="The debt and its terms go, and it stops counting against net worth. Payments already recorded stay in cash."
+			label="Delete this liability"
+			ondelete={async () => {
+				await destroy('liabilities', id);
+				await reopenBook();
+				await goto('/records/money/liabilities', { replaceState: true });
+			}}
+		/>
 	{:else}
 		<Btn t="warm" label="Save changes" soon />
 	{/if}

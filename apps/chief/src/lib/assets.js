@@ -1887,7 +1887,7 @@ const EVENTS = [
 ];
 
 /**
- * @typedef {{ asset: string, name: string, type: string, detail: string, date: Date, when: string }} AssetEvent
+ * @typedef {{ asset: string, name: string, type: string, detail: string, date: Date, when: string , ref?: { collection: string, id: string } }} AssetEvent
  */
 
 /**
@@ -1907,7 +1907,11 @@ export function events(assetId = null, now = new Date()) {
 				type: e.type,
 				detail: e.detail,
 				date,
-				when: dayLabel(date, now)
+				when: dayLabel(date, now),
+				/* The record behind the line, when it is the account's own. */
+				ref: /** @type {{ collection: string, id: string }|undefined} */ (
+					/** @type {any} */ (e).ref
+				)
 			};
 		});
 }

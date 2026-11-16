@@ -15,7 +15,7 @@
  * Signed out, or with no server, jots live here for the session only
  * and the composer says so.
  */
-import { listJots, sphereJot, writeJot } from './pb.js';
+import { listJots, sphereJot, writeJot, destroy } from './pb.js';
 
 /**
  * @typedef {{
@@ -111,6 +111,16 @@ async function send(tempId, body) {
  */
 export async function place(id, organization) {
 	if (kept()) await sphereJot(id, organization);
+	jots.list = jots.list.filter((j) => j.id !== id);
+}
+
+/**
+ * Delete a jot for good. One that was never kept is simply dropped.
+ * @param {string} id
+ */
+export async function drop(id) {
+	const jot = jotOf(id);
+	if (kept() && jot?.state === 'kept') await destroy('jots', id);
 	jots.list = jots.list.filter((j) => j.id !== id);
 }
 

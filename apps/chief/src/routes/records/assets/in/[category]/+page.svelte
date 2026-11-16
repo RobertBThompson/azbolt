@@ -23,10 +23,14 @@
 		isVerified,
 		money,
 		ownerLine,
+		ownBook,
 		sumValue
 	} from '$lib/assets.js';
 	import { focused, inFocus, outOfView, totalInFocus } from '$lib/spheres.svelte.js';
-	import { FocusNote } from '$lib/kit';
+	import { Delete, FocusNote } from '$lib/kit';
+	import { goto } from '$app/navigation';
+	import { reopenBook } from '$lib/book.svelte.js';
+	import { destroy, renameCategory } from '$lib/pb.js';
 
 	const cat = $derived($page.params.category ?? 'all');
 	const all = $derived(cat === 'all');
@@ -58,6 +62,24 @@
 			(a) => effectiveValue(a) ?? 0
 		)
 	);
+
+	let renaming = $state(false);
+	let newName = $state('');
+	let fault = $state('');
+
+	async function rename() {
+		fault = '';
+		try {
+			await renameCategory(cat, newName);
+			await reopenBook();
+			// A fresh screen, so the new name is read from the reopened book.
+			await goto(`/records/assets`, { replaceState: true });
+		} catch (/** @type {any} */ err) {
+			fault = err?.response?.data?.name
+				? 'There is already a category with that name.'
+				: err?.message || 'The server did not answer.';
+		}
+	}
 
 	/** @param {(typeof inCat)[number]} a */
 	const meta = (a) => {
@@ -111,5 +133,31 @@
 		<Note>
 			Nothing is marked unverified automatically — Chief says what is stale and lets you decide.
 		</Note>
+	{/if}
+	{#if ownBook() && !all && cat !== 'none'}
+		{#if renaming}
+			<Field label="Category name" bind:value={newName} />
+			{#if fault}<Alert title="Not saved" meta={fault} />{/if}
+			<Btn t="warm" label="Save name" onclick={rename} disabled={!newName.trim()} />
+			<Btn primary={false} label="Cancel" onclick={() => (renaming = false)} />
+		{:else}
+			<Btn
+				primary={false}
+				label="Rename this category"
+				onclick={() => ((newName = categoryName(cat)), (renaming = true))}
+			/>
+			<Delete
+				what={categoryName(cat)}
+				warn={inCat.length
+					? `The ${inCat.length === 1 ? 'asset in it is' : `${inCat.length} assets in it are`} kept and left with no category.`
+					: 'Nothing is filed in it.'}
+				label="Delete this category"
+				ondelete={async () => {
+					await destroy('asset_categories', cat);
+					await reopenBook();
+					await goto('/records/assets', { replaceState: true });
+				}}
+			/>
+		{/if}
 	{/if}
 </Screen>

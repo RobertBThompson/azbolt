@@ -9,8 +9,8 @@
 	 */
 	import { goto } from '$app/navigation';
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Alert, Btn, SectionHead, SpherePick } from '$lib/kit';
-	import { archive, updatePerson } from '$lib/pb.js';
+	import { Alert, Btn, SectionHead, SpherePick, Delete } from '$lib/kit';
+	import { destroy, updatePerson } from '$lib/pb.js';
 	import PersonForm from '../PersonForm.svelte';
 
 	/** @type {{ person: import('$lib/pb.js').PersonRow }} */
@@ -25,7 +25,6 @@
 	let fields = $state(blank());
 	let busy = $state(false);
 	let fault = $state('');
-	let confirming = $state(false);
 
 	function blank() {
 		return {
@@ -78,18 +77,6 @@
 		} catch (err) {
 			person = { ...person, spheres: before };
 			fault = why(err);
-		}
-	}
-
-	async function remove() {
-		busy = true;
-		fault = '';
-		try {
-			await archive('people', person.id);
-			await goto('/people');
-		} catch (err) {
-			fault = why(err);
-			busy = false;
 		}
 	}
 </script>
@@ -146,21 +133,14 @@
 		{#if fault}<Alert title="Not saved" meta={fault} />{/if}
 
 		<Btn t="cool" label="Edit" onclick={edit} />
-		{#if confirming}
-			<Alert
-				title="Remove {person.name}?"
-				meta="They leave your lists. Records that name them keep the name."
-			/>
-			<Btn
-				t="alert"
-				label={busy ? 'Removing…' : 'Yes, remove them'}
-				onclick={remove}
-				disabled={busy}
-			/>
-			<Btn primary={false} label="Keep them" onclick={() => (confirming = false)} />
-		{:else}
-			<Btn primary={false} label="Remove" onclick={() => (confirming = true)} />
-		{/if}
+		<Delete
+			what={person.name}
+			warn="Everything kept about them goes."
+			ondelete={async () => {
+				await destroy('people', person.id);
+				await goto('/people', { replaceState: true });
+			}}
+		/>
 	{/if}
 </Screen>
 

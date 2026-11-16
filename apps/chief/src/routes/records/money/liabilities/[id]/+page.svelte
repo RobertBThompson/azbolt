@@ -6,7 +6,10 @@
 	 * and an organization before it is a row of terms.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { PageHead, Stats, Row, Facts, SectionHead, Alert, Btn, Blank } from '$lib/kit';
+	import { PageHead, Stats, Row, Facts, SectionHead, Alert, Btn, Blank, Delete } from '$lib/kit';
+	import { goto } from '$app/navigation';
+	import { reopenBook } from '$lib/book.svelte.js';
+	import { destroy } from '$lib/pb.js';
 	import { ORGS } from '$lib/assets.js';
 	import { page } from '$app/stores';
 	import {
@@ -102,6 +105,16 @@
 		{/each}
 		<Btn t="warm" href="/records/money/liabilities/{id}/pay" label="Record a payment" />
 		<Btn primary={false} href="/records/money/liabilities/{id}/edit" label="Edit liability" />
+		<Delete
+			what={l.name}
+			warn="The debt and its terms go, and it stops counting against net worth. Payments already recorded stay in cash."
+			label="Delete this liability"
+			ondelete={async () => {
+				await destroy('liabilities', id);
+				await reopenBook();
+				await goto('/records/money/liabilities', { replaceState: true });
+			}}
+		/>
 	{:else}
 		<Btn t="warm" href="/records/money/liabilities/{id}/edit" label="Edit liability" />
 	{/if}

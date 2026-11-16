@@ -20,8 +20,17 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Blank, Btn, Note, SectionHead, SourceNote, SphereTags, TypeBadge } from '$lib/kit';
-	import { jotOf, kept, place } from '$lib/jots.svelte.js';
+	import {
+		Blank,
+		Btn,
+		Delete,
+		Note,
+		SectionHead,
+		SourceNote,
+		SphereTags,
+		TypeBadge
+	} from '$lib/kit';
+	import { drop, jotOf, kept, place } from '$lib/jots.svelte.js';
 
 	let { data } = $props();
 
@@ -99,6 +108,15 @@
 		<Btn t="warm" label={busy ? 'Saving…' : 'Sphere it'} onclick={keep} disabled={busy || !org} />
 		<Btn primary={false} href="/" label="Back to your jots" />
 		<Btn primary={false} href="/work/tasks/new?jot={id}" label="Task it" />
+		<Delete
+			what="this jot"
+			warn="Your words go with it."
+			label="Delete this jot"
+			ondelete={async () => {
+				await drop(id);
+				await goto('/');
+			}}
+		/>
 	</div>
 
 	<Note>

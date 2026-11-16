@@ -123,7 +123,7 @@
 				<Btn primary={false} label="Cancel" onclick={() => (editing = '')} />
 				<Btn
 					primary={false}
-					label="Retire it"
+					label="Delete it"
 					onclick={() => run(() => retire(key)).then(() => (editing = ''))}
 					disabled={busy}
 				/>
