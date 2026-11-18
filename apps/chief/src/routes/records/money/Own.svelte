@@ -64,7 +64,9 @@
 	const run = runwayFromBalances(ids, now);
 	/* Owed both ways, and profit, over the year: profit counts what is owed
 	   as well as what has moved, so it is read from the lines, not the
-	   balances. */
+	   balances. These are bills and earnings not yet settled, not loan
+	   balances, and are labelled so: "You owe" sat under "$344,500 still
+	   owed" and read as the same thing. */
 	const position = cashPosition(cashFor('year'));
 
 	/* A balance read long ago says little about today. */
@@ -215,8 +217,8 @@
 		<SectionHead label="This year" t="warm" />
 		<Facts
 			items={[
-				{ label: 'Owed to you', value: money(position.owedIn) },
-				{ label: 'You owe', value: money(position.owedOut) },
+				{ label: 'Earned, not yet in', value: money(position.owedIn) },
+				{ label: 'Billed, not yet paid', value: money(position.owedOut) },
 				{ label: 'Profit', value: signed(position.profit) }
 			]}
 		/>
