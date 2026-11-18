@@ -4,15 +4,20 @@
 	 *
 	 * "all" is every category at once. Search runs over what a person
 	 * would actually type: the name, who holds it, a sphere, a kind of
-	 * claim. The three filters are the three questions asked of a list of
-	 * things you own — all of it, what is proven, what needs looking at.
+	 * claim.
+	 *
+	 * The list always opens on everything (Robert, 16 Nov). The one
+	 * filter, needs attention, is offered only when something does, and
+	 * says how many before it is pressed. "Verified" was dropped as a
+	 * filter: with few claims on file, pressing it changed nothing that
+	 * could be seen. Whether an asset is verified is on its own page.
 	 *
 	 * A row that needs attention says why in place of its usual line, so
 	 * the reason is read before the row is opened. Nothing is hidden or
 	 * moved for being flagged.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Alert, Blank, Btn, Field, Note, PageHead, Row, Tabs } from '$lib/kit';
+	import { Alert, Blank, Btn, Field, Filter, Note, PageHead, Row } from '$lib/kit';
 	import { page } from '$app/stores';
 	import {
 		activeAssets,
@@ -21,7 +26,6 @@
 		categoryName,
 		effectiveValue,
 		isMoneyCategory,
-		isVerified,
 		money,
 		ownerLine,
 		ownBook,
@@ -42,12 +46,15 @@
 	);
 
 	let q = $state('');
-	let show = $state($page.url.searchParams.get('show') === 'attention' ? 2 : 0);
+	let show = $state('all');
+	const flagged = $derived(inCat.filter((a) => attention(a.id).length).length);
+	/* If the last flagged asset is put right, the filter goes, and so
+	   does the narrowing it was doing. */
+	const narrowed = $derived(show === 'attention' && flagged > 0);
 
 	const matching = $derived(
 		inCat.filter((a) => {
-			if (show === 1 && !isVerified(a)) return false;
-			if (show === 2 && !attention(a.id).length) return false;
+			if (narrowed && !attention(a.id).length) return false;
 			const needle = q.trim().toLowerCase();
 			if (!needle) return true;
 			const hay = [a.name, ownerLine(a.id), ...a.spheres, ...a.claims.map((c) => c.kind)]
@@ -101,18 +108,25 @@
 			: `${inCat.length} ${inCat.length === 1 ? 'asset' : 'assets'} · ${money(sumValue(inCat))}`}
 		title={all ? 'All assets' : categoryName(cat)}
 	/>
+	<Btn
+		t="warm"
+		href="/records/assets/new{all ? '' : `?category=${cat}`}"
+		label={isMoney ? 'Add an account' : 'Add asset'}
+	/>
 	<FocusNote
 		what="assets here"
 		quiet={list.filter((x) => x.quiet).length}
 		hidden={outOfView(matching, (a) => a.spheres)}
 	/>
 	<Field label="Search assets" placeholder="Name, organization, sphere, claim" bind:value={q} />
-	<Tabs items={['All', 'Verified', 'Needs attention']} active={show} onpick={(i) => (show = i)} />
-
-	{#if show === 2 && list.length}
-		<Alert
-			title="{list.length} {list.length === 1 ? 'asset needs' : 'assets need'} attention"
-			meta="Each row says what is missing or stale."
+	{#if flagged}
+		<Filter
+			label="Show"
+			bind:active={show}
+			items={[
+				{ key: 'all', label: 'All', count: inCat.length },
+				{ key: 'attention', label: 'Needs attention', count: flagged }
+			]}
 		/>
 	{/if}
 
@@ -131,14 +145,9 @@
 		</Blank>
 	{/each}
 
-	<Btn
-		t="warm"
-		href="/records/assets/new{all ? '' : `?category=${cat}`}"
-		label={isMoney ? 'Add an account' : 'Add asset'}
-	/>
-	{#if show === 2}
+	{#if narrowed}
 		<Note>
-			Nothing is marked unverified automatically — Chief says what is stale and lets you decide.
+			Each row says what is missing or stale. Nothing is changed automatically; you decide.
 		</Note>
 	{/if}
 	{#if isMoney}

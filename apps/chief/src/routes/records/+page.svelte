@@ -14,6 +14,12 @@
 	 * There is no All · Personal · Work filter. That split is what
 	 * spheres replaced, and the sphere is already named at the top of the
 	 * screen.
+	 *
+	 * What is missing from the figures is said after the doors, in plain
+	 * text: it qualifies the numbers, it is not a reason to be here, and
+	 * between the numbers and the doors it pushed the doors off the
+	 * first screen. How many assets need attention is not said at all;
+	 * that is not a door's business (Robert, 16 Nov).
 	 */
 	import { book } from '$lib/book.svelte.js';
 	import Screen from '$lib/shell/Screen.svelte';
@@ -28,7 +34,6 @@
 		dayLabel,
 		events,
 		inSentence,
-		needingAttention,
 		ORGS,
 		effectiveValue,
 		money,
@@ -63,15 +68,12 @@
 
 	const count = activeAssets().length;
 	const categories = categorySummary().used.length;
-	const attn = needingAttention().length;
 	const net = cashTotals(cashFor('month')).net;
 	const due = upcomingPayment();
 	const loose = ownershipTree().loose.length;
 	const last = events()[0];
 
-	const assetsLine =
-		`${count} ${count === 1 ? 'asset' : 'assets'} in ${categories} ${categories === 1 ? 'category' : 'categories'}` +
-		(attn ? ` · ${attn} ${attn === 1 ? 'needs' : 'need'} attention` : '');
+	const assetsLine = `${count} ${count === 1 ? 'asset' : 'assets'} in ${categories} ${categories === 1 ? 'category' : 'categories'}`;
 	const moneyLine =
 		`Net ${signed(net)} this month` +
 		(due ? ` · ${due.l.name.toLowerCase()} due ${inSentence(dayLabel(due.due))}` : '');
@@ -98,33 +100,6 @@
 			[short(mine ? netWorthOf(mine) : netWorth()), mine ? 'Your net worth' : 'Net worth']
 		]}
 	/>
-	<!--
-		Two things the figures do not say on their own: what is missing
-		from them, and whose they are.
-	-->
-	<Blank>
-		{#if focused()}
-			Looking through {sphereOf(shell.sphere).name}: {money(inSphere.focused)} of assets are in it{inSphere.related
-				? `, and ${money(inSphere.related)} more in related spheres`
-				: ''}. Liabilities and net worth are not split by sphere.
-		{/if}
-		{#if unvalued || loose}
-			{[
-				unvalued ? `${unvalued} ${unvalued === 1 ? 'asset has' : 'assets have'} no value yet` : '',
-				loose
-					? `${loose}${unvalued ? '' : loose === 1 ? ' asset' : ' assets'} ${loose === 1 ? 'is' : 'are'} held by no organization`
-					: ''
-			]
-				.filter(Boolean)
-				.join(', and ')}, so {unvalued + loose === 1 ? 'it is' : 'they are'} left out of net worth.
-		{/if}
-		{#if ownBook()}
-			Your net worth is what your own organization holds: its share of each thing, and its share of
-			what the organizations it owns are worth.
-		{:else}
-			These are sample figures, across every sample organization.
-		{/if}
-	</Blank>
 	<Row
 		t="warm"
 		href="/records/assets"
@@ -162,5 +137,32 @@
 		trailing="›"
 	/>
 	<Btn t="warm" href="/records/assets/new" label="Add asset" />
+	<!--
+		Two things the figures do not say on their own: what is missing
+		from them, and whose they are.
+	-->
+	<Blank>
+		{#if focused()}
+			Looking through {sphereOf(shell.sphere).name}: {money(inSphere.focused)} of assets are in it{inSphere.related
+				? `, and ${money(inSphere.related)} more in related spheres`
+				: ''}. Liabilities and net worth are not split by sphere.
+		{/if}
+		{#if unvalued || loose}
+			{[
+				unvalued ? `${unvalued} ${unvalued === 1 ? 'asset has' : 'assets have'} no value yet` : '',
+				loose
+					? `${loose}${unvalued ? '' : loose === 1 ? ' asset' : ' assets'} ${loose === 1 ? 'is' : 'are'} held by no organization`
+					: ''
+			]
+				.filter(Boolean)
+				.join(', and ')}, so {unvalued + loose === 1 ? 'it is' : 'they are'} left out of net worth.
+		{/if}
+		{#if ownBook()}
+			Your net worth is what your own organization holds: its share of each thing, and its share of
+			what the organizations it owns are worth.
+		{:else}
+			These are sample figures, across every sample organization.
+		{/if}
+	</Blank>
 	<SourceNote source={book.source} error={book.error} />
 </Screen>

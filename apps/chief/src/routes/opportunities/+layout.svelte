@@ -16,7 +16,7 @@
 		back="/"
 		will="Chief will point out what your own records suggest: an asset sitting idle, a value gone stale, money owed and not collected."
 		meanwhile={[
-			{ href: '/records', title: 'Assets', meta: 'What needs attention is flagged there today' }
+			{ href: '/records', title: 'Assets', meta: 'Each asset in the list says what it is missing' }
 		]}
 	/>
 {:else}

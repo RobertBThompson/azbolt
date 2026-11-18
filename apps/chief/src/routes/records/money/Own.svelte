@@ -8,27 +8,25 @@
 	 * looks: daily, weekly, monthly. The history of those readings is
 	 * the trend.
 	 *
-	 * Behind the balances are three kinds of line: money coming in,
-	 * payments on what is owed or held (the car loan, upkeep on the
-	 * rental), and bills. Chief does not keep everyday spending — the bank
-	 * already does. It shows up where it belongs: as the part of the
+	 * The accounts are the first thing on the screen (Robert, 16 Nov), and
+	 * the figure over them is what they add up to: the same values the
+	 * rows show, so the two can never disagree. It once added up only
+	 * balances with a dated reading behind them, and said $0 above two
+	 * accounts holding $61,200.
+	 *
+	 * Then every summary before any list: how the balances moved this
+	 * month, as a labelled panel rather than loose tiles; what is owed,
+	 * as a door rather than a switch over the top of the page; and the
+	 * year. A list can run long, and a one-line door under it is a door
+	 * nobody finds.
+	 *
+	 * Last, the lines behind the balances: money coming in, payments on
+	 * what is owed or held, and bills. Chief does not keep everyday
+	 * spending — the bank already does. It shows up as the part of the
 	 * change in balances that no line accounts for.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import LensSwitch from '$lib/shell/LensSwitch.svelte';
-	import {
-		Alert,
-		Banner,
-		Blank,
-		Btn,
-		Facts,
-		Note,
-		Row,
-		SectionHead,
-		SourceNote,
-		Stats
-	} from '$lib/kit';
-	import { MONEY_LENSES } from '$lib/asset/money-lenses.js';
+	import { Alert, Blank, Btn, Facts, Lead, Note, Row, SectionHead, SourceNote } from '$lib/kit';
 	import {
 		ASSETS,
 		LIABILITIES,
@@ -39,11 +37,13 @@
 		dayLabel,
 		direction,
 		inSentence,
+		liabilities,
 		money,
 		moneyAssets,
 		moneyCategory,
+		owedMonthly,
+		owedTotal,
 		runwayFromBalances,
-		short,
 		signed,
 		transactions,
 		valuesOf
@@ -56,6 +56,9 @@
 	const now = new Date();
 	const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
+	/* What the account rows show, added up. */
+	const held = accounts.reduce((sum, a) => sum + (a.value ?? 0), 0);
+
 	const tracked = cashTotals(cashFor('month')).net;
 	const line = bottomLine(ids, monthStart, now, tracked);
 	const run = runwayFromBalances(ids, now);
@@ -67,6 +70,28 @@
 	/* A balance read long ago says little about today. */
 	const stale = accounts.filter((a) => a.valuedDaysAgo !== null && a.valuedDaysAgo > 35);
 	const unread = accounts.filter((a) => a.value === null);
+
+	/** @type {{ label: string, value: string }[]} */
+	const month = [
+		...(line.known
+			? [
+					{ label: 'Balances moved', value: signed(line.change) },
+					{ label: 'Payments and income', value: signed(line.tracked) },
+					{ label: 'Everyday, not itemised', value: signed(line.untracked) }
+				]
+			: []),
+		...(run.monthly !== null && run.months !== null
+			? [
+					{
+						label: 'Falling',
+						value: `about ${money(Math.round(run.monthly / 100) * 100)} a month`
+					},
+					{ label: 'Runway', value: `about ${run.months.toFixed(1)} months` }
+				]
+			: run.monthly !== null
+				? [{ label: 'Runway', value: 'Balances are holding' }]
+				: [])
+	];
 
 	const all = transactions();
 	const lines = all.filter((t) => !t.of);
@@ -92,6 +117,10 @@
 	const due = all.filter(
 		(t) => ['Payable', 'Cash Receivable', 'Accrued Expense'].includes(t.type) && t.date <= now
 	);
+	const owed = liabilities();
+
+	/** @param {number} n @param {string} one @param {string} many */
+	const count = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
 	/** @param {import('$lib/assets.js').Tx} t */
 	const about = (t) =>
@@ -113,23 +142,20 @@
 <svelte:head><title>Money · Chief</title></svelte:head>
 
 <Screen back="/records" nav={false}>
-	<LensSwitch label="Money view" items={MONEY_LENSES} at="/records/money" />
-
 	{#if !cat}
 		<Alert
 			title="The Money category is missing"
 			meta="The server is behind the app. Restart PocketBase so the latest migration applies, then reload."
 		/>
 	{:else}
-		<Stats
-			items={[
-				[
-					short(line.end),
-					accounts.length === 1 ? 'In 1 account' : `In ${accounts.length} accounts`
-				],
-				[line.known ? signed(line.change) : '—', 'This month'],
-				[line.known ? signed(line.untracked) : '—', 'Everything else']
-			]}
+		<Lead
+			figure={money(held)}
+			label={accounts.length
+				? `In ${count(accounts.length, 'account', 'accounts')}`
+				: 'No accounts yet'}
+			meta={line.known
+				? `${line.change < 0 ? 'Down' : 'Up'} ${money(Math.abs(line.change))} this month`
+				: ''}
 		/>
 
 		<SectionHead label="Accounts" t="warm" count={accounts.length} />
@@ -148,49 +174,43 @@
 				No accounts yet. Add the ones that matter: a bank account, cash on hand, a wallet.
 			</Blank>
 		{/each}
-		<Btn t="warm" href="/records/assets/new?category={cat.id}" label="Add an account" />
-
 		{#if unread.length || stale.length}
-			<Alert
-				title={unread.length
-					? `${unread.length} ${unread.length === 1 ? 'account has' : 'accounts have'} no balance`
-					: `${stale.length} ${stale.length === 1 ? 'balance is' : 'balances are'} over a month old`}
-				meta="Open the account and update its balance. Totals use the last one read."
-			/>
-		{/if}
-
-		{#if line.known}
-			<Banner
-				t="warm"
-				title="Balances {line.change < 0 ? 'fell' : 'rose'} {money(
-					Math.abs(line.change)
-				)} this month"
-				meta="{signed(line.tracked)} is from the lines below. {signed(
-					line.untracked
-				)} is everything else — everyday spending, which Chief does not itemise."
-			/>
-		{:else if accounts.length}
 			<Blank>
-				Update a balance a second time and Chief shows how it moved. One reading is a balance, not
-				yet a trend.
+				A red mark is a balance not read yet, or read over a month ago. Open the account to update
+				it; totals use the last one read.
 			</Blank>
 		{/if}
+		<Btn
+			t="warm"
+			primary={!accounts.length}
+			href="/records/assets/new?category={cat.id}"
+			label="Add an account"
+		/>
 
-		{#if run.months !== null && run.monthly !== null}
-			<Banner
-				t="warm"
-				title="About {run.months.toFixed(1)} months of runway"
-				meta="{money(run.liquid)} in accounts, falling about {money(
-					Math.round(run.monthly / 100) * 100
-				)} a month over the last {run.days} days."
-			/>
-		{:else if run.monthly !== null && accounts.length}
-			<Banner
-				t="warm"
-				title="Balances are holding"
-				meta="{money(run.liquid)} in accounts, and not falling over the last {run.days} days."
-			/>
+		{#if accounts.length}
+			<SectionHead label="This month" t="warm" />
+			{#if month.length}
+				<Facts items={month} />
+			{:else}
+				<Blank>
+					Update a balance a second time and Chief shows how it moved. One reading is a balance, not
+					yet a trend.
+				</Blank>
+			{/if}
 		{/if}
+
+		<SectionHead label="Liabilities" t="warm" count={owed.length} />
+		<Row
+			t="warm"
+			icon="owed"
+			hue="night"
+			href="/records/money/liabilities"
+			title={owed.length ? `${money(owedTotal())} still owed` : 'Nothing owed'}
+			meta={owed.length
+				? `${count(owed.length, 'liability', 'liabilities')} · ${money(owedMonthly())} a month`
+				: 'Loans, a mortgage, anything you have yet to pay off'}
+			trailing="›"
+		/>
 
 		<SectionHead label="This year" t="warm" />
 		<Facts

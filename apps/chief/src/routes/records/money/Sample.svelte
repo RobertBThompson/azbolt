@@ -17,7 +17,6 @@
 	 */
 	import { book } from '$lib/book.svelte.js';
 	import Screen from '$lib/shell/Screen.svelte';
-	import LensSwitch from '$lib/shell/LensSwitch.svelte';
 	import {
 		Filter,
 		Stats,
@@ -35,7 +34,6 @@
 	} from '$lib/kit';
 	import { ORGS } from '$lib/assets.js';
 	import { page } from '$app/stores';
-	import { MONEY_LENSES } from '$lib/asset/money-lenses.js';
 	import {
 		cashFor,
 		cashLines,
@@ -86,8 +84,6 @@
 <svelte:head><title>Cash flow · Chief</title></svelte:head>
 
 <Screen back="/records" nav={false}>
-	<LensSwitch label="Money view" items={MONEY_LENSES} at="/records/money" />
-
 	{#if view === 'empty' || none}
 		<Hero
 			t="warm"
@@ -192,6 +188,15 @@
 		{/if}
 
 		<Btn t="warm" href="/records/money/amount" label="Add transaction" />
+		<Row
+			t="warm"
+			icon="owed"
+			hue="night"
+			href="/records/money/liabilities"
+			title="Liabilities"
+			meta="What is owed, and what it costs a month"
+			trailing="›"
+		/>
 		<Note>
 			Net is cash in minus cash out, counting only what has actually moved. Profit also counts what
 			is owed either way, because it was earned or incurred even though the money has not changed
