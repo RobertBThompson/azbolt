@@ -147,6 +147,34 @@ async function write(coll, body) {
 	return res.body.id;
 }
 
+/**
+ * Read a record back and say which fields the server did not keep.
+ *
+ * PocketBase drops a field it does not know without a word, so a write
+ * that succeeds proves nothing about a field a migration was meant to
+ * add. On 16 Nov a server started before the pull took the Money
+ * category's `kind` and a cash entry's `asset` and `account`, kept none
+ * of them, and every write here still passed.
+ *
+ * @param {string} coll @param {string} id @param {Record<string, unknown>} want
+ */
+async function kept(coll, id, want) {
+	if (!id) return false;
+	const res = await call(`/api/collections/${coll}/records/${id}`, { token: A.token });
+	const lost = Object.entries(want)
+		.filter(([k, v]) => !res.ok || res.body?.[k] !== v)
+		.map(([k]) => k);
+	if (lost.length) {
+		bad(
+			`${coll}: the server did not keep ${lost.join(', ')}. A migration has not applied: ` +
+				'restart PocketBase after the pull has finished, and check only one is running.'
+		);
+		return false;
+	}
+	ok(`${coll}: ${Object.keys(want).join(', ')} kept`);
+	return true;
+}
+
 const sphere = await write('spheres', { name: `Check ${stamp}`, hue: '' });
 const sphere2 = await call('/api/collections/spheres/records', {
 	method: 'POST',
@@ -191,6 +219,7 @@ await write('people', {
 const jot = await write('jots', { text: 'A check jot', organization: org, sphered: NOON });
 const category = await write('asset_categories', { name: `Check ${stamp}` });
 /* The fixed Money category: made once, and neither renamed nor deleted. */
+let moneyCategory = '';
 {
 	const m = await call('/api/collections/asset_categories/records', {
 		method: 'POST',
@@ -198,19 +227,26 @@ const category = await write('asset_categories', { name: `Check ${stamp}` });
 		body: JSON.stringify({ name: 'Money', kind: 'money', owner: A.id })
 	});
 	if (!m.ok) bad(`asset_categories: could not make the Money category (${m.status})`);
-	else {
+	else if (await kept('asset_categories', m.body.id, { kind: 'money' })) {
+		/* Without the marker the rules below have nothing to hold on to,
+		   and their two failures would only repeat the one above. */
+		moneyCategory = m.body.id;
 		ok('asset_categories: Money category made');
 		const rename = await call(`/api/collections/asset_categories/records/${m.body.id}`, {
 			method: 'PATCH',
 			token: A.token,
 			body: JSON.stringify({ name: 'Renamed' })
 		});
-		rename.ok ? bad('asset_categories: Money was renamed') : ok('asset_categories: Money cannot be renamed');
+		rename.ok
+			? bad('asset_categories: Money was renamed')
+			: ok('asset_categories: Money cannot be renamed');
 		const gone = await call(`/api/collections/asset_categories/records/${m.body.id}`, {
 			method: 'DELETE',
 			token: A.token
 		});
-		gone.ok ? bad('asset_categories: Money was deleted') : ok('asset_categories: Money cannot be deleted');
+		gone.ok
+			? bad('asset_categories: Money was deleted')
+			: ok('asset_categories: Money cannot be deleted');
 	}
 }
 const asset = await write('assets', {
@@ -220,6 +256,16 @@ const asset = await write('assets', {
 	units: 10000,
 	valuation: 'whole'
 });
+/* A money account is an asset in the Money category. */
+const account = moneyCategory
+	? await write('assets', {
+			name: 'Check account',
+			category: moneyCategory,
+			quantity: 1,
+			units: 10000,
+			valuation: 'whole'
+		})
+	: asset;
 await write('valuations', { asset, amount: 0, currency: 'USD', valued_on: NOON, note: '' });
 await write('asset_events', {
 	asset,
@@ -300,7 +346,7 @@ await write('liabilities', {
 	due_day: 31,
 	started: NOON
 });
-await write('cash_entries', {
+const entry = await write('cash_entries', {
 	label: 'Check entry',
 	organization: org,
 	type: 'Actual Expense',
@@ -308,8 +354,11 @@ await write('cash_entries', {
 	amount: 0,
 	currency: 'USD',
 	frequency: 'Once',
-	date: NOON
+	date: NOON,
+	asset,
+	account
 });
+await kept('cash_entries', entry, { asset, account });
 const endeavor = await write('endeavors', {
 	name: 'Check endeavor',
 	outcome: '',
