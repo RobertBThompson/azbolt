@@ -13,6 +13,7 @@
 	import { work, load, taskOf, endeavorOf, orgOf } from '$lib/work.svelte.js';
 	import TaskFields from '$lib/work/TaskFields.svelte';
 	import { today } from '$lib/today.js';
+	import { ASSETS, money } from '$lib/assets.js';
 
 	/** @type {{ id: string }} */
 	let { id } = $props();
@@ -26,7 +27,17 @@
 	const org = $derived(e ? orgOf(e.organization) : null);
 
 	let editing = $state(false);
-	let fields = $state({ name: '', state: 'Now', endeavor: '', due: '', waiting: '', notes: '' });
+	let fields = $state({
+		name: '',
+		state: 'Now',
+		endeavor: '',
+		due: '',
+		waiting: '',
+		notes: '',
+		asset: '',
+		effort: '',
+		gain: 0
+	});
 	let busy = $state(false);
 	let fault = $state('');
 
@@ -108,6 +119,19 @@
 			/>
 		{:else}
 			<Row t="cool" title="Endeavor" meta="Not part of one, so it is in no sphere yet" />
+		{/if}
+		{#if task.asset && ASSETS[task.asset]}
+			<Row
+				t="warm"
+				href="/records/assets/{task.asset}"
+				title="Works on"
+				meta={[
+					ASSETS[task.asset].name,
+					task.effort ? `${task.effort.toLowerCase()} effort` : 'effort not given',
+					task.gain ? `should add ${money(task.gain)}` : 'gain not given'
+				].join(' · ')}
+				trailing="›"
+			/>
 		{/if}
 		{#if task.notes}<p class="notes">{task.notes}</p>{/if}
 

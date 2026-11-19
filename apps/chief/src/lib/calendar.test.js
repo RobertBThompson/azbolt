@@ -50,6 +50,9 @@ test('only open tasks with a date are on the calendar', () => {
 		doneOn: '',
 		endeavor: '',
 		notes: '',
+		asset: '',
+		effort: '',
+		gain: 0,
 		...o
 	});
 	const lines = datedTasks(
@@ -59,7 +62,7 @@ test('only open tasks with a date are on the calendar', () => {
 			task({ id: 'c', name: 'Finished', due: '2026-11-10', state: 'Done' }),
 			task({ id: 'd', name: 'Overdue', due: '2026-11-10', state: 'Soon' })
 		],
-		[{ id: 'e1', name: 'Roof', outcome: '', organization: 'o', stage: 'Active' }],
+		[{ id: 'e1', name: 'Roof', outcome: '', organization: 'o', stage: 'Active', sphere: '' }],
 		now
 	);
 	assert.deepEqual(

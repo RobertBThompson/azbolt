@@ -59,6 +59,8 @@ const EXPECTED = {
 		'valuation',
 		'parent',
 		'let_go',
+		'state',
+		'fixed',
 		'archived',
 		'owner'
 	],
@@ -103,7 +105,7 @@ const EXPECTED = {
 		'archived',
 		'owner'
 	],
-	endeavors: ['name', 'outcome', 'organization', 'stage', 'archived', 'owner'],
+	endeavors: ['name', 'outcome', 'organization', 'stage', 'sphere', 'archived', 'owner'],
 	tasks: [
 		'name',
 		'state',
@@ -113,6 +115,10 @@ const EXPECTED = {
 		'endeavor',
 		'from_jot',
 		'notes',
+		'asset',
+		'effort',
+		'gain',
+		'currency',
 		'archived',
 		'owner'
 	],
@@ -211,6 +217,23 @@ for (const [name, fields] of Object.entries(EXPECTED)) {
 		}
 	}
 	if (!faults) console.log('  ✓ as expected');
+}
+
+/* The fixed things the server itself refuses to lose: the Money
+   category, and each person's one fixed money account. */
+const holds = [
+	['asset_categories', 'deleteRule', "kind != 'money'"],
+	['asset_categories', 'updateRule', "kind != 'money'"],
+	['assets', 'deleteRule', 'fixed = false'],
+	['assets', 'updateRule', 'fixed = false']
+];
+console.log('fixed records');
+for (const [name, rule, part] of holds) {
+	const v = byName[name]?.[rule];
+	if (typeof v !== 'string' || !v.includes(part)) fault(`${name}.${rule} does not hold ${part}`);
+}
+if (!(byName.assets?.indexes ?? []).some((i) => i.includes('idx_assets_owner_fixed'))) {
+	fault('assets has no one-fixed-account-per-person index');
 }
 
 const users = byName.users;

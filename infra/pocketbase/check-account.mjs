@@ -254,8 +254,10 @@ const asset = await write('assets', {
 	category,
 	quantity: 1,
 	units: 10000,
-	valuation: 'whole'
+	valuation: 'whole',
+	state: 'Soon'
 });
+await kept('assets', asset, { state: 'Soon' });
 /* A money account is an asset in the Money category. */
 const account = moneyCategory
 	? await write('assets', {
@@ -266,6 +268,72 @@ const account = moneyCategory
 			valuation: 'whole'
 		})
 	: asset;
+
+/* Each person's one fixed money account: it can be renamed and moved
+   between Now, Soon and Later, and nothing else. It goes only with the
+   person, when their sign-in is deleted. */
+if (moneyCategory) {
+	const body = (/** @type {Record<string, unknown>} */ extra) =>
+		JSON.stringify({
+			category: moneyCategory,
+			quantity: 1,
+			units: 10000,
+			valuation: 'whole',
+			fixed: true,
+			owner: A.id,
+			...extra
+		});
+	const f = await call('/api/collections/assets/records', {
+		method: 'POST',
+		token: A.token,
+		body: body({ name: 'Check fixed', state: 'Now' })
+	});
+	if (!f.ok) bad(`assets: could not make the fixed account (${f.status})`);
+	else if (await kept('assets', f.body.id, { fixed: true, state: 'Now' })) {
+		const patch = (/** @type {Record<string, unknown>} */ change) =>
+			call(`/api/collections/assets/records/${f.body.id}`, {
+				method: 'PATCH',
+				token: A.token,
+				body: JSON.stringify(change)
+			});
+		for (const [what, change] of [
+			['renamed', { name: 'Check fixed, renamed' }],
+			['moved to Soon', { state: 'Soon' }]
+		]) {
+			const r = await patch(change);
+			r.ok
+				? ok(`assets: the fixed account can be ${what}`)
+				: bad(`assets: the fixed account could not be ${what} (${r.status})`);
+		}
+		for (const [what, change] of [
+			['moved out of Money', { category }],
+			['let go', { let_go: NOON }],
+			['marked Done', { state: 'Done' }],
+			['unfixed', { fixed: false }]
+		]) {
+			const r = await patch(change);
+			r.ok
+				? bad(`assets: the fixed account was ${what}`)
+				: ok(`assets: the fixed account cannot be ${what}`);
+		}
+		const gone = await call(`/api/collections/assets/records/${f.body.id}`, {
+			method: 'DELETE',
+			token: A.token
+		});
+		gone.ok
+			? bad('assets: the fixed account was deleted')
+			: ok('assets: the fixed account cannot be deleted');
+		const second = await call('/api/collections/assets/records', {
+			method: 'POST',
+			token: A.token,
+			body: body({ name: 'Check second fixed' })
+		});
+		second.ok
+			? bad('assets: a second fixed account was allowed')
+			: ok('assets: one fixed account per person');
+	}
+}
+
 await write('valuations', { asset, amount: 0, currency: 'USD', valued_on: NOON, note: '' });
 await write('asset_events', {
 	asset,
@@ -363,15 +431,22 @@ const endeavor = await write('endeavors', {
 	name: 'Check endeavor',
 	outcome: '',
 	organization: org,
-	stage: 'Active'
+	stage: 'Active',
+	sphere
 });
-await write('tasks', {
+await kept('endeavors', endeavor, { sphere });
+const task = await write('tasks', {
 	name: 'Check task',
 	state: 'Now',
 	waiting_on: '',
 	endeavor,
-	from_jot: jot
+	from_jot: jot,
+	asset,
+	effort: 'Medium',
+	gain: 120000,
+	currency: 'USD'
 });
+await kept('tasks', task, { asset, effort: 'Medium', gain: 120000 });
 
 /* The app sorts by these; a collection without them reads as an error. */
 for (const [coll, sort] of [
@@ -473,6 +548,7 @@ console.log('\nDeleting single records as A');
 		units: 10000,
 		since: NOON
 	});
+	const yt = await post('tasks', { name: 'Check work on it', state: 'Now', asset: yid });
 	const gone = await del('assets', yid);
 	if (!gone.ok) bad(`assets: could not be deleted with records hanging off it (${gone.status})`);
 	else {
@@ -487,6 +563,12 @@ console.log('\nDeleting single records as A');
 		left
 			? bad(`assets: ${left} records were left behind pointing at a deleted asset`)
 			: ok('assets: its values, history, proofs and links went with it');
+		// A task that named it stays, naming nothing.
+		const t3 = await call(`/api/collections/tasks/records/${yt.body?.id}`, { token: A.token });
+		t3.ok && !t3.body.asset
+			? ok('assets: deleted; a task that worked on it stays')
+			: bad(`assets: the task that named it is ${t3.status} ${t3.body?.asset ?? ''}`);
+		if (t3.ok) await del('tasks', yt.body.id);
 	}
 
 	// A sphere goes; the person who was in it stays.
@@ -541,6 +623,7 @@ for (const coll of OWNED) {
 	for (const r of list.body.items) {
 		// The fixed Money category goes with the account, not before it.
 		if (coll === 'asset_categories' && r.kind === 'money') continue;
+		if (coll === 'assets' && r.fixed) continue;
 		const del = await call(`/api/collections/${coll}/records/${r.id}`, {
 			method: 'DELETE',
 			token: A.token

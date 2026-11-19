@@ -230,9 +230,21 @@ export const categoryName = (id) =>
  *   endeavors: string[], storage: string,
  *   units?: number, parent?: string|null,
  *   valuation?: 'whole'|'parts',
- *   movement?: string, letGo?: boolean
- * }} Asset
+ *   movement?: string, letGo?: boolean,
+ *   state?: string, fixed?: boolean
+ * }} Asset  `state` is one of ASSET_STATES. `fixed` marks the one money
+ *   account a book always has, which cannot be deleted or let go.
  */
+
+/**
+ * Where an asset stands, in the same four words as a task (Robert,
+ * 19 Nov). Now is the focus, Soon is next, Later is on the back burner,
+ * and Done is no longer held: let go, kept as a record.
+ */
+export const ASSET_STATES = ['Now', 'Soon', 'Later', 'Done'];
+
+/** @param {Asset} a */
+export const stateOf = (a) => (a.letGo ? 'Done' : a.state || 'Now');
 
 /**
  * Ownership of one asset is divided into this many units by default.
@@ -543,6 +555,15 @@ const RAW_ASSETS = {
 	}
 };
 
+/** Where each sample stands, so the samples show all four. */
+const SAMPLE_STATES = /** @type {Record<string, string>} */ ({
+	'family-car': 'Later',
+	'storage-racking': 'Soon',
+	'carmen-contract': 'Soon',
+	'upright-piano': 'Soon',
+	'studio-collection': 'Later'
+});
+
 /**
  * Every asset, in cents, with the two fields decision 6 asked for:
  * `parent` for an asset that sits inside another, and `valuation` for
@@ -558,7 +579,9 @@ export const ASSETS = Object.fromEntries(
 			value: a.value == null ? null : dollars(a.value),
 			units: a.units ?? SHARE_UNITS,
 			parent: a.parent ?? null,
-			valuation: a.valuation ?? 'whole'
+			valuation: a.valuation ?? 'whole',
+			state: a.letGo ? 'Done' : (a.state ?? SAMPLE_STATES[id] ?? 'Now'),
+			fixed: a.fixed ?? id === 'household-savings'
 		}
 	])
 );

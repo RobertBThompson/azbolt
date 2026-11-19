@@ -5,7 +5,7 @@
 	 * the name optional, filled from what the record already holds.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Alert, PageHead, Btn, Field, Select, Delete } from '$lib/kit';
+	import { Alert, PageHead, Btn, Field, Note, Select, Delete } from '$lib/kit';
 	import AttributeFields from '$lib/asset/AttributeFields.svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -42,7 +42,9 @@
 		try {
 			await updateAsset(id, {
 				name: name.trim(),
-				category: category || null,
+				/* The fixed money account stays in Money; the server refuses
+				   any change to its category, so none is sent. */
+				...(a.fixed ? {} : { category: category || null }),
 				blurb: blurb.trim(),
 				rights,
 				period: period.trim(),
@@ -67,7 +69,16 @@
 	<PageHead eyebrow={a.name} title="Attributes" meta="Optional until a decision needs them." />
 	{#if own}
 		<Field label="Asset name" bind:value={name} required />
-		<Select label="Category" options={categories} bind:value={category} placeholder="No category" />
+		{#if a.fixed}
+			<Note>Every book keeps one money account, and this is it. It stays in Money.</Note>
+		{:else}
+			<Select
+				label="Category"
+				options={categories}
+				bind:value={category}
+				placeholder="No category"
+			/>
+		{/if}
 		<Field label="In a few words" placeholder="Optional" bind:value={blurb} />
 	{/if}
 	<AttributeFields
@@ -88,16 +99,18 @@
 			onclick={save}
 			disabled={!name.trim() || badCount || busy}
 		/>
-		<Delete
-			what={a.name}
-			warn="Its values, history, proofs and ownership links go with it. If it was sold or given away, record that it was let go instead, and it keeps its history."
-			label="Delete this asset"
-			ondelete={async () => {
-				await destroy('assets', id);
-				await reopenBook();
-				await goto('/records/assets', { replaceState: true });
-			}}
-		/>
+		{#if !a.fixed}
+			<Delete
+				what={a.name}
+				warn="Its values, history, proofs and ownership links go with it. If it was sold or given away, record that it was let go instead, and it keeps its history."
+				label="Delete this asset"
+				ondelete={async () => {
+					await destroy('assets', id);
+					await reopenBook();
+					await goto('/records/assets', { replaceState: true });
+				}}
+			/>
+		{/if}
 	{:else}
 		<Btn t="warm" label="Save attributes" soon />
 	{/if}

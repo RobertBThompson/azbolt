@@ -45,6 +45,11 @@
 	   balance. */
 	const isMoney = $derived(isMoneyCategory(category));
 
+	/* Now is the focus, Soon is next, Later is on the back burner
+	   (Robert, 19 Nov). Done is letting it go, recorded afterwards. */
+	const STANDING = ['Now', 'Soon', 'Later'];
+	let standing = $state('Now');
+
 	const amount = $derived(readAmount(value));
 	const badValue = $derived(value.trim() !== '' && amount === null);
 	const ready = $derived(name.trim() !== '' && !badValue);
@@ -57,7 +62,7 @@
 		busy = true;
 		fault = '';
 		try {
-			const id = await createAsset({ name, category, money: isMoney });
+			const id = await createAsset({ name, category, money: isMoney, state: standing });
 			if (amount !== null) await addValuation(id, dollars(amount), today());
 			/* An account is yours unless you say otherwise, so its balance is
 			   in your net worth from the start. Ownership can be changed. */
@@ -101,6 +106,7 @@
 			bind:value={category}
 			placeholder="Choose category"
 		/>
+		<Select label="Where it stands" options={STANDING} bind:value={standing} />
 		{#if !own}
 			<Select label="Owner" options={owners} bind:value={owner} placeholder="Organization" />
 		{/if}

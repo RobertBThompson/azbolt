@@ -1,5 +1,5 @@
 import { createPocketBase, pocketBaseReachable } from '@azbolt/lib/pocketbase';
-import { sampleWork } from './work.js';
+import { buildName, sampleWork } from './work.js';
 import { PEOPLE, ORGS } from './data.js';
 
 /**
@@ -353,6 +353,28 @@ export async function writeSphere(name, hue = '') {
 	return { id: row.id, name: row.name, hue: row.hue ?? '' };
 }
 
+/**
+ * The endeavor a sphere is built by, made with the sphere (Robert,
+ * 19 Nov). It belongs to the Chief's own organization and builds this
+ * one sphere, which is the only sphere it shows in. The Chief can
+ * rename it, move its tasks, or delete it like any other.
+ * @param {SphereRow} sphere
+ */
+export async function createBuildEndeavor(sphere) {
+	const me = await selfOrganization();
+	if (!me) return null;
+	return endeavor(
+		await pb.collection('endeavors').create({
+			name: buildName(sphere.name),
+			outcome: '',
+			organization: me.id,
+			stage: 'Active',
+			sphere: sphere.id,
+			owner: ownerId()
+		})
+	);
+}
+
 /** @param {string} id @param {string} name */
 export async function renameSphere(id, name) {
 	const row = await pb.collection('spheres').update(id, { name: name.trim() });
@@ -498,27 +520,19 @@ export function readBook() {
 		async () => {
 			await selfOrganization();
 			const live = { filter: 'archived = null' };
-			const [
-				categories,
-				assets,
-				valuations,
-				ownerships,
-				liabilities,
-				cash,
-				events,
-				claims,
-				organizations
-			] = await Promise.all([
-				ownCategories(),
-				pb.collection('assets').getFullList({ sort: 'name', filter: 'archived = null' }),
-				pb.collection('valuations').getFullList({ sort: 'valued_on' }),
-				pb.collection('ownerships').getFullList({ sort: 'created', filter: 'archived = null' }),
-				pb.collection('liabilities').getFullList({ sort: 'name', ...live }),
-				pb.collection('cash_entries').getFullList({ sort: '-date', ...live }),
-				pb.collection('asset_events').getFullList({ sort: 'happened_on,created', ...live }),
-				pb.collection('claims').getFullList({ sort: 'created', ...live }),
-				pb.collection('organizations').getFullList({ sort: 'name', filter: 'archived = null' })
-			]);
+			const categories = await ownCategories();
+			await fixedAccount(categories);
+			const [assets, valuations, ownerships, liabilities, cash, events, claims, organizations] =
+				await Promise.all([
+					pb.collection('assets').getFullList({ sort: 'name', filter: 'archived = null' }),
+					pb.collection('valuations').getFullList({ sort: 'valued_on' }),
+					pb.collection('ownerships').getFullList({ sort: 'created', filter: 'archived = null' }),
+					pb.collection('liabilities').getFullList({ sort: 'name', ...live }),
+					pb.collection('cash_entries').getFullList({ sort: '-date', ...live }),
+					pb.collection('asset_events').getFullList({ sort: 'happened_on,created', ...live }),
+					pb.collection('claims').getFullList({ sort: 'created', ...live }),
+					pb.collection('organizations').getFullList({ sort: 'name', filter: 'archived = null' })
+				]);
 			return /** @type {BookRows} */ ({
 				categories,
 				assets,
@@ -591,6 +605,47 @@ async function ownCategories() {
 		.sort((a, b) => Number(b.kind === 'money') - Number(a.kind === 'money'));
 }
 
+/**
+ * The one money account every book has, and that cannot be deleted
+ * (Robert, 19 Nov). Most likely a bank; a mattress if that is the
+ * truth. An account opened before this existed fixes its oldest money
+ * account rather than gaining a new one. Otherwise one called Cash is
+ * made, wholly the Chief's own. A unique index on the server allows one
+ * per person, so a second tab doing this at the same moment is refused,
+ * and that is ignored.
+ * @param {CategoryRow[]} categories
+ */
+async function fixedAccount(categories) {
+	const money = categories.find((c) => c.kind === 'money');
+	if (!money) return;
+	try {
+		const fixed = await pb.collection('assets').getList(1, 1, { filter: 'fixed = true' });
+		if (fixed.totalItems) return;
+		const oldest = await pb.collection('assets').getList(1, 1, {
+			sort: 'created',
+			filter: pb.filter('category = {:c} && let_go = null && archived = null', { c: money.id })
+		});
+		if (oldest.items.length) {
+			await pb.collection('assets').update(oldest.items[0].id, { fixed: true });
+			return;
+		}
+		const id = await createAsset({ name: 'Cash', category: money.id, money: true, fixed: true });
+		const me = await selfOrganization();
+		if (me) {
+			const day = new Date().toISOString().slice(0, 10);
+			await createOwnership(
+				{ cls: 'organization', id: me.id },
+				{ cls: 'asset', id },
+				'Owner',
+				10_000,
+				day
+			);
+		}
+	} catch {
+		/* Another tab made it, or a server without the migration: nothing to fix here. */
+	}
+}
+
 /** @param {string} id @param {string} name */
 export function renameCategory(id, name) {
 	return pb.collection('asset_categories').update(id, { name: name.trim() });
@@ -605,13 +660,15 @@ export async function createCategory(name) {
 }
 
 /**
- * @param {{ name: string, category?: string, money?: boolean }} fields
+ * @param {{ name: string, category?: string, money?: boolean, state?: string, fixed?: boolean }} fields
  * @returns {Promise<string>} the new asset's id
  */
 export async function createAsset(fields) {
 	const row = await pb.collection('assets').create({
 		name: fields.name.trim(),
 		category: fields.category || null,
+		state: fields.state || 'Now',
+		fixed: !!fields.fixed,
 		// Money can be spent as it stands, which is what liquid means.
 		...(fields.money ? { liquidity: 'Liquid', tangibility: 'Intangible' } : {}),
 		quantity: 1,
@@ -852,7 +909,10 @@ function task(r) {
 		due: String(r.due ?? '').slice(0, 10),
 		doneOn: String(r.done_on ?? '').slice(0, 10),
 		endeavor: r.endeavor ?? '',
-		notes: r.notes ?? ''
+		notes: r.notes ?? '',
+		asset: r.asset ?? '',
+		effort: r.effort ?? '',
+		gain: r.gain ?? 0
 	};
 }
 
@@ -863,7 +923,8 @@ function endeavor(r) {
 		name: r.name ?? '',
 		outcome: r.outcome ?? '',
 		organization: r.organization ?? '',
-		stage: r.stage || 'Active'
+		stage: r.stage || 'Active',
+		sphere: r.sphere ?? ''
 	};
 }
 
@@ -906,6 +967,12 @@ function taskBody(f) {
 	if (f.doneOn !== undefined) body.done_on = stamp(f.doneOn);
 	if (f.endeavor !== undefined) body.endeavor = f.endeavor || null;
 	if (f.notes !== undefined) body.notes = f.notes.trim();
+	if (f.asset !== undefined) body.asset = f.asset || null;
+	if (f.effort !== undefined) body.effort = f.effort || null;
+	if (f.gain !== undefined) {
+		body.gain = Math.max(0, Math.round(f.gain || 0));
+		body.currency = 'USD';
+	}
 	return body;
 }
 
@@ -1040,6 +1107,7 @@ export async function deleteAccount(progress) {
 				// The fixed Money category cannot be deleted on its own. It goes
 				// with the account, at the last step.
 				if (name === 'asset_categories' && r.kind === 'money') continue;
+				if (name === 'assets' && r.fixed) continue;
 				all.push([name, r.id]);
 			}
 		} catch (/** @type {any} */ err) {

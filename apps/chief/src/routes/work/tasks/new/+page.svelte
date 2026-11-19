@@ -18,10 +18,13 @@
 	import { work, kept, load, endeavorOf } from '$lib/work.svelte.js';
 	import TaskFields from '$lib/work/TaskFields.svelte';
 	import { today } from '$lib/today.js';
+	import { ASSETS } from '$lib/assets.js';
 
 	const fromJot = $page.url.searchParams.get('jot') ?? '';
 	const jot = fromJot ? jotOf(fromJot) : null;
 	const forEndeavor = $page.url.searchParams.get('endeavor') ?? '';
+	/* Arriving from an asset's own page, the task is for that asset. */
+	const forAsset = $page.url.searchParams.get('asset') ?? '';
 
 	let fields = $state({
 		name: jot?.text ?? '',
@@ -29,12 +32,19 @@
 		endeavor: endeavorOf(forEndeavor) ? forEndeavor : '',
 		due: '',
 		waiting: '',
-		notes: ''
+		notes: '',
+		asset: ASSETS[forAsset] ? forAsset : '',
+		effort: '',
+		gain: 0
 	});
 	let busy = $state(false);
 	let fault = $state('');
 
-	const back = forEndeavor ? `/work/endeavors/${forEndeavor}` : '/work';
+	const back = forEndeavor
+		? `/work/endeavors/${forEndeavor}`
+		: forAsset
+			? `/records/assets/${forAsset}`
+			: '/work';
 	const ready = $derived(fields.name.trim() !== '');
 
 	/** @param {SubmitEvent} e */

@@ -16,7 +16,11 @@
 //   3. Switch or filter: changes what this screen shows and goes
 //      nowhere. Tabs, LensSwitch or Filter, never a Row. It opens on
 //      everything, says how many each choice holds, and is not drawn
-//      when it would show nothing different.
+//      when it would show nothing different. A switch between whole
+//      views of a screen (the Asset tab's Focus, Work, Activity and
+//      Worth) comes first, above the headline, because it decides what
+//      the headline is (Robert, 19 Nov). A setting on a record (an
+//      asset's Now, Soon or Later) is a Seg, not a switch.
 //   4. Content: records are Rows; places to look (categories) are
 //      Tiles; one end of a set of links is a Group. Anything that is
 //      a Row can be tapped and goes somewhere.

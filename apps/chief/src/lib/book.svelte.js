@@ -93,7 +93,9 @@ function shape(rows) {
 			units: r.units || 10_000,
 			parent: r.parent || null,
 			valuation: r.valuation === 'parts' ? 'parts' : 'whole',
-			letGo: !!r.let_go
+			letGo: !!r.let_go,
+			state: r.let_go ? 'Done' : r.state || 'Now',
+			fixed: !!r.fixed
 		};
 		for (const v of [...history].reverse()) {
 			events.push({

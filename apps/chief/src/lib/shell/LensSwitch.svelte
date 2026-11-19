@@ -1,6 +1,9 @@
 <script>
 	/**
 	 * Two lenses on one branch, as a switch at the top of the screen.
+	 * Three or more (the Asset tab has four) take the full width in equal
+	 * columns with the icon over the word, because side by side they ran
+	 * into each other.
 	 *
 	 * Built from links, not a bound toggle. These navigate, so an anchor
 	 * is the honest element: middle-click opens a tab, it is announced as
@@ -19,7 +22,7 @@
 	let { label, items, at } = $props();
 </script>
 
-<nav class="track" aria-label={label}>
+<nav class="track" class:many={items.length > 2} aria-label={label}>
 	{#each items as item (item.href)}
 		<a
 			href={item.href}
@@ -85,10 +88,26 @@
 		outline: 2px solid #ffffff;
 		outline-offset: 2px;
 	}
+	.many {
+		width: 100%;
+		border-radius: 26px;
+	}
+	.many a {
+		flex: 1 1 0;
+		flex-direction: column;
+		gap: 3px;
+		min-height: 54px;
+		padding: 6px 2px;
+		border-radius: 22px;
+		font-size: 14.5px;
+	}
 	@media (min-width: 900px) {
 		.track {
 			width: 340px;
 			margin-left: 0;
+		}
+		.track.many {
+			width: 480px;
 		}
 	}
 

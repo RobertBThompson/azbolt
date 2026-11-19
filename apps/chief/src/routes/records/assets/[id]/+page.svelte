@@ -10,6 +10,14 @@
 	 *
 	 * Verified, Insured and Stored are read off the claims on file. They
 	 * are never set by hand, so the word cannot outlive the evidence.
+	 *
+	 * Where it stands — Now, Soon or Later — is set here, under its name
+	 * (Robert, 19 Nov). Done is letting it go, which is recorded as what
+	 * happened to it, so it is not a fourth button. The work on it is the
+	 * tasks that name it, open first.
+	 *
+	 * The one fixed money account cannot be deleted or let go; it says so
+	 * where the delete would be.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
 	import {
@@ -23,9 +31,12 @@
 		Facts,
 		Btn,
 		Blank,
-		Delete
+		Delete,
+		Note,
+		Seg
 	} from '$lib/kit';
-	import { ENDEAVORS } from '$lib/data.js';
+	import { work } from '$lib/work.svelte.js';
+	import { inOrder } from '$lib/work.js';
 	import { ORGS } from '$lib/assets.js';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
@@ -48,6 +59,7 @@
 		ownBook,
 		ownerLine,
 		ownersOf,
+		stateOf,
 		statuses,
 		valuedLine
 	} from '$lib/assets.js';
@@ -111,13 +123,35 @@
 	let busy = $state(false);
 	let fault = $state('');
 
+	const STANDING = ['Now', 'Soon', 'Later'];
+	// svelte-ignore state_referenced_locally
+	let standing = $state(Math.max(0, STANDING.indexOf(stateOf(a))));
+	/** @param {number} i */
+	async function stand(i) {
+		fault = '';
+		try {
+			await updateAsset(id, { state: STANDING[i] });
+			await reopenBook();
+		} catch (/** @type {any} */ err) {
+			standing = Math.max(0, STANDING.indexOf(stateOf(a)));
+			fault = err?.message || 'The server did not answer.';
+		}
+	}
+
+	/* The tasks that name this asset: open ones in reading order, then done. */
+	const tasks = $derived(
+		inOrder(work.tasks.filter((t) => t.asset === id)).sort(
+			(x, y) => Number(x.state === 'Done') - Number(y.state === 'Done')
+		)
+	);
+
 	/* Letting go is a date on the record, so undoing a mistaken one is
 	   clearing it. The line in the timeline stays: it did get recorded. */
 	async function bringBack() {
 		busy = true;
 		fault = '';
 		try {
-			await updateAsset(id, { let_go: null });
+			await updateAsset(id, { let_go: null, state: 'Now' });
 			await reopenBook();
 			await goto(`/records/assets/${id}/timeline`);
 		} catch (/** @type {any} */ err) {
@@ -157,8 +191,14 @@
 				disabled={busy}
 			/>
 		{/if}
-	{:else if why.length}
-		<Alert title="Needs attention" meta={why.join(' · ')} />
+	{:else}
+		{#if ownBook()}
+			<Seg t="warm" items={STANDING} bind:active={standing} onpick={stand} />
+			{#if fault}<Alert title="Not saved" meta={fault} />{/if}
+		{/if}
+		{#if why.length}
+			<Note>Missing: {why.join(' · ')}</Note>
+		{/if}
 	{/if}
 
 	<Row
@@ -245,18 +285,28 @@
 		<Blank>Nothing is owed against it.</Blank>
 	{/each}
 
-	<SectionHead label="Linked endeavors" t="cool" count={a.endeavors.length} />
-	{#each a.endeavors as e (e)}
+	<SectionHead label="Work on it" t="cool" count={tasks.filter((t) => t.state !== 'Done').length} />
+	{#each tasks as t (t.id)}
 		<Row
 			t="cool"
-			href="/work/endeavors/{e}"
-			title={ENDEAVORS[e]?.name ?? e}
-			meta={ENDEAVORS[e]?.next ? `Next: ${ENDEAVORS[e].next}` : ''}
-			trailing="↗"
+			href="/work/tasks/{t.id}"
+			title={t.name}
+			meta={[
+				t.state,
+				t.effort ? `${t.effort.toLowerCase()} effort` : '',
+				t.gain ? `should add ${money(t.gain)}` : ''
+			]
+				.filter(Boolean)
+				.join(' · ')}
+			trailing="›"
+			quiet={t.state === 'Done'}
 		/>
 	{:else}
-		<Blank>Not tied to an endeavor.</Blank>
+		<Blank>No task names it yet.</Blank>
 	{/each}
+	{#if ownBook() && !a.letGo}
+		<Btn t="cool" primary={false} href="/work/tasks/new?asset={id}" label="Add a task for it" />
+	{/if}
 
 	<SectionHead label="Timeline" t="warm" count={history.length} />
 	{#each history.slice(0, 3) as h, i (i)}
@@ -272,7 +322,12 @@
 		<Btn t="warm" href="/records/assets/{id}/record" label="Record what happened" />
 	{/if}
 	<Btn t="ai" primary={false} href="/" label="Jot an asset update" />
-	{#if ownBook()}
+	{#if ownBook() && a.fixed}
+		<Note>
+			Every book keeps one money account, so this one cannot be deleted or let go. Rename it to your
+			bank, or to wherever the money is kept.
+		</Note>
+	{:else if ownBook()}
 		<Delete
 			what={a.name}
 			warn="Its values, history, proofs and ownership links go with it. If it was sold or given away, record that it was let go instead, and it keeps its history."

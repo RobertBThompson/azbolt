@@ -49,7 +49,8 @@
 		{ value: 'Moved', label: 'Moved — kept somewhere else now' },
 		{ value: 'Transferred', label: 'Transferred — a different owner' },
 		{ value: 'Acquired', label: 'Acquired — how it came to be held' },
-		{ value: 'Let go', label: 'Let go — sold, given, lost' }
+		/* The one fixed money account is never let go (Robert, 19 Nov). */
+		...(a?.fixed ? [] : [{ value: 'Let go', label: 'Let go — sold, given, lost' }])
 	];
 	const WAYS = ['Sold', 'Given away', 'Lost', 'Scrapped', 'Returned'];
 
@@ -120,7 +121,8 @@
 					day
 				);
 			} else if (kind === 'Let go') {
-				await updateAsset(id, { let_go: `${day} 12:00:00.000Z` });
+				// Let go is Done: no longer held, kept as a record.
+				await updateAsset(id, { let_go: `${day} 12:00:00.000Z`, state: 'Done' });
 				await createAssetEvent(
 					id,
 					'Let go',

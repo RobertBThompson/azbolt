@@ -1,7 +1,20 @@
 <script>
-	/** Two mutually exclusive choices, both visible. */
-	/** @type {{ a: string, b: string, active?: number, t?: string, onpick?: ((i: number) => void)|null }} */
-	let { a, b, active = $bindable(0), t = 'neutral', onpick = null } = $props();
+	/**
+	 * Mutually exclusive choices, all visible: two as `a` and `b`, or a
+	 * few as `items` (an asset's Now, Soon and Later). A setting, not a
+	 * filter: it changes the record, not what the screen shows.
+	 */
+	/** @type {{ a?: string, b?: string, items?: string[], active?: number, t?: string, onpick?: ((i: number) => void)|null, disabled?: boolean }} */
+	let {
+		a = '',
+		b = '',
+		items = [],
+		active = $bindable(0),
+		t = 'neutral',
+		onpick = null,
+		disabled = false
+	} = $props();
+	const choices = $derived(items.length ? items : [a, b]);
 	import { tone } from './tone.js';
 	const c = $derived(tone(t));
 	/** @param {number} i */
@@ -12,12 +25,16 @@
 </script>
 
 <div class="seg" role="group">
-	<button class:on={active === 0} style="--t-ink:{c.ink}; --t-tint:{c.tint}" onclick={() => pick(0)}
-		>{a}</button
-	>
-	<button class:on={active === 1} style="--t-ink:{c.ink}; --t-tint:{c.tint}" onclick={() => pick(1)}
-		>{b}</button
-	>
+	{#each choices as label, i (i)}
+		<button
+			type="button"
+			class:on={active === i}
+			aria-pressed={active === i}
+			style="--t-ink:{c.ink}; --t-tint:{c.tint}"
+			{disabled}
+			onclick={() => pick(i)}>{label}</button
+		>
+	{/each}
 </div>
 
 <style>

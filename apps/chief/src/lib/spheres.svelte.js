@@ -10,6 +10,7 @@
  * stop being offered without taking them with it.
  */
 import {
+	createBuildEndeavor,
 	listOverlaps,
 	listSpheres,
 	renameSphere,
@@ -19,6 +20,7 @@ import {
 } from './pb.js';
 import { SAMPLE_OVERLAPS, pairKey, strength, throughFocus, focusTotal } from './focus.js';
 import { setSphere, shell } from './state.svelte.js';
+import { load as loadWork, work } from './work.svelte.js';
 import { SPHERES, derivedSphere } from './spheres.js';
 
 /** @typedef {{ id: string, name: string, swatch: string, custom: boolean }} Sphere */
@@ -172,6 +174,15 @@ export function sphereOf(id) {
 export async function addSphere(name) {
 	const row = await writeSphere(name);
 	spheres.list = [...spheres.list, row];
+	/* Every sphere starts with an endeavor to build it (Robert, 19 Nov).
+	   If that fails the sphere still stands, and the endeavor can be
+	   made by hand. */
+	try {
+		await createBuildEndeavor(row);
+		if (work.loaded) await loadWork();
+	} catch {
+		/* the sphere is made; its endeavor is not */
+	}
 	return row.id;
 }
 
