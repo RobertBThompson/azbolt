@@ -172,10 +172,7 @@
 
 <svelte:head><title>{a.name} · Chief</title></svelte:head>
 
-<Screen
-	back={a.category ? `/records/assets/in/${a.category}` : '/records/assets/in/all'}
-	nav={false}
->
+<Screen back="/records" nav={false}>
 	<PageHead eyebrow={categoryName(a.category)} title={a.name} meta={a.blurb} />
 	{#if marks.length}<Chips t="warm" items={marks} active={-1} />{/if}
 	<SphereTags keys={a.spheres} />
@@ -192,10 +189,18 @@
 			/>
 		{/if}
 	{:else}
-		{#if ownBook()}
-			<Seg t="warm" items={STANDING} bind:active={standing} onpick={stand} />
-			{#if fault}<Alert title="Not saved" meta={fault} />{/if}
-		{/if}
+		<!-- Shown greyed when signed out rather than hidden: a control that
+		     is not there cannot be found, and samples cannot be changed. -->
+		<Seg
+			t="warm"
+			label="Where it stands"
+			items={STANDING}
+			bind:active={standing}
+			onpick={stand}
+			disabled={!ownBook()}
+			note={ownBook() ? '' : 'Sign in to change this. These are samples.'}
+		/>
+		{#if fault}<Alert title="Not saved" meta={fault} />{/if}
 		{#if why.length}
 			<Note>Missing: {why.join(' · ')}</Note>
 		{/if}
@@ -221,6 +226,29 @@
 	/>
 	{#if isMoney && ownBook() && !a.letGo}
 		<Btn t="warm" href="/records/assets/{id}/valuation?update" label="Update balance" />
+	{/if}
+
+	<SectionHead label="Work on it" t="cool" count={tasks.filter((t) => t.state !== 'Done').length} />
+	{#each tasks as t (t.id)}
+		<Row
+			t="cool"
+			href="/work/tasks/{t.id}"
+			title={t.name}
+			meta={[
+				t.state,
+				t.effort ? `${t.effort.toLowerCase()} effort` : '',
+				t.gain ? `should add ${money(t.gain)}` : ''
+			]
+				.filter(Boolean)
+				.join(' · ')}
+			trailing="›"
+			quiet={t.state === 'Done'}
+		/>
+	{:else}
+		<Blank>No task names it yet.</Blank>
+	{/each}
+	{#if ownBook() && !a.letGo}
+		<Btn t="cool" primary={false} href="/work/tasks/new?asset={id}" label="Add a task for it" />
 	{/if}
 
 	<SectionHead
@@ -284,29 +312,6 @@
 	{:else}
 		<Blank>Nothing is owed against it.</Blank>
 	{/each}
-
-	<SectionHead label="Work on it" t="cool" count={tasks.filter((t) => t.state !== 'Done').length} />
-	{#each tasks as t (t.id)}
-		<Row
-			t="cool"
-			href="/work/tasks/{t.id}"
-			title={t.name}
-			meta={[
-				t.state,
-				t.effort ? `${t.effort.toLowerCase()} effort` : '',
-				t.gain ? `should add ${money(t.gain)}` : ''
-			]
-				.filter(Boolean)
-				.join(' · ')}
-			trailing="›"
-			quiet={t.state === 'Done'}
-		/>
-	{:else}
-		<Blank>No task names it yet.</Blank>
-	{/each}
-	{#if ownBook() && !a.letGo}
-		<Btn t="cool" primary={false} href="/work/tasks/new?asset={id}" label="Add a task for it" />
-	{/if}
 
 	<SectionHead label="Timeline" t="warm" count={history.length} />
 	{#each history.slice(0, 3) as h, i (i)}

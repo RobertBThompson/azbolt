@@ -10,17 +10,43 @@
 	import { sphereOf } from '$lib/spheres.svelte.js';
 	import { shell } from '$lib/state.svelte.js';
 	import Icon from '$lib/kit/Icon.svelte';
+	import { afterNavigate } from '$app/navigation';
 
 	/** @type {{ search?: boolean, back?: string|null }} */
 	let { search = false, back = null } = $props();
 	const sphere = $derived(sphereOf(shell.sphere));
+
+	/*
+	 * Back goes to where you were (Robert, 19 Nov: an asset opened from
+	 * the Asset tab went "back" to a category list never seen). `back` is
+	 * the screen above, used when there is nowhere in the app behind you,
+	 * or when where you were is a step below this screen: a form just
+	 * saved, or a page opened from here. Back from a saved form goes up,
+	 * not into the form again.
+	 */
+	/** @type {URL|null} */
+	let from = null;
+	afterNavigate((nav) => {
+		from = nav.from?.url ?? null;
+	});
+	/** @param {MouseEvent} e */
+	function goBack(e) {
+		if (!from || e.metaKey || e.ctrlKey || e.shiftKey) return;
+		const here = location.pathname.replace(/\/$/, '');
+		const there = from.pathname.replace(/\/$/, '');
+		if (there === here || there.startsWith(`${here}/`)) return;
+		e.preventDefault();
+		history.back();
+	}
 </script>
 
 <div class="band" style="background:{sphere.swatch}"></div>
 
 <header>
 	{#if back}
-		<a class="act back" href={back} aria-label="Back"><span aria-hidden="true">‹</span></a>
+		<a class="act back" href={back} aria-label="Back" onclick={goBack}
+			><span aria-hidden="true">‹</span></a
+		>
 	{/if}
 	{#if !back}
 		<span class="mark"><img src="/logo.png" alt="" width="24" height="24" /></span>

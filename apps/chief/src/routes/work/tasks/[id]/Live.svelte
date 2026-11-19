@@ -6,7 +6,7 @@
 	 * it done — a single tap away. Everything else is behind Edit.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Alert, Btn, Chips, PageHead, Row, SphereTags, Delete } from '$lib/kit';
+	import { Alert, Btn, Chips, PageHead, Row, Seg, SphereTags, Delete } from '$lib/kit';
 	import { goto } from '$app/navigation';
 	import { destroy, updateTask } from '$lib/pb.js';
 	import { isLate, spheresOf, taskLine } from '$lib/work.js';
@@ -41,9 +41,11 @@
 	let busy = $state(false);
 	let fault = $state('');
 
+	/* Where it stands is the buttons below, the same three as on an
+	   asset's page, so it is said here only once it is Done. */
 	const tags = $derived(
 		[
-			task.state,
+			task.state === 'Done' ? 'Done' : '',
 			isLate(task) ? 'Late' : '',
 			task.waiting && task.state !== 'Done' ? `Waiting on ${task.waiting}` : ''
 		].filter(Boolean)
@@ -82,6 +84,14 @@
 		);
 	const done = () => run(() => updateTask(id, { state: 'Done', doneOn: today() }));
 	const reopen = () => run(() => updateTask(id, { state: 'Now', doneOn: '' }));
+
+	const STANDING = ['Now', 'Soon', 'Later'];
+	let standing = $state(0);
+	$effect(() => {
+		standing = Math.max(0, STANDING.indexOf(task.state));
+	});
+	/** @param {number} i */
+	const stand = (i) => run(() => updateTask(id, { state: STANDING[i] }));
 </script>
 
 <svelte:head><title>{task.name} · Chief</title></svelte:head>
@@ -106,8 +116,18 @@
 		</form>
 	{:else}
 		<PageHead eyebrow="Task" title={task.name} meta={taskLine(task, [])} />
-		<Chips t="cool" items={tags} active={-1} />
+		{#if tags.length}<Chips t="cool" items={tags} active={-1} />{/if}
 		{#if org}<SphereTags keys={spheresOf(e, work.orgs)} />{/if}
+		{#if task.state !== 'Done'}
+			<Seg
+				t="cool"
+				label="Where it stands"
+				items={STANDING}
+				bind:active={standing}
+				onpick={stand}
+				disabled={busy}
+			/>
+		{/if}
 
 		{#if e}
 			<Row

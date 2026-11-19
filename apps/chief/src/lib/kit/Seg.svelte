@@ -3,8 +3,14 @@
 	 * Mutually exclusive choices, all visible: two as `a` and `b`, or a
 	 * few as `items` (an asset's Now, Soon and Later). A setting, not a
 	 * filter: it changes the record, not what the screen shows.
+	 *
+	 * `label` names it above the buttons, the way a field is named, so
+	 * three bare words are not left to explain themselves. `small` fits
+	 * it inside a row of a list. `disabled` shows it greyed, with `note`
+	 * saying why, rather than hiding it: a control that is not there
+	 * cannot be learned.
 	 */
-	/** @type {{ a?: string, b?: string, items?: string[], active?: number, t?: string, onpick?: ((i: number) => void)|null, disabled?: boolean }} */
+	/** @type {{ a?: string, b?: string, items?: string[], active?: number, t?: string, onpick?: ((i: number) => void)|null, disabled?: boolean, label?: string, small?: boolean, note?: string }} */
 	let {
 		a = '',
 		b = '',
@@ -12,7 +18,10 @@
 		active = $bindable(0),
 		t = 'neutral',
 		onpick = null,
-		disabled = false
+		disabled = false,
+		label = '',
+		small = false,
+		note = ''
 	} = $props();
 	const choices = $derived(items.length ? items : [a, b]);
 	import { tone } from './tone.js';
@@ -24,7 +33,8 @@
 	};
 </script>
 
-<div class="seg" role="group">
+{#if label}<span class="eyebrow label">{label}</span>{/if}
+<div class="seg" class:small role="group" aria-label={label || undefined}>
 	{#each choices as label, i (i)}
 		<button
 			type="button"
@@ -36,6 +46,7 @@
 		>
 	{/each}
 </div>
+{#if note}<span class="note">{note}</span>{/if}
 
 <style>
 	.seg {
@@ -69,5 +80,35 @@
 	button:focus-visible {
 		outline: 2px solid #ffffff;
 		outline-offset: 2px;
+	}
+	button:disabled {
+		cursor: default;
+		opacity: 0.55;
+	}
+	/* Named the way a form field is named, so it reads as one. */
+	.label {
+		display: block;
+		margin: 2px 0 -5px;
+		color: var(--label-ink, var(--on-field-2));
+	}
+	.note {
+		display: block;
+		margin-top: -3px;
+		font-size: 14.5px;
+		color: var(--on-field-2);
+	}
+	.small {
+		gap: 6px;
+	}
+	.small button {
+		height: 38px;
+		border-radius: 999px;
+		font-size: 14.5px;
+		box-shadow: none;
+	}
+	.small button.on {
+		box-shadow:
+			inset 0 1px 0 #ffffff,
+			inset 0 0 0 1.5px color-mix(in srgb, var(--t-ink) 55%, transparent);
 	}
 </style>

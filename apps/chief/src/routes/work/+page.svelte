@@ -16,6 +16,8 @@
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
 	import LensSwitch from '$lib/shell/LensSwitch.svelte';
+	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	import { Tabs, Row, Btn, Blank, FocusNote, Group, SectionHead, SourceNote } from '$lib/kit';
 	import { ASSETS } from '$lib/assets.js';
 	import { inFocus, outOfView } from '$lib/spheres.svelte.js';
@@ -35,7 +37,21 @@
 		{ label: 'Endeavors', href: '/work/endeavors', icon: 'action' }
 	];
 
-	let active = $state(0);
+	/* The tab is kept in the address, so coming back from a task
+	   returns to the tab it was opened from. */
+	const active = $derived(
+		Math.max(
+			0,
+			TASK_STATES.findIndex((s) => s.toLowerCase() === $page.url.searchParams.get('state'))
+		)
+	);
+	/** @param {number} i */
+	const pick = (i) =>
+		goto(i ? `/work?state=${TASK_STATES[i].toLowerCase()}` : '/work', {
+			replaceState: true,
+			noScroll: true,
+			keepFocus: true
+		});
 	const when = $derived(TASK_STATES[active]);
 	/* A task is in the spheres of its endeavor's organization, and
 	   nowhere else. */
@@ -100,7 +116,7 @@
 
 <Screen>
 	<LensSwitch label="Action view" items={LENSES} at="/work" />
-	<Tabs items={tabs} {active} onpick={(i) => (active = i)} />
+	<Tabs items={tabs} {active} onpick={pick} />
 	<FocusNote
 		what="tasks here"
 		quiet={list.filter((x) => x.quiet).length}

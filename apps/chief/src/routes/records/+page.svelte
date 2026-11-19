@@ -19,7 +19,10 @@
 	 *             organization worth?
 	 *
 	 * Assets are Now, Soon, Later or Done, like tasks, and the sphere at
-	 * the top already narrows them. Focus leads with Now, in this sphere.
+	 * the top already narrows them. Focus has the same four tabs as the
+	 * Action tab, so the two read alike, and opens on Now. The tab is
+	 * kept in the address, so coming back from an asset returns to it.
+	 * Moving many assets at once is its own screen, a tap away.
 	 * Money is a category like any other, reached from the categories at
 	 * the foot of Focus and from Worth; Ownership from Worth.
 	 *
@@ -29,6 +32,7 @@
 	 * to an asset reaches a sphere through whoever owns the asset.
 	 */
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	import { book } from '$lib/book.svelte.js';
 	import Screen from '$lib/shell/Screen.svelte';
 	import LensSwitch from '$lib/shell/LensSwitch.svelte';
@@ -41,11 +45,13 @@
 		Row,
 		SectionHead,
 		SourceNote,
+		Tabs,
 		Tiles
 	} from '$lib/kit';
 	import {
 		ASSETS,
 		ASSET_CATEGORIES,
+		ASSET_STATES,
 		ORGS,
 		assetValue,
 		controllingOrgs,
@@ -91,15 +97,37 @@
 	const held = all.filter((a) => stateOf(a) !== 'Done');
 	const seen = $derived(inFocus(all, (a) => a.spheres));
 	const hidden = $derived(held.length - seen.filter((x) => stateOf(x.item) !== 'Done').length);
-	/** @param {string} s */
-	const inState = (s) => seen.filter((x) => stateOf(x.item) === s);
-	const now = $derived(inState('Now'));
-	const soon = $derived(inState('Soon'));
-	const later = $derived(inState('Later'));
-	const done = $derived(inState('Done'));
-	const nowValue = $derived(now.reduce((n, x) => n + (effectiveValue(x.item) ?? 0), 0));
-	let showLater = $state(false);
-	let showDone = $state(false);
+
+	const standing = $derived(
+		ASSET_STATES.find((s) => s.toLowerCase() === $page.url.searchParams.get('state')) ?? 'Now'
+	);
+	/** @param {number} i */
+	const stand = (i) =>
+		goto(i ? `/records?state=${ASSET_STATES[i].toLowerCase()}` : '/records', {
+			replaceState: true,
+			noScroll: true,
+			keepFocus: true
+		});
+	const inTab = $derived(seen.filter((x) => stateOf(x.item) === standing));
+	const tabValue = $derived(inTab.reduce((n, x) => n + (effectiveValue(x.item) ?? 0), 0));
+	const tabs = $derived(
+		ASSET_STATES.map((s) => {
+			const n = seen.filter((x) => stateOf(x.item) === s).length;
+			return s === 'Done' || !n ? s : `${s} ${n}`;
+		})
+	);
+	/** What each tab is, under the figure. */
+	const MEANS = /** @type {Record<string, string>} */ ({
+		Now: 'The focus',
+		Soon: 'Next in line',
+		Later: 'On the back burner'
+	});
+	const EMPTY = /** @type {Record<string, string>} */ ({
+		Now: 'Nothing is Now. Open an asset and set it to Now, or move several at once.',
+		Soon: 'Nothing is waiting in Soon.',
+		Later: 'Nothing is on the back burner.',
+		Done: 'Nothing has been let go. An asset sold, given away or lost is recorded on its own page, and stays here as a record.'
+	});
 
 	/** @param {string} id */
 	const openOn = (id) => work.tasks.filter((t) => t.asset === id && t.state !== 'Done').length;
@@ -202,32 +230,23 @@
 
 	{#if view === 'focus'}
 		<FocusNote quiet={seen.filter((x) => x.quiet).length} {hidden} what="assets" />
-		{#if held.length}
+		<Tabs items={tabs} active={ASSET_STATES.indexOf(standing)} onpick={stand} />
+		{#if standing !== 'Done' && inTab.length}
 			<Lead
-				figure={money(nowValue)}
-				label="{count(now.length, 'asset')} now"
-				meta="{soon.length} soon · {later.length} later"
+				figure={money(tabValue)}
+				label="{count(inTab.length, 'asset')} {standing.toLowerCase()}"
+				meta={MEANS[standing]}
 			/>
 		{/if}
 		<Btn t="warm" href="/records/assets/new" label="Add asset" />
+		{#if held.length}
+			<Btn primary={false} href="/records/focus" label="Move assets between Now, Soon and Later" />
+		{/if}
 
-		<SectionHead label="Now" t="warm" count={now.length} />
-		{#each now as { item: a, quiet } (a.id)}
-			<Row
-				t="warm"
-				href="/records/assets/{a.id}"
-				title={a.name}
-				meta={assetLine(a)}
-				trailing={valueOf(a)}
-				{quiet}
-			/>
-		{:else}
-			<Blank>Nothing is in Now. Open an asset and set it to Now to put it in front of you.</Blank>
-		{/each}
-
-		{#if soon.length}
-			<SectionHead label="Soon" t="warm" count={soon.length} />
-			{#each soon as { item: a, quiet } (a.id)}
+		{#each inTab as { item: a, quiet } (a.id)}
+			{#if standing === 'Done'}
+				<Row href="/records/assets/{a.id}" title={a.name} meta="Let go · kept as a record" quiet />
+			{:else}
 				<Row
 					t="warm"
 					href="/records/assets/{a.id}"
@@ -236,31 +255,12 @@
 					trailing={valueOf(a)}
 					{quiet}
 				/>
-			{/each}
-		{/if}
-
-		{#if later.length}
-			{#if showLater}
-				<SectionHead label="Later" count={later.length} />
-				{#each later as { item: a } (a.id)}
-					<Row
-						href="/records/assets/{a.id}"
-						title={a.name}
-						meta={assetLine(a)}
-						trailing={valueOf(a)}
-						quiet
-					/>
-				{/each}
-			{:else}
-				<Btn
-					primary={false}
-					label="Show {count(later.length, 'asset')} for later"
-					onclick={() => (showLater = true)}
-				/>
 			{/if}
-		{/if}
+		{:else}
+			<Blank>{EMPTY[standing]}</Blank>
+		{/each}
 
-		{#if categories.length}
+		{#if categories.length && standing !== 'Done'}
 			<SectionHead label="Categories" t="warm" count={categories.length} />
 			<Tiles
 				label="Categories"
@@ -273,26 +273,6 @@
 				}))}
 			/>
 			<Btn primary={false} href="/records/assets" label="All categories" />
-		{/if}
-
-		{#if done.length}
-			{#if showDone}
-				<SectionHead label="Done" count={done.length} />
-				{#each done as { item: a } (a.id)}
-					<Row
-						href="/records/assets/{a.id}"
-						title={a.name}
-						meta="Let go · kept as a record"
-						quiet
-					/>
-				{/each}
-			{:else}
-				<Btn
-					primary={false}
-					label="Show {count(done.length, 'asset')} let go"
-					onclick={() => (showDone = true)}
-				/>
-			{/if}
 		{/if}
 	{:else if view === 'work'}
 		{#if toGain}

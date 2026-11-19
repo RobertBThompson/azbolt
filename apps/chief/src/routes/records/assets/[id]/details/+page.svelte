@@ -9,7 +9,7 @@
 	import AttributeFields from '$lib/asset/AttributeFields.svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { ASSETS, ASSET_CATEGORIES, ownBook } from '$lib/assets.js';
+	import { ASSETS, ASSET_CATEGORIES, ownBook, stateOf } from '$lib/assets.js';
 	import { reopenBook } from '$lib/book.svelte.js';
 	import { destroy, updateAsset } from '$lib/pb.js';
 
@@ -20,6 +20,11 @@
 
 	let name = $state(a.name);
 	let category = $state(a.category);
+	/* Where it stands is edited here too, where anything else about the
+	   asset is: looking for it here and not finding it is how it was
+	   first missed. Done is letting it go, recorded on the asset's page. */
+	const STANDING = ['Now', 'Soon', 'Later'];
+	let standing = $state(stateOf(a) === 'Done' ? 'Done' : stateOf(a));
 	let blurb = $state(a.blurb);
 	let rights = $state(a.rights);
 	let period = $state(a.period);
@@ -42,6 +47,7 @@
 		try {
 			await updateAsset(id, {
 				name: name.trim(),
+				...(standing === 'Done' ? {} : { state: standing }),
 				/* The fixed money account stays in Money; the server refuses
 				   any change to its category, so none is sent. */
 				...(a.fixed ? {} : { category: category || null }),
@@ -69,6 +75,9 @@
 	<PageHead eyebrow={a.name} title="Attributes" meta="Optional until a decision needs them." />
 	{#if own}
 		<Field label="Asset name" bind:value={name} required />
+		{#if standing !== 'Done'}
+			<Select label="Where it stands" options={STANDING} bind:value={standing} />
+		{/if}
 		{#if a.fixed}
 			<Note>Every book keeps one money account, and this is it. It stays in Money.</Note>
 		{:else}
