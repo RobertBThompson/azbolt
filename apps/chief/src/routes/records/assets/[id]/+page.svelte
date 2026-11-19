@@ -59,6 +59,7 @@
 		ownBook,
 		ownerLine,
 		ownersOf,
+		FOCUS_QUESTION,
 		stateOf,
 		statuses,
 		valuedLine
@@ -193,7 +194,7 @@
 		     is not there cannot be found, and samples cannot be changed. -->
 		<Seg
 			t="warm"
-			label="Where it stands"
+			label={FOCUS_QUESTION}
 			items={STANDING}
 			bind:active={standing}
 			onpick={stand}

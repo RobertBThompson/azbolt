@@ -13,7 +13,7 @@
 	import { work, load, taskOf, endeavorOf, orgOf } from '$lib/work.svelte.js';
 	import TaskFields from '$lib/work/TaskFields.svelte';
 	import { today } from '$lib/today.js';
-	import { ASSETS, money } from '$lib/assets.js';
+	import { ASSETS, FOCUS_QUESTION, money } from '$lib/assets.js';
 
 	/** @type {{ id: string }} */
 	let { id } = $props();
@@ -121,7 +121,7 @@
 		{#if task.state !== 'Done'}
 			<Seg
 				t="cool"
-				label="Where it stands"
+				label={FOCUS_QUESTION}
 				items={STANDING}
 				bind:active={standing}
 				onpick={stand}

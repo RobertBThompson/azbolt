@@ -73,7 +73,7 @@
 				since
 			);
 			await reopenBook();
-			await goto(`/records/ownership/${l.id}`);
+			await goto(`/records/ownership/${l.id}`, { replaceState: true });
 		} catch (/** @type {any} */ err) {
 			fault = err?.message || 'The server did not answer.';
 			busy = false;

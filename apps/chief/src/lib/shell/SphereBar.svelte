@@ -24,6 +24,9 @@
 	 * saved, or a page opened from here. Back from a saved form goes up,
 	 * not into the form again.
 	 */
+	/* A screen you fill in and save. Back never returns to one. */
+	const FORM =
+		/\/(new|add|edit|details|record|valuation|amount|confirm|pay|attributes|paperwork|signin)$|\/settle\//;
 	/** @type {URL|null} */
 	let from = null;
 	afterNavigate((nav) => {
@@ -34,7 +37,7 @@
 		if (!from || e.metaKey || e.ctrlKey || e.shiftKey) return;
 		const here = location.pathname.replace(/\/$/, '');
 		const there = from.pathname.replace(/\/$/, '');
-		if (there === here || there.startsWith(`${here}/`)) return;
+		if (there === here || there.startsWith(`${here}/`) || FORM.test(there)) return;
 		e.preventDefault();
 		history.back();
 	}

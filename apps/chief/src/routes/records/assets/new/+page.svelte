@@ -23,6 +23,7 @@
 		ownBook
 	} from '$lib/assets.js';
 	import { readAmount } from '$lib/amount.js';
+	import { FOCUS_QUESTION } from '$lib/assets.js';
 	import { reopenBook } from '$lib/book.svelte.js';
 	import { addValuation, createAsset, createOwnership, selfOrganization } from '$lib/pb.js';
 	import { today } from '$lib/today.js';
@@ -32,14 +33,33 @@
 	let name = $state('');
 	const asked = $page.url.searchParams.get('category') ?? '';
 	let category = $state(asked === 'all' || asked === 'none' ? '' : asked);
-	let owner = $state('');
+	/* Who owns it is asked here, with your own organization first and
+	   chosen (Robert, 19 Nov: "it just needs owner"). Without one an
+	   asset is in nobody's net worth and no sphere. YOU stands for your
+	   own organization when it has not been made yet. */
+	const YOU = 'you';
+	const mine = Object.entries(ORGS).find(([, o]) => o.self)?.[0] ?? '';
+	let owner = $state(mine || YOU);
 	let value = $state('');
 	let busy = $state(false);
 	let fault = $state('');
 
 	const categories = ASSET_CATEGORIES.map((c) => ({ value: c.id, label: c.name }));
-	const owners = Object.entries(ORGS).map(([id, o]) => ({ value: id, label: o.name }));
-	const back = $derived(category ? `/records/assets/in/${category}` : '/records/assets');
+	const owners = [
+		{
+			value: mine || YOU,
+			/* Your own organization is already named "… (me)" when it is made. */
+			label: !mine
+				? 'You'
+				: /\(me\)\s*$/.test(ORGS[mine].name)
+					? ORGS[mine].name
+					: `${ORGS[mine].name} (you)`
+		},
+		...Object.entries(ORGS)
+			.filter(([id]) => id !== mine)
+			.map(([id, o]) => ({ value: id, label: o.name }))
+	];
+	const back = '/records';
 
 	/* A money account: a bank account, cash, a wallet. Its value is its
 	   balance. */
@@ -64,22 +84,24 @@
 		try {
 			const id = await createAsset({ name, category, money: isMoney, state: standing });
 			if (amount !== null) await addValuation(id, dollars(amount), today());
-			/* An account is yours unless you say otherwise, so its balance is
-			   in your net worth from the start. Ownership can be changed. */
-			if (isMoney) {
-				const me = await selfOrganization();
-				if (me) {
-					await createOwnership(
-						{ cls: 'organization', id: me.id },
-						{ cls: 'asset', id },
-						'Owner',
-						SHARE_UNITS,
-						today()
-					);
-				}
+			/* Wholly the owner chosen, so it counts in their net worth from
+			   the start. Shares are changed under Ownership. */
+			const holder = owner === YOU ? (await selfOrganization())?.id : owner;
+			if (holder) {
+				await createOwnership(
+					{ cls: 'organization', id: holder },
+					{ cls: 'asset', id },
+					'Owner',
+					SHARE_UNITS,
+					today()
+				);
 			}
 			await reopenBook();
-			await goto(`/records/assets/${id}`, { replaceState: true });
+			/* Back to your assets, on the tab it was put in, where it now is.
+			   The rest of its record can be filled in later. */
+			await goto(standing === 'Now' ? '/records' : `/records?state=${standing.toLowerCase()}`, {
+				replaceState: true
+			});
 		} catch (/** @type {any} */ err) {
 			fault = err?.message || 'The server did not answer.';
 			busy = false;
@@ -89,7 +111,7 @@
 
 <svelte:head><title>{isMoney ? 'Add account' : 'Add asset'} · Chief</title></svelte:head>
 
-<Screen {back} nav={false}>
+<Screen {back}>
 	{#if !own}
 		<Prog t="warm" title="The record" value={0.5} meta="Step 1 of 2 · only the name is required" />
 	{/if}
@@ -106,10 +128,8 @@
 			bind:value={category}
 			placeholder="Choose category"
 		/>
-		<Select label="Where it stands" options={STANDING} bind:value={standing} />
-		{#if !own}
-			<Select label="Owner" options={owners} bind:value={owner} placeholder="Organization" />
-		{/if}
+		<Select label={FOCUS_QUESTION} options={STANDING} bind:value={standing} />
+		<Select label="Owner" options={owners} bind:value={owner} />
 		<Field
 			label={isMoney ? 'Balance today' : 'What it is worth today'}
 			type="money"
@@ -137,8 +157,8 @@
 			full account number. It is recorded as yours; change that under Ownership if it is held by
 			something else. Update the balance as often as suits you; the readings make the trend.
 		{:else if own}
-			Only the name is required. Without a value it is flagged as needing one and left out of totals
-			until it has it. Who owns it is recorded under Ownership.
+			Only the name is required. Without a value it is left out of totals until it has one. It is
+			saved as wholly owned by the owner chosen; shares can be changed later under Ownership.
 		{:else}
 			This is the sample flow: nothing typed here is kept. Sign in to add your own.
 		{/if}

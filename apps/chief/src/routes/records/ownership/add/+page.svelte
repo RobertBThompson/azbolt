@@ -132,7 +132,11 @@
 				day
 			);
 			await reopenBook();
-			await goto(`/records/ownership/${id}`, { replaceState: true });
+			/* Back where you came from (Robert, 19 Nov: the link's own page
+			   offered only Edit and Delete, and no way back to assets). */
+			await goto(preset ? `/records/assets/${preset}` : '/records/ownership', {
+				replaceState: true
+			});
 		} catch (/** @type {any} */ err) {
 			fault = err?.message || 'The server did not answer.';
 			busy = false;
@@ -142,7 +146,7 @@
 
 <svelte:head><title>Add ownership link · Chief</title></svelte:head>
 
-<Screen back="/records/ownership" nav={false}>
+<Screen back={preset ? `/records/assets/${preset}` : '/records/ownership'}>
 	<Banner
 		t="warm"
 		title="{label(owner)} {verb} {label(owned)}"

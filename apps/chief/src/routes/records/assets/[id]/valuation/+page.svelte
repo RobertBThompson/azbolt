@@ -69,7 +69,7 @@
 		try {
 			await addValuation(id, dollars(amount), day, note);
 			await reopenBook();
-			await goto(`/records/assets/${id}`);
+			await goto(`/records/assets/${id}`, { replaceState: true });
 		} catch (/** @type {any} */ err) {
 			fault = err?.message || 'The server did not answer.';
 			busy = false;

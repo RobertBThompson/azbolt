@@ -247,6 +247,13 @@ export const ASSET_STATES = ['Now', 'Soon', 'Later', 'Done'];
 export const stateOf = (a) => (a.letGo ? 'Done' : a.state || 'Now');
 
 /**
+ * What the Now, Soon and Later buttons ask, on an asset and on a task
+ * alike (Robert, 19 Nov: "Where it stands" was confusing; it is about
+ * whether it is his focus). One place, so every screen asks the same.
+ */
+export const FOCUS_QUESTION = 'When is it my focus?';
+
+/**
  * Ownership of one asset is divided into this many units by default.
  *
  * Percentages cannot carry a share to the hundredth without fractions:

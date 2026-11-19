@@ -9,7 +9,7 @@
 	import AttributeFields from '$lib/asset/AttributeFields.svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { ASSETS, ASSET_CATEGORIES, ownBook, stateOf } from '$lib/assets.js';
+	import { ASSETS, ASSET_CATEGORIES, FOCUS_QUESTION, ownBook, stateOf } from '$lib/assets.js';
 	import { reopenBook } from '$lib/book.svelte.js';
 	import { destroy, updateAsset } from '$lib/pb.js';
 
@@ -61,7 +61,7 @@
 				inventory: inventory === 0 ? 'Inventory' : 'Not inventory'
 			});
 			await reopenBook();
-			await goto(`/records/assets/${id}`);
+			await goto(`/records/assets/${id}`, { replaceState: true });
 		} catch (/** @type {any} */ err) {
 			fault = err?.message || 'The server did not answer.';
 			busy = false;
@@ -76,7 +76,7 @@
 	{#if own}
 		<Field label="Asset name" bind:value={name} required />
 		{#if standing !== 'Done'}
-			<Select label="Where it stands" options={STANDING} bind:value={standing} />
+			<Select label={FOCUS_QUESTION} options={STANDING} bind:value={standing} />
 		{/if}
 		{#if a.fixed}
 			<Note>Every book keeps one money account, and this is it. It stays in Money.</Note>

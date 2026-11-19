@@ -9,10 +9,14 @@
 	 * like a morning.
 	 * @type {{ search?: boolean, back?: string|null, nav?: boolean, horizon?: boolean, children: import('svelte').Snippet }}
 	 */
-	let { search = false, back = null, nav = true, horizon = false, children } = $props();
+	/* The menu is on every screen (Robert, 19 Nov: "No menu. I'm stuck").
+	   `nav={false}` once hid it on every screen below a tab, which left
+	   the back arrow as the only way out. It is still accepted, and
+	   ignored. */
+	let { search = false, back = null, horizon = false, children } = $props();
 </script>
 
-<div class="screen" class:railed={nav}>
+<div class="screen" class:railed={true}>
 	<div class="field" class:horizon aria-hidden="true">
 		<div class="sun"></div>
 		{#if horizon}
@@ -95,7 +99,7 @@
 	<SphereBar {search} {back} />
 	<div class="body">
 		<main>{@render children()}</main>
-		{#if nav}<BottomNav />{/if}
+		<BottomNav />
 	</div>
 </div>
 

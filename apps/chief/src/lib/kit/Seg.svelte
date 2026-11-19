@@ -66,16 +66,19 @@
 		font-weight: 600;
 		cursor: pointer;
 	}
+	/* The one chosen is filled solid in its colour, white on it, so it is
+	   told at a glance from the two that are not (Robert, 19 Nov: a pale
+	   cream on white was "barely highlighted"). */
 	button.on {
-		border-color: color-mix(in srgb, var(--t-ink) 55%, #ffffff);
-		background: linear-gradient(180deg, #ffffff 0%, var(--t-tint) 100%);
-		color: var(--ink);
+		border-color: transparent;
+		background:
+			var(--gloss),
+			linear-gradient(135deg, color-mix(in srgb, var(--t-ink) 74%, #ffffff) 0%, var(--t-ink) 100%);
+		color: #ffffff;
 		font-weight: 700;
 		box-shadow:
-			inset 0 1px 0 #ffffff,
-			inset 0 0 0 1.5px color-mix(in srgb, var(--t-ink) 55%, transparent),
-			0 0 0 3px color-mix(in srgb, var(--t-ink) 16%, transparent),
-			0 12px 22px -12px color-mix(in srgb, var(--t-ink) 70%, transparent);
+			inset 0 1px 0 rgba(255, 255, 255, 0.3),
+			0 12px 22px -12px color-mix(in srgb, var(--t-ink) 85%, transparent);
 	}
 	button:focus-visible {
 		outline: 2px solid #ffffff;
@@ -107,8 +110,6 @@
 		box-shadow: none;
 	}
 	.small button.on {
-		box-shadow:
-			inset 0 1px 0 #ffffff,
-			inset 0 0 0 1.5px color-mix(in srgb, var(--t-ink) 55%, transparent);
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
 	}
 </style>
