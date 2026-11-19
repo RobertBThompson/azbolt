@@ -20,5 +20,5 @@
 	<Field label="What happened" placeholder="Include the result you expected" />
 	<Row title="App diagnostics" meta="Version, device and recent errors" trailing="Off" />
 	<Row title="Private content" meta="Never attached automatically" trailing="Off" />
-	<Btn label="Send to support" />
+	<Btn label="Send to support" soon />
 </Screen>

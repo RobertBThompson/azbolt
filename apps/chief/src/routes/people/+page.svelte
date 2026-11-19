@@ -20,9 +20,9 @@
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
 	import LensSwitch from '$lib/shell/LensSwitch.svelte';
-	import { Alert, Field, Row, Btn, SourceNote, EmptyLive, SphereTags } from '$lib/kit';
-	import { listPeople, seedDirectory } from '$lib/pb.js';
-	import { sphereOf } from '$lib/spheres.js';
+	import { Alert, Field, FocusNote, Row, Btn, SourceNote, EmptyLive, SphereTags } from '$lib/kit';
+	import { listPeople } from '$lib/pb.js';
+	import { inFocus, outOfView } from '$lib/spheres.svelte.js';
 
 	const LENSES = [
 		{ label: 'People', href: '/people', icon: 'people' },
@@ -30,26 +30,20 @@
 	];
 
 	let load = $state(listPeople());
-	let sphere = $state('all');
 	let query = $state('');
 
-	async function seed() {
-		await seedDirectory();
-		load = listPeople();
-	}
-
-	/** @param {any[]} people */
-	const sphereList = (people) => [...new Set(people.flatMap((p) => p.spheres ?? []))].sort();
-
-	/** @param {any[]} people */
+	/**
+	 * Decision 10: the sphere in focus sets people back or out of view;
+	 * it is chosen once, in the sphere switcher, not again on each list.
+	 * @param {any[]} people
+	 */
 	function visible(people) {
 		const q = query.trim().toLowerCase();
-		return people.filter((p) => {
-			const inSphere = sphere === 'all' || (p.spheres ?? []).includes(sphere);
-			if (!inSphere) return false;
-			if (!q) return true;
-			return `${p.name} ${p.meta ?? ''} ${(p.spheres ?? []).join(' ')}`.toLowerCase().includes(q);
-		});
+		const found = people.filter(
+			(p) =>
+				!q || `${p.name} ${p.meta ?? ''} ${(p.spheres ?? []).join(' ')}`.toLowerCase().includes(q)
+		);
+		return inFocus(found, (p) => p.spheres ?? []);
 	}
 </script>
 
@@ -61,29 +55,20 @@
 
 	{#await load}
 		<Row t="cool" title="Loading people…" dot={false} />
-	{:then { data, source }}
+	{:then { data, source, error }}
 		{#if source === 'live' && data.length === 0}
-			<EmptyLive what="people" onseed={seed} />
+			<EmptyLive what="people" add="person" />
 		{:else}
-			{@const all = sphereList(data)}
 			{@const shown = visible(data)}
-
-			<div class="filter" role="group" aria-label="Filter by sphere">
-				<button type="button" class:on={sphere === 'all'} onclick={() => (sphere = 'all')}>
-					All life
-				</button>
-				{#each all as key (key)}
-					{@const s = sphereOf(key)}
-					<button type="button" class:on={sphere === key} onclick={() => (sphere = key)}>
-						<span class="sw" style="background:{s.swatch}"></span>
-						{s.name}
-					</button>
-				{/each}
-			</div>
+			<FocusNote
+				what="people"
+				quiet={shown.filter((x) => x.quiet).length}
+				hidden={outOfView(data, (p) => p.spheres ?? [])}
+			/>
 
 			<div class="grid">
-				{#each shown as p (p.id)}
-					<a class="person edged" href="/people/{p.id}">
+				{#each shown as { item: p, quiet } (p.id)}
+					<a class="person edged" class:quiet href="/people/{p.id}">
 						<span class="who">
 							<span class="nm">{p.name}</span>
 							<span class="mt">{p.meta}</span>
@@ -94,10 +79,10 @@
 			</div>
 
 			{#if shown.length === 0}
-				<p class="none">Nobody in that sphere yet.</p>
+				<p class="none">{query.trim() ? 'Nobody matches.' : 'Nobody in view.'}</p>
 			{/if}
 
-			<SourceNote {source} />
+			<SourceNote {source} {error} onretry={() => (load = listPeople())} />
 		{/if}
 	{:catch}
 		<Alert
@@ -110,58 +95,16 @@
 </Screen>
 
 <style>
-	/* Scrolls rather than wraps: the number of spheres is the Chief's
-	   business, and a filter that grows a second row pushes the list it
-	   filters off the screen. */
-	.filter {
-		display: flex;
-		gap: 8px;
-		overflow-x: auto;
-		scrollbar-width: none;
-		padding: 2px var(--shell-gutter) 8px;
-		margin: -2px calc(var(--shell-gutter) * -1) -6px;
+	/* Related to the sphere in focus, not in it: set back, still legible. */
+	.person.quiet {
+		background: var(--glass-dim);
+		box-shadow: none;
+		--edge: 0px;
 	}
-	.filter::-webkit-scrollbar {
-		display: none;
+	.person.quiet .nm {
+		font-weight: 500;
 	}
-	.filter button {
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		flex: none;
-		min-height: 36px;
-		padding: 0 14px;
-		border-radius: 999px;
-		border: 1px solid var(--glass-line);
-		background: var(--glass);
-		font-family: var(--font-label);
-		font-size: 13px;
-		font-weight: 700;
-		letter-spacing: 0.08em;
-		color: var(--ink-3);
-		cursor: pointer;
-		white-space: nowrap;
-		box-shadow:
-			inset 0 1px 0 #ffffff,
-			0 4px 10px -5px rgba(30, 20, 90, 0.45);
-	}
-	.filter button.on {
-		border-color: color-mix(in srgb, var(--tone-cool) 55%, #ffffff);
-		background: linear-gradient(180deg, #ffffff 0%, var(--tone-cool-tint) 100%);
-		color: var(--tone-cool);
-		box-shadow:
-			inset 0 1px 0 #ffffff,
-			0 0 0 3px color-mix(in srgb, var(--tone-cool) 16%, transparent),
-			0 5px 12px -5px color-mix(in srgb, var(--tone-cool) 60%, transparent);
-	}
-	.sw {
-		width: 9px;
-		height: 9px;
-		border-radius: 50%;
-		box-shadow:
-			inset 0 1px 1px rgba(255, 255, 255, 0.55),
-			0 1px 3px rgba(30, 20, 90, 0.35);
-	}
+
 	.person {
 		display: flex;
 		flex-direction: column;
@@ -202,14 +145,9 @@
 		font-size: 14.5px;
 		color: var(--on-field-2);
 	}
-	/* Desktop. The filter has room to wrap, so nothing hides off the
-	   right edge, and the cards pair up rather than each stretching to a
+	/* Desktop. The cards pair up rather than each stretching to a
 	   full-width band with one name in it. */
 	@media (min-width: 900px) {
-		.filter {
-			flex-wrap: wrap;
-			overflow-x: visible;
-		}
 		.grid {
 			display: grid;
 			grid-template-columns: repeat(2, minmax(0, 1fr));

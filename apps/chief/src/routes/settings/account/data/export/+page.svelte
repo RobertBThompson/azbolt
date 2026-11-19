@@ -1,49 +1,84 @@
 <script>
 	/**
-	 * B8 — G13 Review export.
-	 * Explicit about scope and omissions. Selection happens by branch so a
-	 * user can take a complete archive or a smaller, understandable subset
-	 * without exposing private notes by accident.
+	 * B8 — G13 Export.
+	 * One file with everything the account holds, exactly as it is
+	 * stored. Nothing is chosen and nothing is left out, removed records
+	 * included: a copy with gaps is not a copy.
+	 *
+	 * It is put together on this device and saved straight to it. It is
+	 * not encrypted and is not kept anywhere else, and the screen says
+	 * so rather than implying a vault.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Banner, Appr, Chips, Btn } from '$lib/kit';
+	import { Alert, Banner, Btn, Facts, Note } from '$lib/kit';
+	import { session } from '$lib/session.svelte.js';
+	import { exportAccount } from '$lib/pb.js';
+	import { today } from '$lib/today.js';
 
-	let records = $state(true);
-	let evidence = $state(true);
-	let notes = $state(false);
+	let busy = $state(false);
+	let fault = $state('');
+	/** @type {{ label: string, value: string }[]} */
+	let counts = $state([]);
+	let missing = $state(/** @type {string[]} */ ([]));
+
+	const words = (/** @type {string} */ name) =>
+		name.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
+
+	async function download() {
+		if (busy) return;
+		busy = true;
+		fault = '';
+		try {
+			const copy = await exportAccount();
+			counts = Object.entries(copy.collections)
+				.filter(([, rows]) => rows.length)
+				.map(([name, rows]) => ({ label: words(name), value: String(rows.length) }));
+			missing = copy.missing;
+			const url = URL.createObjectURL(
+				new Blob([JSON.stringify(copy, null, 2)], { type: 'application/json' })
+			);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = `chief-${today()}.json`;
+			a.click();
+			URL.revokeObjectURL(url);
+		} catch (/** @type {any} */ err) {
+			fault = err?.message || 'The server did not answer.';
+		}
+		busy = false;
+	}
 </script>
 
-<svelte:head><title>Review export · Chief</title></svelte:head>
+<svelte:head><title>Export · Chief</title></svelte:head>
 
 <Screen back="/settings/account/data" nav={false}>
-	<Banner title="Choose what leaves Chief" meta="Nothing is changed or removed by an export." />
-	<Appr
-		t="neutral"
-		bind:included={records}
-		title="Records"
-		meta="People, work, assets, money and plans"
-		confidence="Included"
-		index={1}
-		total={3}
-	/>
-	<Appr
-		t="neutral"
-		bind:included={evidence}
-		title="Evidence files"
-		meta="Original uploads and audit metadata"
-		confidence="Included"
-		index={2}
-		total={3}
-	/>
-	<Appr
-		t="neutral"
-		bind:included={notes}
-		title="Private notes"
-		meta="Excluded by default"
-		confidence="Off"
-		index={3}
-		total={3}
-	/>
-	<Chips items={['JSON', 'CSV', 'Documents']} />
-	<Btn href="/settings/account/data/export/ready" label="Prepare export" />
+	<Banner title="A copy of everything" meta="Nothing is changed or removed by an export." />
+	{#if session.signedIn}
+		<Btn
+			label={busy ? 'Putting it together…' : 'Download a copy'}
+			onclick={download}
+			disabled={busy}
+		/>
+		{#if fault}<Alert title="Not exported" meta={fault} />{/if}
+		{#if counts.length}
+			<Facts items={counts} />
+		{:else if !busy && !fault && counts.length === 0 && missing.length === 0}
+			<Note>
+				One file, in JSON, with every record you hold — the ones you have removed from view too.
+			</Note>
+		{/if}
+		{#if missing.length}
+			<Alert
+				title="This server is behind the app"
+				meta="Not found, so not in the copy: {missing.map(words).join(', ')}."
+			/>
+		{/if}
+		<Note>
+			The file is saved to this device as it is: not encrypted, and not kept anywhere else. Notes
+			and documents live on this device, not in your account, and are not in it.
+		</Note>
+	{:else}
+		<Note>Sign in to export. The records on show signed out are samples, not yours.</Note>
+		<Btn href="/signin" label="Sign in" />
+	{/if}
 </Screen>

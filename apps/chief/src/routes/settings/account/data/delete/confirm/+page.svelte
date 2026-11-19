@@ -4,12 +4,36 @@
 	 * The irreversible action gets a second screen, an exact account label
 	 * and typed confirmation. No default focus lands on Delete, and leaving
 	 * this screen changes nothing.
+	 *
+	 * The records are removed first and the sign-in last, so a deletion
+	 * that is interrupted leaves an account that can still sign in and
+	 * finish the job.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Alert, Banner, Field, Row, Btn } from '$lib/kit';
+	import { goto } from '$app/navigation';
+	import { session } from '$lib/session.svelte.js';
+	import { deleteAccount } from '$lib/pb.js';
 
 	let typed = $state('');
-	const armed = $derived(typed.trim().toUpperCase() === 'DELETE');
+	let busy = $state(false);
+	let fault = $state('');
+	let at = $state('');
+	const armed = $derived(session.signedIn && typed.trim().toUpperCase() === 'DELETE');
+
+	async function remove() {
+		if (!armed || busy) return;
+		busy = true;
+		fault = '';
+		try {
+			await deleteAccount((done, total) => (at = `${done} of ${total} records removed`));
+			// A full load, so nothing of the account is left in memory.
+			window.location.assign('/');
+		} catch (/** @type {any} */ err) {
+			fault = `${err?.message || 'The server did not answer.'} ${at ? `Stopped after ${at}.` : ''} Your account still exists; try again to finish.`;
+			busy = false;
+		}
+	}
 </script>
 
 <svelte:head><title>Confirm deletion · Chief</title></svelte:head>
@@ -20,12 +44,17 @@
 		meta="Confirm the account below. Export first if you need a copy."
 	/>
 	<Banner
-		title="Pamela Anderson · personal account"
-		meta="All connected spheres and records in scope are listed before production release."
+		title={session.signedIn ? session.label : 'Not signed in'}
+		meta={session.signedIn ? (session.user?.email ?? '') : 'There is no account here to delete.'}
 	/>
-	<Field label="Type DELETE to confirm" placeholder="DELETE" bind:value={typed} />
-	<Row title="Current account" meta="Pamela Anderson · signed in" trailing="✓" />
-	<button class="danger" disabled={!armed}>Delete account and data</button>
+	{#if session.signedIn}
+		<Field label="Type DELETE to confirm" placeholder="DELETE" bind:value={typed} />
+		{#if busy && at}<Row title="Deleting" meta={at} />{/if}
+		{#if fault}<Alert title="Not finished" meta={fault} />{/if}
+		<button class="danger" disabled={!armed || busy} onclick={remove}>
+			{busy ? 'Deleting…' : 'Delete account and data'}
+		</button>
+	{/if}
 	<Btn primary={false} href="/settings/account" label="Keep my account" />
 </Screen>
 

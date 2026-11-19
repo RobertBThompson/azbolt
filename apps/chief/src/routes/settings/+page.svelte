@@ -18,13 +18,6 @@
 		trailing="›"
 	/>
 	<Row
-		t="ai"
-		href="/settings/ai"
-		title="AI & privacy"
-		meta="What Chief may do without you"
-		trailing="›"
-	/>
-	<Row
 		href="/settings/help"
 		title="Help"
 		meta="Indexed by what you are trying to do"
@@ -35,12 +28,5 @@
 		title="Account & legal"
 		meta="Profile, privacy, export"
 		trailing="›"
-	/>
-	<Row
-		t="ai"
-		href="/jot/rules"
-		title="Placement rules"
-		meta="What Chief learned from you"
-		trailing="↗"
 	/>
 </Screen>

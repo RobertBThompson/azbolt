@@ -13,7 +13,9 @@
 
 <dl class="facts">
 	{#each items as it (it.label)}
-		<div>
+		<!-- A line that opens something opens from anywhere on it: people
+		     tap the words, not only the amount. -->
+		<div class:link={!!it.href}>
 			<dt>{it.label}</dt>
 			<dd>
 				{#if it.href}<a href={it.href}>{it.value}</a>{:else}{it.value}{/if}
@@ -64,5 +66,25 @@
 	dd a {
 		color: var(--tone-cool);
 		font-weight: 600;
+	}
+	/* The link's reach is stretched over its whole line. */
+	div.link {
+		position: relative;
+		cursor: pointer;
+	}
+	div.link a::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+	}
+	div.link:hover {
+		background: color-mix(in srgb, var(--card) 92%, var(--tone-cool));
+	}
+	div.link a:focus-visible {
+		outline: none;
+	}
+	div.link:has(a:focus-visible) {
+		outline: 2px solid var(--tone-cool);
+		outline-offset: -2px;
 	}
 </style>

@@ -6,7 +6,7 @@
 	 * after seeing why Chief noticed it.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Banner, Row, Btn } from '$lib/kit';
+	import { Banner, Btn, Row, SourceNote } from '$lib/kit';
 </script>
 
 <svelte:head><title>Opportunity · Chief</title></svelte:head>
@@ -32,6 +32,7 @@
 		trailing="↗"
 	/>
 	<Row t="cool" title="Confidence" meta="High · records agree" trailing="Why" />
-	<Btn t="cool" label="Turn into an endeavor action" />
+	<Btn t="cool" label="Turn into an endeavor action" soon />
 	<Btn primary={false} href="/opportunities" label="Dismiss with a reason" />
+	<SourceNote source="fixture" />
 </Screen>

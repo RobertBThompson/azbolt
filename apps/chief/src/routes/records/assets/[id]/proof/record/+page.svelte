@@ -10,7 +10,7 @@
 	import { page } from '$app/stores';
 	import { ASSETS } from '$lib/assets.js';
 
-	const a = $derived(ASSETS[$page.params.id ?? ''] ?? ASSETS['nfta-014']);
+	const a = $derived(ASSETS[$page.params.id ?? '']);
 </script>
 
 <svelte:head><title>Evidence record · Chief</title></svelte:head>
@@ -27,5 +27,5 @@
 		trailing="↗"
 	/>
 	<Row t="warm" title="Audit history" meta="Added, checked, linked" trailing="›" />
-	<Btn primary={false} label="Replace this evidence" />
+	<Btn primary={false} label="Replace this evidence" soon />
 </Screen>

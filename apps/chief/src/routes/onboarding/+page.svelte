@@ -6,10 +6,6 @@
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Hero, Prog } from '$lib/kit';
-	import { shell } from '$lib/state.svelte.js';
-
-	// Not signed in yet — the context band has nothing to report.
-	shell.sphere = 'all';
 </script>
 
 <svelte:head><title>Chief</title></svelte:head>

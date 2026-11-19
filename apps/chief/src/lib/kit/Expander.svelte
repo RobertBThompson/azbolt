@@ -137,7 +137,9 @@
 		border-radius: var(--r-xs);
 		display: grid;
 		place-items: center;
-		background: var(--gloss), linear-gradient(135deg, color-mix(in srgb, var(--t-ink) 72%, #ffffff), var(--t-ink));
+		background:
+			var(--gloss),
+			linear-gradient(135deg, color-mix(in srgb, var(--t-ink) 72%, #ffffff), var(--t-ink));
 		color: #ffffff;
 		box-shadow:
 			inset 0 1px 0 #ffffff,

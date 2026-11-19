@@ -6,7 +6,7 @@
 	 * other way round. Each row reads as a sentence.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Tabs, Row, Btn } from '$lib/kit';
+	import { Btn, Row, SourceNote, Tabs } from '$lib/kit';
 
 	let active = $state(0);
 </script>
@@ -18,15 +18,15 @@
 	<Row
 		t="cool"
 		href="/organizations/structure/pamela"
-		title="Pamela Anderson"
+		title="Dev Patel"
 		meta="CEO · reports to the board"
 		trailing="›"
 	/>
 	<Row
 		t="cool"
 		href="/organizations/structure/carmen"
-		title="Carmen Mendez"
-		meta="Operations · reports to Pamela"
+		title="Carmen Ruiz"
+		meta="Operations · reports to Dev"
 		trailing="›"
 	/>
 	<Row
@@ -37,4 +37,5 @@
 		trailing="›"
 	/>
 	<Btn t="cool" href="/organizations/structure/add" label="Add a reporting link" />
+	<SourceNote source="fixture" />
 </Screen>

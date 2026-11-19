@@ -7,12 +7,16 @@
 	 * organization, and its row names both — a loan that is not tied to
 	 * either is flagged, because that is the half of the record that makes
 	 * it mean something.
+	 *
+	 * This is a door from Money, not one side of a switch over it, so the
+	 * back arrow goes to Money. The next payment due is said on the row of
+	 * the liability it is for; a red row of its own above the list read as
+	 * an emergency, and it was the same row said twice.
 	 */
+	import { book } from '$lib/book.svelte.js';
 	import Screen from '$lib/shell/Screen.svelte';
-	import LensSwitch from '$lib/shell/LensSwitch.svelte';
 	import { Stats, Row, Btn, SectionHead, SourceNote, Blank } from '$lib/kit';
-	import { ORGS } from '$lib/data.js';
-	import { MONEY_LENSES } from '$lib/asset/money-lenses.js';
+	import { ORGS } from '$lib/assets.js';
 	import {
 		ASSETS,
 		dayLabel,
@@ -34,14 +38,18 @@
 		[
 			`${money(l.balance)} left`,
 			l.asset ? `on ${ASSETS[l.asset]?.name}` : 'not tied to an asset',
-			l.lender ? ORGS[l.lender]?.name : 'lender not linked'
-		].join(' · ');
+			l.lender ? ORGS[l.lender]?.name : 'lender not linked',
+			due && due.l.id === l.id
+				? `next ${money(l.payment)} due ${inSentence(dayLabel(due.due))}`
+				: ''
+		]
+			.filter(Boolean)
+			.join(' · ');
 </script>
 
 <svelte:head><title>Liabilities · Chief</title></svelte:head>
 
-<Screen back="/records" nav={false}>
-	<LensSwitch label="Money view" items={MONEY_LENSES} at="/records/money/liabilities" />
+<Screen back="/records/money" nav={false}>
 	<Stats
 		items={[
 			[short(owedTotal()), 'Balance'],
@@ -50,15 +58,7 @@
 		]}
 	/>
 
-	{#if due}
-		<Row
-			t="alert"
-			href="/records/money/liabilities/{due.l.id}"
-			title="Upcoming payment"
-			meta="{due.l.name} · {money(due.l.payment)} due {inSentence(dayLabel(due.due))}"
-			trailing="›"
-		/>
-	{/if}
+	<Btn t="warm" href="/records/money/liabilities/new" label="Add liability" />
 
 	<SectionHead label="Owed" t="warm" count={list.length} />
 	{#each list as l (l.id)}
@@ -73,6 +73,5 @@
 		<Blank>Nothing is owed.</Blank>
 	{/each}
 
-	<Btn t="warm" href="/records/money/liabilities/new" label="Add liability" />
-	<SourceNote source="fixture" />
+	<SourceNote source={book.source} error={book.error} />
 </Screen>

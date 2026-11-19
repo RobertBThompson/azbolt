@@ -9,20 +9,20 @@
 <div class="prog" style="--t-ink:{c.ink}; --pct:{pct}">
 	<span class="ring" aria-hidden="true"><span class="w">{pct}%</span></span>
 	<div class="main">
-	<div class="head">
-		<span class="t">{title}</span>
-	</div>
-	<div
-		class="track"
-		role="progressbar"
-		aria-valuenow={pct}
-		aria-valuemin="0"
-		aria-valuemax="100"
-		aria-label={title}
-	>
-		<div class="fill" style="width:{pct}%; background-color:{c.ink}"></div>
-	</div>
-	{#if meta}<div class="m">{meta}</div>{/if}
+		<div class="head">
+			<span class="t">{title}</span>
+		</div>
+		<div
+			class="track"
+			role="progressbar"
+			aria-valuenow={pct}
+			aria-valuemin="0"
+			aria-valuemax="100"
+			aria-label={title}
+		>
+			<div class="fill" style="width:{pct}%; background-color:{c.ink}"></div>
+		</div>
+		{#if meta}<div class="m">{meta}</div>{/if}
 	</div>
 </div>
 

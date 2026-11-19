@@ -14,10 +14,10 @@
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Icon } from '$lib/kit';
 	import { tone } from '$lib/kit/tone.js';
-	import { SPHERES } from '$lib/spheres.js';
+	import { sphereOf } from '$lib/spheres.svelte.js';
 	import { shell } from '$lib/state.svelte.js';
 
-	const sphere = $derived(SPHERES[shell.sphere] ?? SPHERES.all);
+	const sphere = $derived(sphereOf(shell.sphere));
 
 	/* Tone keys are not token names — warm is --tone-clay — so these go
 	   through the helper rather than being interpolated into a custom
@@ -119,7 +119,8 @@
 		border-radius: var(--r-xs);
 		display: grid;
 		place-items: center;
-		background: var(--gloss), linear-gradient(135deg, color-mix(in srgb, var(--t) 72%, #ffffff), var(--t));
+		background:
+			var(--gloss), linear-gradient(135deg, color-mix(in srgb, var(--t) 72%, #ffffff), var(--t));
 		color: #ffffff;
 		flex: none;
 		box-shadow:

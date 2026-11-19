@@ -7,10 +7,10 @@
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Hero, Banner, Btn, Icon, Note, SectionHead } from '$lib/kit';
-	import { SPHERES } from '$lib/spheres.js';
+	import { sphereOf } from '$lib/spheres.svelte.js';
 	import { shell } from '$lib/state.svelte.js';
 
-	const sphere = $derived(SPHERES[shell.sphere] ?? SPHERES.all);
+	const sphere = $derived(sphereOf(shell.sphere));
 
 	/**
 	 * What a plan is for, structurally.

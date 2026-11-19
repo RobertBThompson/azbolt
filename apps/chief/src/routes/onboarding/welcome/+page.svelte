@@ -2,7 +2,8 @@
 	/**
 	 * B1 Onboarding — A2 Welcome.
 	 * Privacy language sits above the buttons, before any permission is
-	 * possible. Two ways in and nothing else on screen.
+	 * possible. One way in and nothing else on screen: signing in with Apple or
+	 * Google was drawn here and is not offered.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Hero, Btn, Note } from '$lib/kit';
@@ -12,8 +13,7 @@
 
 <Screen back="/onboarding" nav={false}>
 	<Hero title="Your life and your work, in one place" meta="Capture first. Organize with help." />
-	<Btn href="/onboarding/focus" label="Continue with Apple" />
-	<Btn primary={false} href="/onboarding/focus" label="Continue with Google" />
+	<Btn href="/signin" label="Sign in or create an account" />
 	<Note>
 		Chief asks for contacts and calendar later, at the moment each one becomes useful — never here.
 	</Note>

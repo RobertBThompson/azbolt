@@ -9,6 +9,7 @@
 	 * Six things happen to an asset: it is acquired, moved, transferred,
 	 * re-valued, kept up, or let go. The filter is those six.
 	 */
+	import { book } from '$lib/book.svelte.js';
 	import Screen from '$lib/shell/Screen.svelte';
 	import { Filter, Row, Btn, SourceNote, Blank } from '$lib/kit';
 	import { EVENT_TYPES, events } from '$lib/assets.js';
@@ -31,7 +32,7 @@
 
 <Screen back="/records" nav={false}>
 	<Filter label="Kind of event" {items} bind:active={type} />
-	{#each list as e (e.asset + e.type + e.detail)}
+	{#each list as e, i (i)}
 		<Row
 			t="warm"
 			href="/records/assets/{e.asset}"
@@ -42,6 +43,6 @@
 	{:else}
 		<Blank>Nothing of that kind has happened yet.</Blank>
 	{/each}
-	<Btn t="ai" primary={false} href="/jot" label="Jot an asset update" />
-	<SourceNote source="fixture" />
+	<Btn t="ai" primary={false} href="/" label="Jot an asset update" />
+	<SourceNote source={book.source} error={book.error} />
 </Screen>

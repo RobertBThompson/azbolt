@@ -14,7 +14,7 @@
 	<Row
 		href="/settings/account/profile"
 		title="Profile"
-		meta="Name, photo, sign-in methods"
+		meta="Name, password, sign out"
 		trailing="›"
 	/>
 	<Row
@@ -23,7 +23,12 @@
 		meta="Channels and quiet hours"
 		trailing="›"
 	/>
-	<Row href="/settings/account/privacy" title="Privacy policy" meta="Version 2.1" trailing="›" />
-	<Row href="/settings/account/terms" title="Terms" meta="Version 2.1" trailing="›" />
+	<Row
+		href="/settings/account/privacy"
+		title="Privacy policy"
+		meta="Not written yet"
+		trailing="›"
+	/>
+	<Row href="/settings/account/terms" title="Terms" meta="Not written yet" trailing="›" />
 	<Btn primary={false} href="/settings/account/data" label="Export or delete my data" />
 </Screen>

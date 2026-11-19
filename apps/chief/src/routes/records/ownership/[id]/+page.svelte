@@ -1,4 +1,7 @@
 <script>
+	import { goto } from '$app/navigation';
+	import { reopenBook } from '$lib/book.svelte.js';
+	import { destroy } from '$lib/pb.js';
 	/**
 	 * Ownership — one link.
 	 *
@@ -10,11 +13,16 @@
 	 * disagree. A manager holds no share and so carries no value.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { PageHead, Stats, Row, Facts, SectionHead, Btn, Note } from '$lib/kit';
+	import { PageHead, Stats, Row, Facts, SectionHead, Btn, Note, Delete } from '$lib/kit';
 	import { page } from '$app/stores';
-	import { LINKS, linkOf, money, nodeHref, nodeName } from '$lib/assets.js';
+	import { LINKS, linkOf, money, nodeHref, nodeName, ownBook, sharePercent } from '$lib/assets.js';
 
-	const l = $derived(linkOf($page.params.id ?? '') ?? LINKS[0]);
+	/* The route guard in +layout.js has already turned an unknown id
+	   into a not-found screen, so the link is there by the time this
+	   component runs. */
+	const l = $derived(
+		/** @type {NonNullable<ReturnType<typeof linkOf>>} */ (linkOf($page.params.id ?? ''))
+	);
 	const verb = $derived(
 		l.role === 'Owner' ? 'owns' : l.role === 'Manager' ? 'manages' : 'guarantees'
 	);
@@ -34,7 +42,7 @@
 	<Stats
 		items={[
 			[l.role, 'Role'],
-			[l.shares !== null ? `${l.shares}%` : '—', 'Share'],
+			[sharePercent(l) !== null ? `${sharePercent(l)}%` : '—', 'Share'],
 			['Active', 'Status']
 		]}
 	/>
@@ -77,4 +85,16 @@
 	{/if}
 
 	<Btn t="warm" href="/records/ownership/{l.id}/edit" label="Edit ownership" />
+	{#if ownBook()}
+		<Delete
+			what="this link"
+			warn="{nodeName(l.owner)} stops holding {nodeName(l.owned)}. Both stay on file."
+			label="Delete this link"
+			ondelete={async () => {
+				await destroy('ownerships', l.id);
+				await reopenBook();
+				await goto('/records/ownership', { replaceState: true });
+			}}
+		/>
+	{/if}
 </Screen>

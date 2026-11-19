@@ -12,11 +12,11 @@
 <svelte:head><title>Google Calendar · Chief</title></svelte:head>
 
 <Screen back="/settings/integrations" nav={false}>
-	<Banner title="Connected · two-way" meta="Last synced 4 minutes ago." />
+	<Banner title="Not connected" meta="Calendar sync is not built yet." />
 	<Row title="Reads" meta="Events and availability" trailing="On" />
 	<Row title="Writes" meta="Only blocks you approve" trailing="On" />
 	<Row title="Calendars" meta="Work and Personal" trailing="›" />
 	<Row title="Sync history" meta="No unresolved errors" trailing="›" />
-	<Btn label="Sync now" />
+	<Btn label="Sync now" soon />
 	<Btn primary={false} href="/settings/integrations" label="Disconnect" />
 </Screen>

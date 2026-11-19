@@ -365,7 +365,7 @@ export const TASKS = {
 	carmen: {
 		name: 'Talk to Carmen',
 		when: 'Today · 3:30–3:50 PM',
-		who: 'Carmen Mendez',
+		who: 'Carmen Ruiz',
 		endeavor: 'Website launch',
 		tags: ['In progress', 'High priority']
 	},

@@ -6,14 +6,36 @@
 	/* `icon` swaps the bead for a colourful icon tile — decoration only,
 	   for hub rows that open a whole section. `hue` picks the tile's fill:
 	   wine, blue, night, pop, green, clay or taupe. */
-	/** @type {{ title: string, meta?: string, trailing?: string, t?: string, href?: string|null, dot?: boolean, icon?: string, hue?: string }} */
-	let { title, meta = '', trailing = '', t = 'neutral', href = null, dot = true, icon = '', hue = 'wine' } = $props();
+	/** @type {{ title: string, meta?: string, trailing?: string, t?: string, href?: string|null, dot?: boolean, icon?: string, hue?: string, quiet?: boolean }} */
+	let {
+		title,
+		meta = '',
+		trailing = '',
+		t = 'neutral',
+		href = null,
+		dot = true,
+		icon = '',
+		hue = 'wine',
+		quiet = false
+	} = $props();
 	import Icon from './Icon.svelte';
 	import { tone } from './tone.js';
 	const c = $derived(tone(t));
+	/* An arrow says "this opens something". A row with nowhere to go
+	   keeps its other trailing marks — a tick, a count, a value — and
+	   loses the arrow, rather than inviting a press that does nothing. */
+	const ARROWS = ['\u203a', '\u2197', '\u2192', '>'];
+	const mark = $derived(!href && ARROWS.includes(trailing.trim()) ? '' : trailing);
 </script>
 
-<svelte:element this={href ? 'a' : 'div'} {href} class="row" class:link={!!href} style="--t-ink:{c.ink}">
+<svelte:element
+	this={href ? 'a' : 'div'}
+	{href}
+	class="row"
+	class:link={!!href}
+	class:quiet
+	style="--t-ink:{c.ink}"
+>
 	{#if icon}
 		<span class="tile {hue}" aria-hidden="true"><Icon name={icon} size={20} /></span>
 	{:else if dot}<span class="dot" aria-hidden="true"></span>{/if}
@@ -21,10 +43,23 @@
 		<span class="t">{title}</span>
 		{#if meta}<span class="m">{meta}</span>{/if}
 	</span>
-	{#if trailing}<span class="x">{trailing}</span>{/if}
+	{#if mark}<span class="x">{mark}</span>{/if}
 </svelte:element>
 
 <style>
+	/* Related to the sphere in focus, not in it: still here, set back.
+	   Text stays at full contrast — only the pane recedes. */
+	.row.quiet {
+		min-height: 50px;
+		background: var(--glass-dim, rgba(255, 255, 255, 0.72));
+		box-shadow: none;
+		margin-inline: 10px;
+	}
+	.row.quiet .t {
+		font-size: 15px;
+		font-weight: 500;
+	}
+
 	/* A row is a pane like any other. It reads --pane-line and
 	   --pane-shadow so a container that is itself glass can ask its rows
 	   to sit flatter than they do on the open field. */
@@ -97,31 +132,45 @@
 		place-items: center;
 		color: #ffffff;
 		background: var(--gloss), var(--grad-wine);
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 6px 14px -4px rgba(154, 43, 59, 0.45);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.3),
+			0 6px 14px -4px rgba(154, 43, 59, 0.45);
 	}
 	.tile.blue {
 		background: var(--gloss), var(--grad-blue);
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 6px 14px -4px rgba(45, 98, 163, 0.45);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.3),
+			0 6px 14px -4px rgba(45, 98, 163, 0.45);
 	}
 	.tile.night {
 		background: var(--gloss), var(--grad-night);
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 6px 14px -4px rgba(30, 42, 66, 0.45);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.22),
+			0 6px 14px -4px rgba(30, 42, 66, 0.45);
 	}
 	.tile.pop {
 		background: var(--gloss), var(--grad-pop);
 		color: var(--pop-ink);
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), var(--glow-pop);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.4),
+			var(--glow-pop);
 	}
 	.tile.green {
 		background: var(--gloss), var(--grad-green);
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 6px 14px -4px rgba(39, 111, 68, 0.45);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.3),
+			0 6px 14px -4px rgba(39, 111, 68, 0.45);
 	}
 	.tile.clay {
 		background: var(--gloss), var(--grad-clay);
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 6px 14px -4px rgba(138, 76, 20, 0.45);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.3),
+			0 6px 14px -4px rgba(138, 76, 20, 0.45);
 	}
 	.tile.taupe {
 		background: var(--gloss), var(--grad-taupe);
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 6px 14px -4px rgba(111, 98, 91, 0.45);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.3),
+			0 6px 14px -4px rgba(111, 98, 91, 0.45);
 	}
 </style>

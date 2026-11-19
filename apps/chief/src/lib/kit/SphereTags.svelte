@@ -9,7 +9,7 @@
 	 */
 	/** @type {{ keys: string[], size?: 'sm'|'md' }} */
 	let { keys, size = 'md' } = $props();
-	import { sphereOf } from '$lib/spheres.js';
+	import { sphereOf } from '$lib/spheres.svelte.js';
 </script>
 
 <ul class="tags" class:sm={size === 'sm'}>

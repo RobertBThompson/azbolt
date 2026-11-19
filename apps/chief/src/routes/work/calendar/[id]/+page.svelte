@@ -6,7 +6,7 @@
 	 * the task it came from.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Banner, Row, Btn } from '$lib/kit';
+	import { Banner, Btn, Row, SourceNote } from '$lib/kit';
 </script>
 
 <svelte:head><title>Calendar item · Chief</title></svelte:head>
@@ -18,4 +18,5 @@
 	<Row t="cool" href="/work/tasks/carmen" title="Linked task" meta="Talk to Carmen" trailing="↗" />
 	<Btn t="cool" href="/work/tasks/carmen" label="Open task" />
 	<Btn primary={false} href="/work/calendar" label="Remove from calendar" />
+	<SourceNote source="fixture" />
 </Screen>

@@ -14,11 +14,11 @@
 	<Row
 		href="/settings/integrations/calendar"
 		title="Google Calendar"
-		meta="Two-way · synced 4 minutes ago"
+		meta="Not connected"
 		trailing="On"
 	/>
 	<Row title="Outlook Calendar" meta="Not connected" trailing="›" />
 	<Row title="Device contacts" meta="12 of 340 imported" trailing="On" />
 	<Row title="File storage" meta="Choose a provider" trailing="›" />
-	<Btn primary={false} label="Manage connections" />
+	<Btn primary={false} label="Manage connections" soon />
 </Screen>

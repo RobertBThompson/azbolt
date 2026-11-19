@@ -1,24 +1,37 @@
 <script>
 	/**
-	 * B8 — G10 Privacy policy.
-	 * Leads with version and effective date, then a scannable outline. The
-	 * map does not invent legal copy: implementation renders the approved
-	 * text under these stable section anchors.
+	 * B8 — Privacy policy.
+	 * There is no approved text yet, and this screen says so instead of
+	 * showing a version number over an outline with nothing under it.
+	 * What it can say truthfully is how the app behaves today.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { Banner, Row, Btn } from '$lib/kit';
+	import { Banner, Row, Note } from '$lib/kit';
 </script>
 
 <svelte:head><title>Privacy policy · Chief</title></svelte:head>
 
 <Screen back="/settings/account" nav={false}>
-	<Banner
-		title="Privacy policy · version 2.1"
-		meta="Effective date and prior versions appear here."
+	<Banner title="Privacy policy" meta="Not written yet. Chief is in testing." />
+	<Row title="Where your records are kept" meta="On the Chief server, under your own account" />
+	<Row
+		title="Who can see them"
+		meta="Only the account that made them, and whoever keeps the server"
 	/>
-	<Row title="What Chief collects" meta="Account, records and device data" trailing="›" />
-	<Row title="How AI uses data" meta="Processing and retained controls" trailing="›" />
-	<Row title="Sharing and providers" meta="Who receives which data" trailing="›" />
-	<Row title="Your choices" meta="Access, export and deletion" trailing="›" />
-	<Btn primary={false} label="Download a copy" />
+	<Row
+		href="/settings/account/data/export"
+		title="Taking a copy"
+		meta="One file with everything, whenever you like"
+		trailing="›"
+	/>
+	<Row
+		href="/settings/account/data/delete"
+		title="Leaving"
+		meta="Deletes the account and every record under it"
+		trailing="›"
+	/>
+	<Note>
+		These four lines describe how Chief works today. They are not the privacy policy; that will
+		appear here, with its date, once it is written.
+	</Note>
 </Screen>

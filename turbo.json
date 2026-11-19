@@ -3,25 +3,39 @@
   "ui": "stream",
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["build/**", ".svelte-kit/**", "dist/**"],
-      "env": ["PUBLIC_*", "NODE_ENV"]
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "build/**",
+        ".svelte-kit/**",
+        "dist/**"
+      ],
+      "env": [
+        "PUBLIC_*",
+        "NODE_ENV"
+      ]
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
     "preview": {
-      "dependsOn": ["build"],
+      "dependsOn": [
+        "build"
+      ],
       "cache": false,
       "persistent": true
     },
     "check": {
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build"
+      ]
     },
     "lint": {},
     "clean": {
       "cache": false
-    }
+    },
+    "test": {}
   }
 }

@@ -13,8 +13,9 @@
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
 	import { PageHead, Alert, Btn, TypeBadge } from '$lib/kit';
-	import { ORGS, PEOPLE } from '$lib/data.js';
-	import { money, nodeHref, nodeName, ownershipTree } from '$lib/assets.js';
+	import { PEOPLE } from '$lib/data.js';
+	import { ORGS } from '$lib/assets.js';
+	import { money, nodeHref, nodeName, ownershipTree, sharePercent } from '$lib/assets.js';
 
 	const { rows, loose } = ownershipTree();
 
@@ -25,7 +26,7 @@
 	 * @param {string} org
 	 */
 	function above(org) {
-		const owners = (ORGS[org]?.members ?? [])
+		const owners = /** @type {{ who: string, role: string }[]} */ (ORGS[org]?.members ?? [])
 			.filter((m) => m.role === 'owner')
 			.map((m) => (m.who === 'me' ? 'You' : (PEOPLE[m.who]?.name ?? m.who)));
 		return owners.length ? `Owned by ${owners.join(' and ')}` : 'Nothing above it';
@@ -51,8 +52,8 @@
 					</span>
 					{#if r.link}
 						<span class="tm">
-							{r.link.role}{r.link.shares !== null ? ` · ${r.link.shares}%` : ''}{r.link
-								.currentValue !== null
+							{r.link.role}{sharePercent(r.link) !== null ? ` · ${sharePercent(r.link)}%` : ''}{r
+								.link.currentValue !== null
 								? ` · ${money(r.link.currentValue)}`
 								: ''}
 						</span>

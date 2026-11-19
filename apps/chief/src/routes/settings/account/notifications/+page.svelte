@@ -19,5 +19,5 @@
 	<Row title="Tasks and due dates" meta="Reminders" trailing="On" />
 	<Row title="Sync failures" meta="System warning" trailing="On" />
 	<Row title="Quiet hours" meta="10:00 PM–7:00 AM" trailing="›" />
-	<Btn label="Save notification settings" />
+	<Btn label="Save notification settings" soon />
 </Screen>

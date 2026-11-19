@@ -1,18 +1,31 @@
 <script>
 	/**
 	 * Assets — attributes.
-	 * The technical fields, all optional, filled from what the record
-	 * already holds. Add them when a decision or a proof needs them.
+	 * The name, where it is filed, and the technical fields — all but
+	 * the name optional, filled from what the record already holds.
 	 */
 	import Screen from '$lib/shell/Screen.svelte';
-	import { PageHead, Btn } from '$lib/kit';
+	import { Alert, PageHead, Btn, Field, Note, Select, Delete } from '$lib/kit';
 	import AttributeFields from '$lib/asset/AttributeFields.svelte';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { ASSETS } from '$lib/assets.js';
+	import { ASSETS, ASSET_CATEGORIES, FOCUS_QUESTION, ownBook, stateOf } from '$lib/assets.js';
+	import { reopenBook } from '$lib/book.svelte.js';
+	import { destroy, updateAsset } from '$lib/pb.js';
 
+	const own = ownBook();
 	const id = $page.params.id ?? '';
-	const a = ASSETS[id] ?? ASSETS['nfta-014'];
+	const a = ASSETS[id];
+	const categories = ASSET_CATEGORIES.map((c) => ({ value: c.id, label: c.name }));
 
+	let name = $state(a.name);
+	let category = $state(a.category);
+	/* Where it stands is edited here too, where anything else about the
+	   asset is: looking for it here and not finding it is how it was
+	   first missed. Done is letting it go, recorded on the asset's page. */
+	const STANDING = ['Now', 'Soon', 'Later'];
+	let standing = $state(stateOf(a) === 'Done' ? 'Done' : stateOf(a));
+	let blurb = $state(a.blurb);
 	let rights = $state(a.rights);
 	let period = $state(a.period);
 	let quantity = $state(String(a.quantity));
@@ -20,12 +33,63 @@
 	let tangible = $state(a.tangibility === 'Tangible' ? 0 : 1);
 	let liquid = $state(a.liquidity === 'Liquid' ? 0 : 1);
 	let inventory = $state(a.inventory === 'Inventory' ? 0 : 1);
+
+	let busy = $state(false);
+	let fault = $state('');
+
+	const count = $derived(Number(quantity));
+	const badCount = $derived(!Number.isFinite(count) || count <= 0);
+
+	async function save() {
+		if (!name.trim() || badCount || busy) return;
+		busy = true;
+		fault = '';
+		try {
+			await updateAsset(id, {
+				name: name.trim(),
+				...(standing === 'Done' ? {} : { state: standing }),
+				/* The fixed money account stays in Money; the server refuses
+				   any change to its category, so none is sent. */
+				...(a.fixed ? {} : { category: category || null }),
+				blurb: blurb.trim(),
+				rights,
+				period: period.trim(),
+				quantity: count,
+				notes: notes.trim(),
+				tangibility: tangible === 0 ? 'Tangible' : 'Intangible',
+				liquidity: liquid === 0 ? 'Liquid' : 'Not liquid',
+				inventory: inventory === 0 ? 'Inventory' : 'Not inventory'
+			});
+			await reopenBook();
+			await goto(`/records/assets/${id}`, { replaceState: true });
+		} catch (/** @type {any} */ err) {
+			fault = err?.message || 'The server did not answer.';
+			busy = false;
+		}
+	}
 </script>
 
 <svelte:head><title>Attributes · {a.name} · Chief</title></svelte:head>
 
 <Screen back="/records/assets/{id}" nav={false}>
 	<PageHead eyebrow={a.name} title="Attributes" meta="Optional until a decision needs them." />
+	{#if own}
+		<Field label="Asset name" bind:value={name} required />
+		{#if standing !== 'Done'}
+			<Select label={FOCUS_QUESTION} options={STANDING} bind:value={standing} />
+		{/if}
+		{#if a.fixed}
+			<Note>Every book keeps one money account, and this is it. It stays in Money.</Note>
+		{:else}
+			<Select
+				label="Category"
+				options={categories}
+				bind:value={category}
+				placeholder="No category"
+			/>
+		{/if}
+		<Field label="In a few words" placeholder="Optional" bind:value={blurb} />
+	{/if}
 	<AttributeFields
 		bind:rights
 		bind:period
@@ -35,5 +99,28 @@
 		bind:liquid
 		bind:inventory
 	/>
-	<Btn t="warm" href="/records/assets/{id}" label="Save attributes" />
+	{#if own}
+		{#if badCount}<Alert title="Quantity has to be a number above zero" />{/if}
+		{#if fault}<Alert title="Not saved" meta={fault} />{/if}
+		<Btn
+			t="warm"
+			label={busy ? 'Saving…' : 'Save'}
+			onclick={save}
+			disabled={!name.trim() || badCount || busy}
+		/>
+		{#if !a.fixed}
+			<Delete
+				what={a.name}
+				warn="Its values, history, proofs and ownership links go with it. If it was sold or given away, record that it was let go instead, and it keeps its history."
+				label="Delete this asset"
+				ondelete={async () => {
+					await destroy('assets', id);
+					await reopenBook();
+					await goto('/records/assets', { replaceState: true });
+				}}
+			/>
+		{/if}
+	{:else}
+		<Btn t="warm" label="Save attributes" soon />
+	{/if}
 </Screen>

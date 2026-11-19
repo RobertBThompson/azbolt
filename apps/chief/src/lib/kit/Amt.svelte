@@ -11,21 +11,28 @@
 	/** @type {{ value?: string, meta?: string, t?: string }} */
 	let { value = $bindable(''), meta = '', t = 'warm' } = $props();
 	import { tone } from './tone.js';
+	import { readAmount } from '../amount.js';
 	const c = $derived(tone(t));
 
 	const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', '←'];
 	/** @param {string} k */
 	const press = (k) => {
+		/* A second point is a slip, not an amount: swallow it rather than
+		   building a string that cannot be read back. */
 		if (k === '←') value = value.slice(0, -1);
+		else if (k === '.' && value.includes('.')) return;
 		else value += k;
 	};
-	const shown = $derived(value ? `$${value}` : '$0.00');
+	const typed = $derived(value.trim());
+	const read = $derived(readAmount(typed));
+	const shown = $derived(read === null ? (typed === '' ? '$0.00' : typed) : `$${read.toFixed(2)}`);
+	const fault = $derived(typed !== '' && read === null ? 'That is not an amount.' : '');
 </script>
 
 <div class="amt">
 	<div class="display" style="--t-ink:{c.ink}; --t-tint:{c.tint}">
-		<div class="v" aria-live="polite">{shown}</div>
-		{#if meta}<div class="m">{meta}</div>{/if}
+		<div class="v" class:bad={!!fault} aria-live="polite">{shown}</div>
+		{#if fault}<div class="m bad-m">{fault}</div>{:else if meta}<div class="m">{meta}</div>{/if}
 	</div>
 
 	<label class="sys">
@@ -62,6 +69,14 @@
 		font-variant-numeric: tabular-nums lining-nums;
 		letter-spacing: -0.02em;
 		line-height: 1;
+	}
+	.v.bad {
+		font-size: 28px;
+		color: var(--tone-rust, #8c3b2a);
+	}
+	.bad-m {
+		color: var(--tone-rust, #8c3b2a);
+		font-weight: 600;
 	}
 	.m {
 		font-size: 14.5px;

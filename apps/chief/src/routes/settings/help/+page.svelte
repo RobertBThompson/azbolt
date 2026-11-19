@@ -12,7 +12,7 @@
 
 <Screen back="/settings" nav={false}>
 	<Field label="What are you trying to do" placeholder="Search help" />
-	<Row href="/settings/help/quick-jot" title="Use Quick Jot" meta="2 minutes" trailing="›" />
+	<Row href="/settings/help/jot" title="Throw a jot" meta="2 minutes" trailing="›" />
 	<Row title="What “ownership” means here" meta="Plain language" trailing="›" />
 	<Row title="Track an asset" meta="Step by step" trailing="›" />
 	<Btn primary={false} href="/settings/help/contact" label="Contact support" />
